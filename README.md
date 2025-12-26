@@ -124,15 +124,20 @@ Login menggunakan email: admin@sekolah.com dan password: admin
 
 ## 📂 Struktur Folder Proyek
 
-/actions      -> Server Actions (Logika Backend & Database)
-/app          -> Halaman Website (Next.js App Router)
-  /(dashboard)-> Layout Dashboard Admin & Siswa
-  /api        -> API Routes (Download Excel, Backup)
-  /login      -> Halaman Login
-/components   -> Komponen UI (Grafik, Tombol, Form, Alert)
-/lib          -> Konfigurasi (Auth, DB Connection, Crypto Helper)
-/models       -> Schema Database Mongoose (User, Member, Nilai, dll)
-/public       -> File Aset Statis (Gambar, Icon)
+```text
+.
+├── actions/                # Server Actions (Logika Backend & Database)
+│   ├── attendance-actions.ts
+│   ├── system-actions.ts
+│   └── user-actions.ts
+├── app/                    # Next.js App Router (Halaman Website)
+│   ├── (dashboard)/        # Layout & Halaman Dashboard (Admin & Siswa)
+│   ├── api/                # API Routes (Endpoint Download & Backup)
+│   └── login/              # Halaman Login
+├── components/             # Komponen UI (Grafik, Tombol, Form, Alert)
+├── lib/                    # Konfigurasi (Auth, DB Connection, Crypto)
+├── models/                 # Schema Database Mongoose (User, Member, Nilai)
+└── public/                 # File Aset Statis (Gambar, Icon, Logo)
 
 ---
 
