@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏫 Sistem Informasi Manajemen Siswa (SIMS)
 
-## Getting Started
+Aplikasi berbasis web untuk manajemen data siswa, absensi, nilai, dan tugas sekolah.
 
-First, run the development server:
+## 🌟 Fitur Utama
 
-```bash
+### 👮‍♂️ Panel Admin
+* Dashboard: Grafik kehadiran & nilai.
+* Siswa: CRUD & Import Excel.
+* Tugas: Buat tugas dengan deadline.
+* Nilai: Input & Download Rekap (Excel).
+* Absensi: Input & Download Laporan (Excel).
+* Settings: Backup (.school), Restore, & Reset Database.
+
+### 👨‍🎓 Panel Siswa
+* Absen: Tombol absen harian (1x/hari).
+* Info: Statistik kehadiran & rata-rata nilai.
+* Tugas: Daftar tugas pending & riwayat nilai.
+
+---
+
+## 🚀 Cara Instalasi
+
+1. Clone Repository
+git clone https://github.com/username-anda/sims-sekolah.git
+cd sims-sekolah
+
+2. Install Dependencies
+npm install
+
+3. Setup Environment (.env.local)
+Buat file .env.local dan isi:
+
+MONGODB_URI="mongodb://localhost:27017/sekolah_db"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="rahasia_123"
+BACKUP_SECRET_KEY="kunci_backup_123"
+
+4. Setup Admin (Manual via MongoDB)
+Insert ke collection 'users':
+{
+  "user": "admin@sekolah.com",
+  "password": "21232f297a57a5a743894a0e4a801fc3",
+  "role": "admin"
+}
+(Password: admin)
+
+5. Jalankan
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Buka: http://localhost:3000
