@@ -77,7 +77,7 @@ Pastikan komputer Anda sudah terinstall:
 
 ### 2. Clone Repository
 Buka terminal dan jalankan:
-git clone https://github.com/username-anda/sims-sekolah.git
+git clone [https://github.com/username-anda/sims-sekolah.git](https://github.com/upiw256/tugasku.git)
 cd sims-sekolah
 
 ### 3. Install Dependencies
