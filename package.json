@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
@@ -32,8 +33,10 @@
     "eslint-config-next": "16.1.1",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "mongodb-memory-server": "^11.0.1",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
