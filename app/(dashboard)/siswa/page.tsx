@@ -1,7 +1,10 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Absensi, Member, Nilai, Tugas, User } from '@/models';
+// Tambahkan 'Pengumuman' di sini
+import { Absensi, Member, Nilai, Tugas, User, Pengumuman } from '@/models';
 import { redirect } from 'next/navigation';
+// Import komponen Papan Pengumuman
+import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
 import AttendanceButton from '@/components/ui/AttendanceButton';
 
 export default async function SiswaDashboard() {
@@ -52,15 +55,27 @@ export default async function SiswaDashboard() {
   const totalNilai = allGrades.reduce((acc: number, curr: any) => acc + curr.nilai, 0);
   const rataRataNilai = allGrades.length > 0 ? Math.round(totalNilai / allGrades.length) : 0;
 
-  // 6. Hitung Tugas Pending (REVISI: Semua yang belum dinilai, mau telat atau tidak)
+  // 6. Hitung Tugas Pending
   const pendingTasksCount = tasks.filter((t: any) => {
     // Cek apakah tugas ini sudah ada nilainya?
     const isGraded = allGrades.some((g: any) => g.tugas_id.toString() === t._id.toString());
     return !isGraded; // Kembalikan true jika BELUM dinilai
   }).length;
 
+  // --- 7. AMBIL PENGUMUMAN (BARU) ---
+  const dataPengumuman = await Pengumuman.find({})
+    .sort({ tanggal: -1 })
+    .limit(5)
+    .lean();
+
+  const announcements = dataPengumuman.map((item: any) => ({
+    ...item,
+    _id: item._id.toString(),
+    tanggal: item.tanggal.toISOString(),
+  }));
+
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto p-4 md:p-6">
       
       {/* HEADER */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
@@ -69,6 +84,7 @@ export default async function SiswaDashboard() {
           <p className="opacity-90 text-lg">Kelas: <span className="font-bold bg-white/20 px-2 py-1 rounded">{student.kelas}</span></p>
           <p className="opacity-80 text-sm mt-1">NIS: {student.nis}</p>
         </div>
+        {/* Tombol Absen (Jika ingin diaktifkan, uncomment baris bawah) */}
         {/* <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
              <AttendanceButton sudahAbsen={!!absenToday} waktu={absenToday?.waktu} />
         </div> */}
@@ -94,27 +110,26 @@ export default async function SiswaDashboard() {
             </div>
         </div>
         
-        {/* CARD TUGAS PENDING (YANG ANDA MINTA) */}
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="p-3 bg-orange-100 text-orange-600 rounded-full text-2xl">📝</div>
             <div>
                 <p className="text-gray-500 text-sm">Tugas Pending</p>
-                {/* Angka ini sekarang menghitung semua tugas yg belum dinilai */}
                 <h3 className="text-2xl font-bold text-gray-800">{pendingTasksCount}</h3>
                 <p className="text-xs text-gray-400">Belum dinilai</p>
             </div>
         </div>
       </div>
 
+      {/* MAIN GRID LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* LIST TUGAS */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* KOLOM KIRI (2/3): LIST TUGAS */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
             <div className="p-5 border-b bg-gray-50">
                 <h2 className="font-bold text-lg text-gray-800">📋 Daftar Semua Tugas</h2>
             </div>
             
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
                 {tasks.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                         Belum ada tugas.
@@ -174,27 +189,40 @@ export default async function SiswaDashboard() {
             </div>
         </div>
 
-        {/* INFO CARD */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-            <div className="p-5 border-b bg-gray-50">
-                <h2 className="font-bold text-gray-800">🔔 Status Pengerjaan</h2>
+        {/* KOLOM KANAN (1/3): PENGUMUMAN & INFO */}
+        <div className="space-y-6">
+            
+            {/* 1. PAPAN PENGUMUMAN (BARU) */}
+            <div className="h-[400px]">
+                <AnnouncementBoard 
+                  role="siswa" 
+                  initialData={announcements} 
+                />
             </div>
-            <div className="p-5">
-                <ul className="space-y-3 text-sm text-gray-600">
-                    <li className="flex justify-between items-center">
-                        <span>Sudah Dinilai</span>
-                        <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded">{allGrades.length}</span>
-                    </li>
-                    <li className="flex justify-between items-center">
-                        <span>Belum Dinilai</span>
-                        <span className="font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">{pendingTasksCount}</span>
-                    </li>
-                    <li className="pt-2 border-t mt-2 flex justify-between items-center font-bold text-gray-800">
-                        <span>Total Tugas</span>
-                        <span>{tasks.length}</span>
-                    </li>
-                </ul>
+
+            {/* 2. INFO CARD */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
+                <div className="p-5 border-b bg-gray-50">
+                    <h2 className="font-bold text-gray-800">🔔 Status Pengerjaan</h2>
+                </div>
+                <div className="p-5">
+                    <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex justify-between items-center">
+                            <span>Sudah Dinilai</span>
+                            <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded">{allGrades.length}</span>
+                        </li>
+                        <li className="flex justify-between items-center">
+                            <span>Belum Dinilai</span>
+                            <span className="font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">{pendingTasksCount}</span>
+                        </li>
+                        <li className="pt-2 border-t mt-2 flex justify-between items-center font-bold text-gray-800">
+                            <span>Total Tugas</span>
+                            <span>{tasks.length}</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
+
         </div>
 
       </div>

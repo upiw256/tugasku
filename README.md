@@ -90,6 +90,18 @@ MONGODB_URI="mongodb://localhost:27017/sekolah_db"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="rahasia_random_string_minimal_32_karakter"
 BACKUP_SECRET_KEY="kunci_rahasia_untuk_enkripsi_backup_jangan_hilang"
+# PUSHER CONFIG (SERVER SIDE - Rahasia)
+PUSHER_APP_ID="2096663"
+PUSHER_SECRET="6c2a3c06fb66c4afcf09"
+
+# PUSHER CONFIG (CLIENT SIDE - Bisa dibaca Browser)
+# Kita tambahkan NEXT_PUBLIC_ di depannya
+NEXT_PUBLIC_PUSHER_KEY="7385539f8386cf6c8096"
+NEXT_PUBLIC_PUSHER_CLUSTER="ap1"
+
+# Simpan juga versi tanpa prefix untuk server action (biar konsisten)
+PUSHER_KEY="7385539f8386cf6c8096"
+PUSHER_CLUSTER="ap1"
 
 *(Sesuaikan MONGODB_URI jika Anda menggunakan MongoDB Atlas/Cloud)*
 

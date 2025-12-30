@@ -39,9 +39,18 @@ const AbsensiSchema = new mongoose.Schema({
   status: { type: String, default: 'Hadir' }, // Hadir, Izin, Sakit (Nanti bisa dikembangkan)
 }, { timestamps: true });
 
+const announcementSchema = new mongoose.Schema({
+  judul: { type: String, required: true },
+  konten: { type: String, required: true },
+  prioritas: { type: String, enum: ['Penting', 'Info', 'Libur'], default: 'Info' },
+  dibuat_oleh: { type: String }, // Email admin
+  tanggal: { type: Date, default: Date.now }
+});
+
 // Cek apakah model sudah ada (biar gak error overwrite saat reload), kalau belum buat baru
 export const Member = models.Member || model('Member', MemberSchema);
 export const User = models.User || model('User', UserSchema);
 export const Tugas = models.Tugas || model('Tugas', TugasSchema);
 export const Nilai = models.Nilai || model('Nilai', NilaiSchema);
 export const Absensi = mongoose.models.Absensi || mongoose.model('Absensi', AbsensiSchema);
+export const Pengumuman = mongoose.models.Pengumuman || mongoose.model('Pengumuman', announcementSchema);

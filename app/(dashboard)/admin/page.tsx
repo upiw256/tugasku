@@ -1,11 +1,14 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-// Pastikan import Absensi ditambahkan
-import { Member, Tugas, Nilai, Absensi } from '@/models';
+// Tambahkan Pengumuman di sini
+import { Member, Tugas, Nilai, Absensi, Pengumuman } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AttendanceChart from '@/components/ui/AttendanceChart';
 import GradesChart from '@/components/ui/GradesChart';
+// Import component AnnouncementBoard
+import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
+
 export default async function AdminDashboardPage() {
   const session = await auth();
   
@@ -20,22 +23,34 @@ export default async function AdminDashboardPage() {
   const totalTugas = await Tugas.countDocuments();
   const totalPengumpulan = await Nilai.countDocuments();
 
-const recentSubmissions = await Nilai.find()
+  // --- DATA PENGUMUMAN (BARU) ---
+  const dataPengumuman = await Pengumuman.find({})
+    .sort({ tanggal: -1 })
+    .limit(5)
+    .lean();
+
+  // Serialisasi data pengumuman agar bisa dikirim ke Client Component
+  const announcements = dataPengumuman.map((item: any) => ({
+    ...item,
+    _id: item._id.toString(),
+    tanggal: item.tanggal.toISOString(),
+  }));
+
+  const recentSubmissions = await Nilai.find()
     .sort({ tanggal_mengumpulkan: -1 })
     .limit(5)
-    .populate('member_id', 'nama_lengkap kelas') // Ambil field nama_lengkap & kelas dari Member
-    .populate('tugas_id', 'judul') // Ambil field judul dari Tugas
+    .populate('member_id', 'nama_lengkap kelas') 
+    .populate('tugas_id', 'judul') 
     .lean();
+
   // --- LOGIKA DATA GRAFIK KEHADIRAN HARI INI ---
-// 1. Tentukan Range Waktu (7 Hari Terakhir)
   const endDate = new Date();
   endDate.setHours(23, 59, 59, 999);
   
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 6); // Mundur 6 hari ke belakang
+  startDate.setDate(startDate.getDate() - 6); 
   startDate.setHours(0, 0, 0, 0);
 
-  // 2. Mapping Siswa ke Kelas & List Kelas Unik
   const allStudents = await Member.find({}).lean();
   const studentClassMap: Record<string, string> = {}; 
   const distinctClasses: Record<string, boolean> = {};
@@ -47,23 +62,16 @@ const recentSubmissions = await Nilai.find()
   
   const sortedClasses = Object.keys(distinctClasses).sort();
 
-  // 3. Ambil Log Absensi 7 Hari Terakhir
   const attendanceLogs = await Absensi.find({
     tanggal: { $gte: startDate, $lte: endDate }
   }).lean();
 
-  // 4. Struktur Data: Group by Kelas -> Tanggal
-  // Format target: { "X 1": [ {date: "Senin", Hadir: 10...}, ... ], "X 2": [...] }
   const chartDataByClass: Record<string, any[]> = {};
-
-  // -- Helper: Buat array tanggal 7 hari terakhir --
   const dateRange: string[] = [];
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    // Format tanggal: "DD/MM" (contoh: 26/12)
     dateRange.push(d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' }));
   }
 
-  // -- Inisialisasi Data Nol untuk setiap Kelas & Tanggal --
   sortedClasses.forEach(cls => {
     chartDataByClass[cls] = dateRange.map(dateStr => ({
       date: dateStr,
@@ -71,42 +79,33 @@ const recentSubmissions = await Nilai.find()
     }));
   });
 
-  // 5. Isi Data dengan Log Absensi
   attendanceLogs.forEach((log: any) => {
     const studentId = log.member_id.toString();
     const cls = studentClassMap[studentId];
     
     if (cls && chartDataByClass[cls]) {
-      // Cari index tanggal yang sesuai
       const logDateStr = new Date(log.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' });
       const dataIndex = chartDataByClass[cls].findIndex(d => d.date === logDateStr);
       
       if (dataIndex !== -1 && log.status) {
-        // Increment status (Hadir/Sakit/Izin/Alpha)
         if (chartDataByClass[cls][dataIndex][log.status] !== undefined) {
           chartDataByClass[cls][dataIndex][log.status] += 1;
         }
       }
     }
   });
-  // --------------------------------------------
-// ================= LOGIKA GRAFIK NILAI (BARU) =================
-  
-  // 1. Ambil Semua Data Nilai
-  const allGrades = await Nilai.find({}).lean();
 
-  // 2. Siapkan Struktur Data: { "X 1": { totalNilai: 1500, count: 20 } }
+  // --- LOGIKA GRAFIK NILAI ---
+  const allGrades = await Nilai.find({}).lean();
   const gradeStatsByClass: Record<string, { total: number, count: number }> = {};
   
-  // Inisialisasi kelas (biar kelas yang belum ada nilai tetap muncul 0)
   sortedClasses.forEach(cls => {
     gradeStatsByClass[cls] = { total: 0, count: 0 };
   });
 
-  // 3. Hitung Total Nilai per Kelas
   allGrades.forEach((g: any) => {
     const studentId = g.member_id.toString();
-    const cls = studentClassMap[studentId]; // Pake map siswa->kelas yang sudah dibuat di atas
+    const cls = studentClassMap[studentId];
 
     if (cls && gradeStatsByClass[cls]) {
       gradeStatsByClass[cls].total += g.nilai;
@@ -114,7 +113,6 @@ const recentSubmissions = await Nilai.find()
     }
   });
 
-  // 4. Hitung Rata-rata
   const gradesChartData = sortedClasses.map(cls => {
     const stats = gradeStatsByClass[cls];
     const avg = stats.count > 0 ? Math.round(stats.total / stats.count) : 0;
@@ -141,7 +139,6 @@ const recentSubmissions = await Nilai.find()
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* ... (Kode card statistik Anda yang lama tetap di sini) ... */}
         <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
           <p className="text-sm text-gray-500">Total Siswa</p>
           <h2 className="text-3xl font-bold">{totalSiswa}</h2>
@@ -155,6 +152,34 @@ const recentSubmissions = await Nilai.find()
           <h2 className="text-3xl font-bold">{totalPengumpulan}</h2>
         </div>
       </div>
+
+      {/* --- GRID UTAMA: GRAFIK & PENGUMUMAN --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* KOLOM KIRI (2/3): Grafik-grafik */}
+        <div className="lg:col-span-2 space-y-6">
+           {/* Grafik Absensi */}
+           <AttendanceChart 
+              dataByClass={chartDataByClass} 
+              allClasses={sortedClasses} 
+           />
+           {/* Grafik Nilai */}
+           <GradesChart data={gradesChartData} />
+        </div>
+
+        {/* KOLOM KANAN (1/3): Papan Pengumuman */}
+        <div className="lg:col-span-1">
+          {/* Container dengan tinggi fix agar scroll berfungsi */}
+          <div className="h-[600px]">
+            <AnnouncementBoard 
+              role="admin" 
+              initialData={announcements} 
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Tabel Aktivitas Terbaru */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
           <h3 className="font-bold text-gray-800 text-lg">Aktivitas Pengumpulan Terbaru</h3>
@@ -213,22 +238,9 @@ const recentSubmissions = await Nilai.find()
         </div>
       </div>
 
-      {/* --- KOMPONEN GRAFIK BARU --- */}
-      {/* Kita kirim data yang sudah dihitung dan daftar semua kelas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <AttendanceChart 
-          dataByClass={chartDataByClass} 
-          allClasses={sortedClasses} 
-       />
-       <GradesChart data={gradesChartData} />
-      </div>
-      {/* ---------------------------- */}
-
-
-      {/* Action Buttons (Pindahkan ke bawah jika mau, atau biarkan di sini) */}
+      {/* Action Buttons */}
       <div className="flex gap-4">
-        {/* ... (Tombol-tombol Anda yang lama) ... */}
-         <Link href="/admin/siswa/import" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow">
+        <Link href="/admin/siswa/import" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow">
           + Import Siswa
         </Link>
         <Link href="/admin/tugas" className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-900 transition shadow">
