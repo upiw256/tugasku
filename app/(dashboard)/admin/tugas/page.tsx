@@ -83,84 +83,107 @@ export default async function KelolaTugasPage({
 
       {/* Tabel Tugas */}
       <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
-              <tr>
-                <th className="px-6 py-3">Judul Tugas</th>
-                <th className="px-6 py-3">Kelas</th>
-                <th className="px-6 py-3">Deadline</th>
-                <th className="px-6 py-3 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {tasks.map((t: any) => (
-                <tr key={t._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-gray-900">{t.judul}</div>
-                    <div className="text-xs text-gray-500 line-clamp-1">
-                      {t.deskripsi || '-'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {/* Handle jika kelas string atau array */}
-                      {Array.isArray(t.kelas) 
-                        ? t.kelas.map((k: string) => (
-                            <span key={k} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                              {k}
-                            </span>
-                          ))
-                        : (
-                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                              {t.kelas}
-                            </span>
-                          )
-                      }
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {t.deadline ? (
-                      <span className={`text-xs font-bold px-2 py-1 rounded 
-                        ${new Date(t.deadline) < new Date() ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}
-                      `}>
-                        {new Date(t.deadline).toLocaleDateString('id-ID', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        })}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 flex justify-center gap-4 items-center">
-                    {/* Link Edit */}
-                    <Link
-                      href={`/admin/tugas/${t._id}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Edit
-                    </Link>
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm text-left">
+      <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
+        <tr>
+          <th className="px-6 py-3">Judul Tugas</th>
+          <th className="px-6 py-3">Kelas</th>
+          <th className="px-6 py-3">Metode</th>
+          <th className="px-6 py-3">Deadline</th>
+          <th className="px-6 py-3 text-center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100">
+        {tasks.map((t: any) => {
+          // LOGIKA PENENTU TIPE (Fallback ke 'online' jika null)
+          const isOnline = (t.tipe_pengumpulan || 'online') === 'online';
 
-                    {/* Tombol Hapus */}
-                    <DeleteTaskButton 
-                      id={t._id.toString()} 
-                      judul={t.judul} 
-                    />
-                  </td>
-                </tr>
-              ))}
-              
-              {tasks.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-500">
-                    Belum ada tugas dibuat.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          return (
+            <tr key={t._id} className="hover:bg-gray-50">
+              {/* 1. JUDUL */}
+              <td className="px-6 py-4">
+                <div className="font-bold text-gray-900">{t.judul}</div>
+                <div className="text-xs text-gray-500 line-clamp-1">
+                  {t.deskripsi || '-'}
+                </div>
+              </td>
+
+              {/* 2. KELAS */}
+              <td className="px-6 py-4">
+                <div className="flex flex-wrap gap-1">
+                  {Array.isArray(t.kelas)
+                    ? t.kelas.map((k: string) => (
+                        <span key={k} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                          {k}
+                        </span>
+                      ))
+                    : (
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                          {t.kelas}
+                        </span>
+                      )
+                  }
+                </div>
+              </td>
+
+              {/* 3. METODE (BARU) */}
+              <td className="px-6 py-4">
+                {isOnline ? (
+                  <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded border border-blue-200">
+                    ☁️ Upload
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded border border-gray-200">
+                    🏫 Offline
+                  </span>
+                )}
+              </td>
+
+              {/* 4. DEADLINE */}
+              <td className="px-6 py-4">
+                {t.deadline ? (
+                  <span className={`text-xs font-bold px-2 py-1 rounded 
+                    ${new Date(t.deadline) < new Date() ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}
+                  `}>
+                    {new Date(t.deadline).toLocaleDateString('id-ID', {
+                      day: 'numeric', month: 'short', year: 'numeric'
+                    })}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">-</span>
+                )}
+              </td>
+
+              {/* 5. AKSI */}
+              <td className="px-6 py-4 flex justify-center gap-4 items-center">
+                <Link
+                  href={`/admin/tugas/${t._id}`}
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Edit
+                </Link>
+
+                <DeleteTaskButton 
+                  id={t._id.toString()} 
+                  judul={t.judul} 
+                />
+              </td>
+            </tr>
+          );
+        })}
+        
+        {tasks.length === 0 && (
+          <tr>
+            <td colSpan={5} className="p-8 text-center text-gray-500">
+              Belum ada tugas dibuat.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 
       {totalPages > 1 && <Pagination totalPages={totalPages} />}
     </div>

@@ -1,6 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Sidebar from "@/components/ui/Sidebar"; // Import Sidebar yang baru
+// app/(dashboard)/layout.tsx
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import Sidebar from '@/components/ui/Sidebar';
 
 export default async function DashboardLayout({
   children,
@@ -8,24 +9,33 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  
-  if (!session) redirect('/login');
+
+  if (!session) {
+    redirect('/login');
+  }
+
+  // Siapkan data user sederhana untuk Sidebar
+  const userForSidebar = {
+    name: session.user.name || 'Pengguna',
+    role: session.user.role || 'siswa',
+  };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans overflow-hidden">
+    <div className="flex min-h-screen bg-gray-50 font-sans">
       
-      {/* Sidebar Component */}
-      <Sidebar user={session.user} />
+      {/* 1. SIDEBAR (Client Component) */}
+      <Sidebar user={userForSidebar} />
 
-      {/* Area Konten Utama */}
+      {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         
-        {/* Main Content (Scrollable) */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-16 md:pt-8">
+        {/* Konten Utama */}
+        {/* pt-16 ditambahkan agar konten tidak tertutup header di tampilan mobile */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6 bg-gray-50">
           {children}
         </main>
-        
       </div>
+
     </div>
   );
 }
