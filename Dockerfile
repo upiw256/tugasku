@@ -38,18 +38,15 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 
 # Copy folder .next/static agar CSS/JS client terload
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy hasil build standalone (server kecil)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
 # Switch ke user nextjs
 USER nextjs
 
-# Expose port 3000
-EXPOSE 3000
+# 👇 UBAH DI SINI
+EXPOSE 7020
 
-ENV PORT 3000
+ENV PORT 7020
 ENV HOSTNAME "0.0.0.0"
 
 # Jalankan server
