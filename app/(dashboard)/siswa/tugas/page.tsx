@@ -24,11 +24,10 @@ export default async function HalamanTugasSiswa() {
     return <div className="p-8 text-red-500 font-bold">Profil siswa belum terhubung.</div>;
   }
 
-  // 3. QUERY TUGAS (Support String & Array)
-  // Mencari tugas yang ditujukan untuk kelas siswa ini
+  // 3. QUERY TUGAS (Support String & Array untuk Multi Kelas)
   const tasks = await Tugas.find({
     $or: [
-      { kelas: member.kelas },             // Jika data di DB masih String ("X 1")
+      { kelas: member.kelas },             // Jika data di DB String ("X 1")
       { kelas: { $in: [member.kelas] } }   // Jika data di DB Array (["X 1", "X 2"])
     ]
   })
@@ -58,21 +57,32 @@ export default async function HalamanTugasSiswa() {
             </div>
         ) : (
             tasks.map((task: any) => {
-            // --- LOGIKA UTAMA ---
             
-            // 1. Cari Pengumpulan
-            const submission = mySubmissions.find((s: any) => s.tugas_id.toString() === task._id.toString());
+            // --- 1. CARI DATA PENGUMPULAN ---
+            const rawSubmission = mySubmissions.find((s: any) => s.tugas_id.toString() === task._id.toString());
             
-            // 2. Tentukan Tipe (Fix Bug Offline: Default ke 'online' jika null)
+            // --- 2. PERBAIKAN ERROR SERIALIZATION (PENTING!) ---
+            // Kita harus mengubah ObjectId menjadi string agar tidak error saat dikirim ke Client Component
+            let cleanSubmission = null;
+            if (rawSubmission) {
+                cleanSubmission = {
+                    ...rawSubmission,
+                    _id: rawSubmission._id.toString(),           
+                    tugas_id: rawSubmission.tugas_id.toString(), 
+                    member_id: rawSubmission.member_id.toString(),
+                };
+            }
+
+            // --- 3. TENTUKAN TIPE (Fix Bug Offline: Default ke 'online' jika null) ---
             const taskType = task.tipe_pengumpulan || 'online';
             const isOnline = taskType === 'online';
 
-            // 3. Tentukan Status "Selesai"
-            // - Online: Harus ada file_url
-            // - Offline: Dianggap selesai jika Guru sudah memberi input (submission ada)
+            // --- 4. TENTUKAN STATUS ---
+            // Online: Selesai jika file_url ada
+            // Offline: Selesai jika submission (nilai) sudah dibuat oleh guru
             const isDone = isOnline 
-                ? !!submission?.file_url 
-                : !!submission; 
+                ? !!cleanSubmission?.file_url 
+                : !!cleanSubmission; 
                 
             const deadline = new Date(task.deadline);
             const isLate = !isDone && new Date() > deadline;
@@ -117,7 +127,8 @@ export default async function HalamanTugasSiswa() {
                         {isOnline ? (
                             <TaskSubmissionForm 
                                 tugasId={task._id.toString()} 
-                                initialData={submission ? { ...submission, _id: submission._id.toString() } : null}
+                                // Kirim data yang sudah dibersihkan (cleanSubmission)
+                                initialData={cleanSubmission}
                             />
                         ) : (
                         
@@ -130,7 +141,7 @@ export default async function HalamanTugasSiswa() {
                                     <div className="text-2xl mb-1">✅</div>
                                     <p className="text-sm font-bold text-green-700">Sudah Dinilai Guru</p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Nilai: <span className="font-bold text-gray-800 text-lg">{submission?.nilai}</span>
+                                        Nilai: <span className="font-bold text-gray-800 text-lg">{cleanSubmission?.nilai}</span>
                                     </p>
                                 </div>
                             ) : (
