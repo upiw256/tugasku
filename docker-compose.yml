@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # 1. Aplikasi Next.js Anda
+  app:
+    container_name: nextjs_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Koneksi ke service 'mongo' di bawah (bukan localhost lagi)
+      - MONGODB_URI=mongodb://mongo:27017/sekolah_db
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=rahasia_super_aman_123
+    depends_on:
+      - mongo
+    volumes:
+      # PENTING: Agar file upload gambar tidak hilang saat container direstart
+      - ./public/uploads:/app/public/uploads
+
+  # 2. Database MongoDB
+  mongo:
+    container_name: mongodb_container
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017" # Agar bisa diakses MongoDB Compass dari luar
+    volumes:
+      - mongodb_data:/data/db # Simpan data DB agar tidak hilang
+
+volumes:
+  mongodb_data:
