@@ -16,7 +16,7 @@ export async function importTasksAction(formData: FormData) {
     const buffer = Buffer.from(arrayBuffer);
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(buffer as any);
 
     const worksheet = workbook.getWorksheet(1);
     if (!worksheet) return { success: false, message: 'Sheet excel kosong' };

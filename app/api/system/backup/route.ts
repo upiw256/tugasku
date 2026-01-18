@@ -29,7 +29,7 @@ export async function GET() {
 
   // 3. Return sebagai file download dengan ekstensi .school
   // Kita kirim sebagai 'application/octet-stream' (binary file)
-  return new NextResponse(encryptedBuffer, {
+  return new NextResponse(encryptedBuffer as any, {
     status: 200,
     headers: {
       'Content-Type': 'application/octet-stream',

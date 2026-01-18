@@ -24,7 +24,7 @@ export async function importStudentsAction(formData: FormData): Promise<ActionSt
     const buffer = Buffer.from(arrayBuffer);
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(buffer as any);
 
     const worksheet = workbook.getWorksheet(1); // Ambil sheet pertama
     if (!worksheet) return { success: false, message: 'Sheet excel kosong atau rusak' };
