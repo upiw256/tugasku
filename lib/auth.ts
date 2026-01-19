@@ -5,6 +5,16 @@ import { User } from "@/models"
 import md5 from "md5"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // 1. WAJIB: Definisikan Secret & Strategy
+  secret: process.env.NEXTAUTH_SECRET, 
+  session: { strategy: "jwt" },
+  
+  // 2. WAJIB: Beri tahu NextAuth lokasi halaman login kita
+  pages: {
+    signIn: "/login",
+    error: "/api/auth/error", // Halaman error jika login gagal
+  },
+
   providers: [
     Credentials({
       credentials: {
@@ -12,45 +22,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        await connectDB()
-        
-        // 1. Cari user berdasarkan field 'user' (bukan email)
-        const user = await User.findOne({ user: credentials.username })
+        try {
+          await connectDB()
+          
+          const user = await User.findOne({ user: credentials.username })
 
-        if (!user) {
-          throw new Error("User not found.")
-        }
+          if (!user) {
+            throw new Error("User not found.")
+          }
 
-        // Cek Password (MD5)
-        if (user.password !== md5(credentials.password as string)) {
-          throw new Error("Invalid password.")
-        }
+          if (user.password !== md5(credentials.password as string)) {
+            throw new Error("Invalid password.")
+          }
 
-        // 2. Return data object
-        // PENTING: Kita harus mapping field 'user' database ke 'email' NextAuth
-        return {
-          id: user._id.toString(),
-          name: user.role,      // Bisa diisi role atau nama
-          email: user.user,     // <--- INI KUNCINYA (Mapping user -> email)
-          role: user.role,      // Custom field role
+          return {
+            id: user._id.toString(),
+            name: user.role,
+            email: user.user, 
+            role: user.role,
+          }
+        } catch (error) {
+          console.error("Login Error:", error);
+          return null; // Return null jika gagal agar NextAuth tahu
         }
       },
     }),
   ],
   callbacks: {
-    // 3. Pastikan data masuk ke Token JWT
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
-        token.email = user.email // Pastikan email tersimpan
+        token.email = user.email
       }
       return token
     },
-    // 4. Pastikan data masuk ke Session Client
     async session({ session, token }) {
       if (session.user) {
         session.user.role = token.role as string
-        session.user.email = token.email as string // Pastikan email terbaca di frontend
+        session.user.email = token.email as string
       }
       return session
     },
