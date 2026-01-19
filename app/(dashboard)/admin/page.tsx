@@ -11,7 +11,7 @@ import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
 
 export default async function AdminDashboardPage() {
   const session = await auth();
-  
+  console.log("LOGIN DEBUG:", JSON.stringify(session, null, 2));
   if (!session || session.user.role !== 'admin') {
     redirect('/login');
   }
