@@ -1,5 +1,5 @@
 # --- TAHAP 1: Base ---
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # --- TAHAP 2: Dependencies ---
 FROM base AS deps
@@ -37,16 +37,19 @@ RUN adduser --system --uid 1001 nextjs
 # Copy file public (gambar, icon, dll)
 COPY --from=builder /app/public ./public
 
-# Copy folder .next/static agar CSS/JS client terload
+# ✅ TAMBAHAN PENTING: Copy folder static agar CSS & JS terbaca
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy folder .next/standalone (Server Logic)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
 # Switch ke user nextjs
 USER nextjs
 
-# 👇 UBAH DI SINI
-EXPOSE 7020
+# 👇 Port sudah benar sesuai request (8020)
+EXPOSE 8020
 
-ENV PORT 7020
+ENV PORT 8020
 ENV HOSTNAME "0.0.0.0"
 
 # Jalankan server

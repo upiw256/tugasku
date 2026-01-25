@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     container_name: nextjs_app
@@ -8,19 +6,25 @@ services:
       dockerfile: Dockerfile
     restart: always
     
-    # 👇 UBAH MAPPING PORT
+    # Mapping Port Aplikasi (Kiri: Laptop, Kanan: Docker)
     ports:
-      - "7020:7020" # Kiri (Host Laptop) : Kanan (Container)
+      - "8020:8020"
     
+    # Gunakan .env
     env_file:
-      - .env
+      - .env.local
 
     environment:
-      # Override Env untuk Docker
-      - MONGODB_URI=mongodb://mongo:27017/sekolah_db
+      # Koneksi ke Service Mongo di port ASLI (27017)
+      - MONGODB_URI=mongodb://mongo:27017/tugasku
       
-      # 👇 PENTING: Update URL Auth agar login/logout tidak error
-      - NEXTAUTH_URL=http://localhost:8020 
+      # URL Login (Sesuaikan dengan Port Aplikasi)
+      - NEXTAUTH_URL=https://tugas.sman1margaasih.sch.id
+      
+      # WAJIB: Agar Auth jalan di Docker
+      - AUTH_TRUST_HOST=true
+      
+      - NEXTAUTH_SECRET=rahasia_sekolah_12345 
 
     depends_on:
       - mongo
@@ -31,8 +35,11 @@ services:
     container_name: mongodb_container
     image: mongo:latest
     restart: always
+    # Mapping Port Database
+    # Kiri (27117): Akses dari Compass Laptop
+    # Kanan (27017): Port Asli Container (JANGAN UBAH YANG KANAN)
     ports:
-      - "27017:27017"
+      - "27117:27017"
     volumes:
       - mongodb_data:/data/db
 

@@ -2,35 +2,53 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// ⚠️ PERUBAHAN PENTING:
+// Nama fungsi harus 'proxy' (bukan middleware) karena versi Next.js Anda memintanya.
 export async function proxy(req: NextRequest) {
-  // Ambil token sesi user
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  
+  // 1. Ambil Token (Fix Token Null/Looping)
+  // Kita wajib sebutkan 'cookieName' agar dia membaca cookie 'next-auth.session-token'
+  // yang sudah kita set "secure: false" di lib/auth.ts
+  const token = await getToken({ 
+    req, 
+    secret: process.env.NEXTAUTH_SECRET,
+    cookieName: 'next-auth.session-token' 
+  });
+  
   const { pathname } = req.nextUrl;
+  console.log(`[Proxy] Akses ke: ${pathname} | User: ${token?.email || 'Guest'}`);
 
-  // 1. Jika user belum login dan mencoba akses halaman admin/siswa
-  if (!token) {
-    if (pathname.startsWith('/admin') || pathname.startsWith('/siswa')) {
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
-    return NextResponse.next();
+  // 2. Proteksi Halaman Login (Redirect jika user SUDAH login)
+  if (token && pathname === '/login') {
+    if (token.role === 'admin') return NextResponse.redirect(new URL('/admin/siswa', req.url));
+    if (token.role === 'siswa') return NextResponse.redirect(new URL('/siswa', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
-  // 2. Proteksi Halaman Admin (Hanya untuk role 'admin')
+  // 3. Proteksi Halaman Private (Redirect jika user BELUM login)
+  if (!token) {
+    // Izinkan akses ke Login & API auth agar tidak error
+    if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
+      return NextResponse.next();
+    }
+    // Selain itu, tendang ke login
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  // 4. Proteksi Halaman Admin (Hanya untuk role 'admin')
   if (pathname.startsWith('/admin') && token.role !== 'admin') {
-    // Jika siswa nyasar ke admin, balikin ke dashboard siswa
     return NextResponse.redirect(new URL('/siswa', req.url));
   }
 
-  // 3. Proteksi Halaman Siswa (Hanya untuk role 'siswa')
+  // 5. Proteksi Halaman Siswa (Hanya untuk role 'siswa')
   if (pathname.startsWith('/siswa') && token.role !== 'siswa') {
-    // Jika admin iseng ke halaman siswa, balikin ke admin
-    return NextResponse.redirect(new URL('/admin/tugas', req.url));
+    return NextResponse.redirect(new URL('/admin/siswa', req.url));
   }
 
   return NextResponse.next();
 }
 
-// Tentukan halaman mana saja yang dijaga satpam
+// Config Matcher: Menentukan halaman mana yang dijaga
 export const config = {
-  matcher: ['/admin/:path*', '/siswa/:path*'],
+  matcher: ['/', '/login', '/admin/:path*', '/siswa/:path*'],
 };

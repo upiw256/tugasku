@@ -157,6 +157,12 @@ export default async function KelolaTugasPage({
 
               {/* 5. AKSI */}
               <td className="px-6 py-4 flex justify-center gap-4 items-center">
+                  <Link
+                    href={`/admin/tugas/${t._id}/pengumpulan`}
+                    className="bg-teal-100 text-teal-700 border border-teal-200 px-3 py-1 rounded text-xs font-bold hover:bg-teal-200 transition flex items-center gap-1"
+                  >
+                    👁️ Cek Pengumpulan
+                  </Link>                
                 <Link
                   href={`/admin/tugas/${t._id}`}
                   className="text-blue-600 hover:text-blue-800 font-medium"
