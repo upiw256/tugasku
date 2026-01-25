@@ -20,7 +20,7 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/sekolah_db
       
       # 👇 PENTING: Update URL Auth agar login/logout tidak error
-      - NEXTAUTH_URL=http://localhost:7020 
+      - NEXTAUTH_URL=http://localhost:8020 
 
     depends_on:
       - mongo
