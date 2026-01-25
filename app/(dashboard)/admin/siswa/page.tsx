@@ -6,19 +6,19 @@ import { redirect } from 'next/navigation';
 import ResetPasswordButton from '@/components/ui/ResetPasswordButton';
 import DeleteStudentButton from '@/components/ui/DeleteStudentButton';
 import Pagination from '@/components/ui/Pagination';
+// Import komponen baru
+import DownloadAkunSiswa from '@/components/admin/DownloadButton';
 
-// PERUBAHAN 1: Definisikan searchParams sebagai Promise
 export default async function DataSiswaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string, kelas?: string }>;
 }) {
   const session = await auth();
   if (session?.user?.role !== 'admin') redirect('/login');
 
   await connectDB();
 
-  // PERUBAHAN 2: Await searchParams sebelum mengakses isinya
   const params = await searchParams;
   
   const query = params.q || '';
@@ -34,9 +34,14 @@ export default async function DataSiswaPage({
     .sort({ kelas: 1, nama_lengkap: 1 })
     .skip(skip)
     .limit(LIMIT);
-
+    
+  const selectedKelas = params.kelas || '';
   const totalStudents = await Member.countDocuments(filter);
   const totalPages = Math.ceil(totalStudents / LIMIT);
+  
+  // Ambil List Kelas dari Member (Karena Member yang punya data kelas lengkap)
+  const distinctClasses = await Member.distinct('kelas');
+  const sortedClasses = distinctClasses.sort();
 
   return (
     <div className="space-y-6">
@@ -44,22 +49,44 @@ export default async function DataSiswaPage({
         <h1 className="text-2xl font-bold text-gray-800">
           Data Siswa ({totalStudents})
         </h1>
+        <div className="flex flex-wrap gap-2 items-end justify-end w-full md:w-auto">
+          
+          {/* TOMBOL DOWNLOAD (FITUR BARU) */}
+          <DownloadAkunSiswa listKelas={sortedClasses} />
+          
+          <div className="hidden md:block w-[1px] h-[30px] bg-gray-300 mx-1"></div>
 
-        <div className="flex gap-2">
+          {/* Filter Tampilan Tabel */}
+          <div className="flex flex-col">
+            <label className="text-xs font-bold text-gray-600 mb-1">Filter Tabel</label>
+            <select 
+              name="kelas" 
+              defaultValue={selectedKelas}
+              className="border p-2 rounded text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
+            >
+              <option value="">-- Semua --</option>
+              {sortedClasses.map((cls: string) => (
+                <option key={cls} value={cls}>{cls}</option>
+              ))}
+            </select>
+          </div>      
+          
           {/* Form Search */}
-          <form className="flex gap-2">
-            <input
-              type="text"
-              name="q"
-              defaultValue={query}
-              placeholder="Cari nama siswa..."
-              className="border border-gray-300 px-3 py-2 rounded-lg text-sm"
-            />
-            {/* Reset page ke 1 saat pencarian baru */}
+          <form className="flex gap-2 items-end">
+            <div className="flex flex-col">
+              <label className="text-xs font-bold text-gray-600 mb-1">Cari Nama</label>
+              <input
+                type="text"
+                name="q"
+                defaultValue={query}
+                placeholder="Nama..."
+                className="border border-gray-300 px-3 py-2 rounded text-sm h-[38px]"
+              />
+            </div>
             <input type="hidden" name="page" value="1" />
             <button
               type="submit"
-              className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm"
+              className="bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold h-[38px]"
             >
               Cari
             </button>
@@ -67,13 +94,14 @@ export default async function DataSiswaPage({
 
           <Link 
               href="/admin/siswa/tambah" 
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 whitespace-nowrap"
+              className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-blue-700 whitespace-nowrap h-[38px] flex items-center"
             >
-              + Tambah Siswa
+              + Siswa
           </Link>
         </div>
       </div>
 
+      {/* Tabel Data Siswa */}
       <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
