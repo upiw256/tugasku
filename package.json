@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "cloudinary": "^2.9.0",
     "exceljs": "^4.4.0",
     "md5": "^2.3.0",
     "mongoose": "^9.0.2",

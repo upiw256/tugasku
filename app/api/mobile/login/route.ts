@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { User } from "@/models";
+import { User, Member } from "@/models"; // ✅ Pastikan import Member
 import md5 from "md5";
 
 export async function POST(req: Request) {
   try {
-    // 1. Baca data yang dikirim dari HP
     const body = await req.json();
     const { username, password } = body;
 
@@ -16,10 +15,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Koneksi DB
     await connectDB();
 
-    // 3. Cari User (Samakan logic dengan auth.ts)
+    // 1. Cari User Login
     const user = await User.findOne({ user: username });
 
     if (!user) {
@@ -29,7 +27,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Cek Password MD5
+    // 2. Cek Password
     const inputHash = md5(password);
     if (user.password !== inputHash) {
       return NextResponse.json(
@@ -38,16 +36,36 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Login Sukses! Kirim data user balik ke HP
+    // ---------------------------------------------------------
+    // 👇 LOGIC BARU: AMBIL KELAS DARI TABLE MEMBERS 👇
+    // ---------------------------------------------------------
+    let kelasSiswa = "-";
+    let namaSiswa = user.nama_lengkap;
+
+    // Jika user punya member_id (artinya dia Siswa/Guru yang terdaftar)
+    if (user.member_id) {
+      const member = await Member.findById(user.member_id);
+      
+      if (member) {
+        // Ambil kelas dari tabel Member
+        kelasSiswa = member.kelas || "-";
+        
+        // Opsional: Gunakan nama dari member jika di user kosong
+        if (!namaSiswa) namaSiswa = member.nama_lengkap;
+      }
+    }
+
+    // 3. Kirim Data Lengkap ke HP
     return NextResponse.json({
       success: true,
       message: "Login Berhasil",
       data: {
-        id: user._id,
-        nama: user.nama_lengkap,
+        id: user.member_id || user._id, // Prioritaskan member_id untuk relasi tugas
+        user_id: user._id,              // ID login asli (opsional)
+        nama: namaSiswa,
         role: user.role,
-        kelas: user.kelas || "-",
-        user: user.user
+        kelas: kelasSiswa,              // ✅ INI SUDAH BENAR (Dari Member)
+        username: user.user
       }
     });
 
