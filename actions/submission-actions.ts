@@ -2,45 +2,52 @@
 
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Nilai, User } from '@/models'; // Pastikan import User
+import { Nilai, User } from '@/models';
 import { revalidatePath } from 'next/cache';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function submitTaskAction(formData: FormData) {
   try {
     const session = await auth();
-    if (session?.user?.role !== 'siswa') return { success: false, message: 'Unauthorized' };
-
     const tugasId = formData.get('tugasId');
-    const fileUrl = formData.get('fileUrl');
+    const file = formData.get('file') as File;
     const catatan = formData.get('catatan');
 
-    if (!tugasId || !fileUrl) {
-      return { success: false, message: 'File wajib diupload.' };
-    }
+    if (!file || file.size === 0) return { success: false, message: "File kosong" };
 
     await connectDB();
 
-    // Cari member_id milik user yang login
-    const user = await User.findOne({ user: session.user.email });
-    if (!user || !user.member_id) return { success: false, message: 'Data siswa tidak ditemukan.' };
+    // 1. Upload ke Cloudinary
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const uploadRes: any = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream({ folder: "tugas_siswa" }, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      }).end(buffer);
+    });
 
-    // Simpan ke Collection Nilai (Upsert: Update jika ada, Create jika belum)
+    // 2. Simpan ke DB
+    const user = await User.findOne({ user: session?.user?.email });
     await Nilai.findOneAndUpdate(
       { tugas_id: tugasId, member_id: user.member_id },
-      {
-        file_url: fileUrl,
+      { 
+        file_url: uploadRes.secure_url, // URL dari Cloudinary
         catatan_siswa: catatan,
-        tanggal_mengumpulkan: new Date(),
-        // Jika sebelumnya sudah ada nilai, jangan di-reset. Jika belum, biarkan 0.
+        tanggal_mengumpulkan: new Date()
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true }
     );
 
-    revalidatePath('/siswa/tugas'); // Refresh halaman tugas siswa
-    return { success: true, message: 'Tugas berhasil dikumpulkan!' };
-
-  } catch (error) {
-    console.error(error);
-    return { success: false, message: 'Gagal mengumpulkan tugas.' };
+    revalidatePath('/admin/tugas');
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: "Gagal mengunggah" };
   }
 }

@@ -30,6 +30,9 @@ const NilaiSchema = new Schema({
   tugas_id: { type: Schema.Types.ObjectId, ref: 'Tugas', required: true },
   nilai: { type: Number, default: 0 },
   tanggal_mengumpulkan: { type: Date, default: Date.now },
+  // 👇 TAMBAHKAN DUA BARIS INI 👇
+  file_url: { type: String },
+  catatan_siswa: { type: String },
 }, { timestamps: false });
 
 const AbsensiSchema = new mongoose.Schema({
