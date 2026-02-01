@@ -129,10 +129,7 @@ export default async function HalamanPengumpulan({
                               src={thumbnailUrl} // Pakai URL Thumbnail yg sudah di-resize
                               alt="Bukti" 
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                              // Fallback jika error
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://placehold.co/150x150?text=Error';
-                              }}
+                              
                             />
                             {/* Overlay Zoom Icon saat hover */}
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
