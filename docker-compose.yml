@@ -12,7 +12,7 @@ services:
     
     # Gunakan .env
     env_file:
-      - .env.local
+      - .env
 
     environment:
       # Koneksi ke Service Mongo di port ASLI (27017)
