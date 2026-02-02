@@ -1,56 +1,37 @@
-# --- TAHAP 1: Base ---
-FROM node:20-alpine AS base
+FROM oven/bun:1.3.5 AS base
+WORKDIR /app
 
-# --- TAHAP 2: Dependencies ---
+# --- deps ---
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install
 
-# Copy package json
-COPY package.json package-lock.json* ./
-# Install dependencies
-RUN npm ci
-
-# --- TAHAP 3: Builder ---
+# --- build ---
 FROM base AS builder
-WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Matikan telemetry nextjs saat build
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_DISABLE_TURBOPACK=1
 
-# Build project
-RUN npm run build
+RUN bun run build
 
-# --- TAHAP 4: Runner (Production) ---
-FROM base AS runner
+# --- runner ---
+FROM oven/bun:1.3.5 AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV PORT=8020
+ENV HOSTNAME=0.0.0.0
 
-# Buat user baru agar aman (bukan root)
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN groupadd --gid 1001 nodejs \
+ && useradd --uid 1001 --gid nodejs --shell /bin/sh --create-home nextjs
 
-# Copy file public (gambar, icon, dll)
 COPY --from=builder /app/public ./public
-
-# ✅ TAMBAHAN PENTING: Copy folder static agar CSS & JS terbaca
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy folder .next/standalone (Server Logic)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-
-# Switch ke user nextjs
 USER nextjs
-
-# 👇 Port sudah benar sesuai request (8020)
 EXPOSE 8020
 
-ENV PORT 8020
-ENV HOSTNAME "0.0.0.0"
-
-# Jalankan server
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]

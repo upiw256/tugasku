@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { submitTaskAction } from "@/actions/submission-actions";
 import { toast } from "react-hot-toast"; 
 
-export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
+export default function TaskSubmissionForm({ tugasId, initialData }: { tugasId: string, initialData: any; }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
