@@ -15,18 +15,7 @@ const formatDate = (date: Date) => {
   });
 };
 
-// --- HELPER 2: Bikin Thumbnail Cloudinary (Agar loading cepat) ---
-const getThumbnailUrl = (url: string) => {
-  if (!url) return '';
-  // Cek apakah ini URL Cloudinary
-  if (url.includes('cloudinary.com')) {
-    // Sisipkan parameter resize (width 150px, crop fill) setelah '/upload/'
-    return url.replace('/upload/', '/upload/w_150,h_150,c_fill,q_auto,f_auto/');
-  }
-  return url; // Jika bukan cloudinary, kembalikan url asli
-};
-
-// --- HELPER 3: Cek apakah file PDF ---
+// --- HELPER 2: Cek apakah file PDF ---
 const isPdf = (url: string) => {
   return url?.toLowerCase().endsWith('.pdf');
 };
@@ -92,9 +81,7 @@ export default async function HalamanPengumpulan({
               const siswa = item.member_id;
               if (!siswa) return null; 
 
-              // Pastikan nama field di DB Anda 'file_url'
               const fileUrl = item.file_url; 
-              const thumbnailUrl = getThumbnailUrl(fileUrl);
               const fileIsPdf = isPdf(fileUrl);
 
               return (
@@ -106,34 +93,31 @@ export default async function HalamanPengumpulan({
                     <div className="text-xs text-gray-500">{siswa.nis} - {siswa.kelas}</div>
                   </td>
 
-                  {/* 👇 KOLOM GAMBAR (CLOUDINARY) 👇 */}
+                  {/* KOLOM PRATINJAU LOKAL */}
                   <td className="px-6 py-3 text-center align-middle">
                     {fileUrl ? (
                       <a 
-                        href={fileUrl} // Link lari ke Gambar ASLI (Besar)
+                        href={fileUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-block relative group"
                         title="Klik untuk melihat ukuran penuh"
                       >
                         {fileIsPdf ? (
-                          // Tampilan jika file PDF
                           <div className="flex flex-col items-center justify-center w-16 h-16 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition">
                             <span className="text-2xl">📄</span>
                             <span className="text-[10px] text-red-600 font-bold">PDF</span>
                           </div>
                         ) : (
-                          // Tampilan jika Gambar (Pakai Thumbnail Cloudinary)
-                          <div className="relative overflow-hidden rounded border border-gray-200 shadow-sm w-16 h-16">
+                          <div className="relative overflow-hidden rounded border border-gray-200 shadow-sm w-16 h-16 bg-gray-100">
                             <img 
-                              src={thumbnailUrl} // Pakai URL Thumbnail yg sudah di-resize
+                              src={fileUrl} // Langsung gunakan fileUrl lokal (/uploads/...)
                               alt="Bukti" 
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                              
+                              // HAPUS onError JIKA INI SERVER COMPONENT
                             />
-                            {/* Overlay Zoom Icon saat hover */}
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <span className="text-white text-xs">🔍 Zoom</span>
+                              <span className="text-white text-[10px]">🔍 Zoom</span>
                             </div>
                           </div>
                         )}
@@ -144,7 +128,6 @@ export default async function HalamanPengumpulan({
                       </span>
                     )}
                   </td>
-                  {/* 👆 ------------------- 👆 */}
 
                   <td className="px-6 py-3 text-gray-600">
                     {formatDate(item.tanggal_mengumpulkan)}
@@ -171,17 +154,6 @@ export default async function HalamanPengumpulan({
                 </tr>
               );
             })}
-            
-            {submissions.length === 0 && (
-              <tr>
-                <td colSpan={6} className="p-12 text-center text-gray-500">
-                  <div className="flex flex-col items-center gap-2 opacity-60">
-                    <span className="text-4xl">📭</span>
-                    <span className="font-medium">Belum ada pengumpulan.</span>
-                  </div>
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>

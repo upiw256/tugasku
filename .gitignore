@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Mengabaikan semua file yang diunggah siswa
+public/uploads/*
+
+# Kecuali file .gitkeep jika Anda ingin folder 'uploads' tetap ada di GitHub/Server
+!public/uploads/.gitkeep
