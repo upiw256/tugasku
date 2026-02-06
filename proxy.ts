@@ -24,7 +24,12 @@ export async function proxy(req: NextRequest) {
     if (token.role === 'siswa') return NextResponse.redirect(new URL('/siswa', req.url));
     return NextResponse.redirect(new URL('/', req.url));
   }
-
+  if (pathname.startsWith('/uploads')) {
+    const response = NextResponse.next();
+    // Tambahkan Header Anti-Cache agar file baru langsung terdeteksi
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    return response;
+  }
   // 3. Proteksi Halaman Private (Redirect jika user BELUM login)
   if (!token) {
     // Izinkan akses ke Login & API auth agar tidak error
@@ -50,5 +55,5 @@ export async function proxy(req: NextRequest) {
 
 // Config Matcher: Menentukan halaman mana yang dijaga
 export const config = {
-  matcher: ['/', '/login', '/admin/:path*', '/siswa/:path*'],
+  matcher: ['/', '/login', '/admin/:path*', '/siswa/:path*', '/uploads/:path*'],
 };

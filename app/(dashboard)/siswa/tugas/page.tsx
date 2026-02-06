@@ -127,8 +127,6 @@ export default async function HalamanTugasSiswa() {
                         {isOnline ? (
                             <TaskSubmissionForm 
                                 tugasId={task._id.toString()} 
-                                // Kirim data yang sudah dibersihkan (cleanSubmission)
-                                initialData={cleanSubmission}
                             />
                         ) : (
                         

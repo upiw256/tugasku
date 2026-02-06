@@ -85,6 +85,19 @@ export default function Sidebar({ user }: { user: any }) {
       items: filteredMenus.filter(m => m.href === '/settings')
     }
   ];
+  const handleLogout = async () => {
+    // 1. Hapus Session Storage & Local Storage
+    // Ini penting agar data siswa sebelumnya tidak tersisa di perangkat sekolah
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+
+    // 2. Jalankan signOut dari NextAuth
+    // redirect: true akan mengarahkan user ke halaman login secara otomatis
+    await signOut({ 
+      redirect: true, 
+      callbackUrl: "/login" 
+    });
+  };
 
   // Fungsi helper untuk merender item menu agar tidak duplikasi kode
   const renderMenuItem = (menu: MenuItem) => {
@@ -203,7 +216,7 @@ export default function Sidebar({ user }: { user: any }) {
         {/* 4. LOGOUT BUTTON (Gelap & Merah) */}
         <div className="p-4 border-t border-slate-800 shrink-0">
           <button 
-            onClick={() => signOut({ callbackUrl: '/login' })}
+            onClick={handleLogout}
             className={`group flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium transition-all duration-200
                 text-red-400 hover:bg-red-500/10 hover:text-red-300
                 ${isCollapsed ? 'justify-center' : ''}

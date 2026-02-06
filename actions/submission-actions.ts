@@ -30,7 +30,7 @@ export async function submitTaskAction(formData: FormData) {
     // Bersihkan nama tugas dari karakter ilegal untuk folder
     const folderName = tugas.judul.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const extension = file.type === 'application/pdf' ? 'pdf' : 'jpg';
-    const fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis}.${extension}`;
+    const fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis.trim().replace(/\s+/g, '')}.${extension}`;
 
     // 2. Siapkan Folder Tujuan
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', folderName);
