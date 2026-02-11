@@ -72,6 +72,7 @@ export default async function HalamanPengumpulan({
               <th className="px-6 py-3">Nama Siswa</th>
               <th className="px-6 py-3 text-center">Bukti / File</th>
               <th className="px-6 py-3">Waktu Kirim</th>
+              <th className="px-6 py-3">Catatan</th>
               <th className="px-6 py-3">Nilai</th>
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
@@ -131,6 +132,9 @@ export default async function HalamanPengumpulan({
 
                   <td className="px-6 py-3 text-gray-600">
                     {formatDate(item.tanggal_mengumpulkan)}
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">
+                    {item.catatan_siswa || <span className="text-gray-300 italic text-xs">Tanpa catatan</span>}
                   </td>
                   
                   <td className="px-6 py-3">
