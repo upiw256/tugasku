@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Tugas, Nilai, Member, User } from '@/models';
 import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import { redirect } from 'next/navigation';
+import Image from 'next/image'; // Gunakan Image Next.js untuk optimasi
 
 export default async function HalamanTugasSiswa() {
   // 1. Cek Sesi Login
@@ -27,11 +28,11 @@ export default async function HalamanTugasSiswa() {
   // 3. QUERY TUGAS (Support String & Array untuk Multi Kelas)
   const tasks = await Tugas.find({
     $or: [
-      { kelas: member.kelas },             // Jika data di DB String ("X 1")
-      { kelas: { $in: [member.kelas] } }   // Jika data di DB Array (["X 1", "X 2"])
+      { kelas: member.kelas },             
+      { kelas: { $in: [member.kelas] } }   
     ]
   })
-  .sort({ deadline: -1 }) // Urutkan deadline terbaru diatas
+  .sort({ deadline: -1 })
   .lean();
 
   // 4. Ambil Data Pengumpulan (Nilai) Siswa Ini
@@ -61,9 +62,8 @@ export default async function HalamanTugasSiswa() {
             // --- 1. CARI DATA PENGUMPULAN ---
             const rawSubmission = mySubmissions.find((s: any) => s.tugas_id.toString() === task._id.toString());
             
-            // --- 2. PERBAIKAN ERROR SERIALIZATION (PENTING!) ---
-            // Kita harus mengubah ObjectId menjadi string agar tidak error saat dikirim ke Client Component
-            let cleanSubmission = null;
+            // --- 2. PERBAIKAN SERIALIZATION & DATA ---
+            let cleanSubmission: any = null;
             if (rawSubmission) {
                 cleanSubmission = {
                     ...rawSubmission,
@@ -73,22 +73,20 @@ export default async function HalamanTugasSiswa() {
                 };
             }
 
-            // --- 3. TENTUKAN TIPE (Fix Bug Offline: Default ke 'online' jika null) ---
+            // --- 3. LOGIKA STATUS (FIXED) ---
             const taskType = task.tipe_pengumpulan || 'online';
             const isOnline = taskType === 'online';
-
-            // --- 4. TENTUKAN STATUS ---
-            // Online: Selesai jika file_url ada
-            // Offline: Selesai jika submission (nilai) sudah dibuat oleh guru
+            
+            // isDone benar-benar mengecek file_url jika online
             const isDone = isOnline 
                 ? !!cleanSubmission?.file_url 
-                : !!cleanSubmission; 
+                : !!cleanSubmission?.nilai; // Offline dianggap done jika sudah ada nilai
                 
             const deadline = new Date(task.deadline);
             const isLate = !isDone && new Date() > deadline;
             
             return (
-                <div key={task._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full transition hover:shadow-md group">
+                <div key={task._id.toString()} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full transition hover:shadow-md group relative">
                 
                 {/* Indikator Warna Header */}
                 <div className={`h-1.5 w-full ${isDone ? 'bg-green-500' : isLate ? 'bg-red-500' : 'bg-blue-500'}`}></div>
@@ -109,11 +107,35 @@ export default async function HalamanTugasSiswa() {
                         )}
                     </div>
                     
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
                         {task.deskripsi || <span className="italic text-gray-400">Tidak ada deskripsi.</span>}
                     </p>
+
+                    {/* --- PREVIEW FOTO JIKA SUDAH UPLOAD --- */}
+                    {isOnline && (
+                        <div className="mb-4">
+                            {isDone && cleanSubmission?.file_url ? (
+                                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+                                    <Image 
+                                        width={400}
+                                        height={300}
+                                        src={cleanSubmission.file_url} 
+                                        alt="Preview Tugas"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                        <span className="text-white text-[10px] font-bold bg-black/40 px-2 py-1 rounded">Terkirim</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="w-full h-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                                    <span className="text-[10px] text-gray-400 italic">Belum ada file diunggah</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     
-                    <div className="text-xs text-gray-500 mb-4 flex items-center gap-1.5 bg-gray-50 p-2 rounded">
+                    <div className="text-[11px] text-gray-500 mb-4 flex items-center gap-1.5 bg-gray-50 p-2 rounded">
                         <span>📅 Deadline:</span>
                         <span className={`font-bold ${isLate ? 'text-red-500' : 'text-gray-700'}`}>
                             {deadline.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
@@ -122,36 +144,29 @@ export default async function HalamanTugasSiswa() {
 
                     {/* AREA AKSI (Bawah) */}
                     <div className="mt-auto pt-4 border-t border-gray-50">
-                        
-                        {/* JIKA TIPE ONLINE (Upload File) */}
                         {isOnline ? (
                             <TaskSubmissionForm 
                                 tugasId={task._id.toString()} 
                             />
                         ) : (
-                        
-                        /* JIKA TIPE OFFLINE (Info Only) */
-                        <div className={`p-4 rounded-lg text-center border border-dashed transition-colors
-                            ${isDone ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}
-                        `}>
-                            {isDone ? (
-                                <div>
-                                    <div className="text-2xl mb-1">✅</div>
-                                    <p className="text-sm font-bold text-green-700">Sudah Dinilai Guru</p>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Nilai: <span className="font-bold text-gray-800 text-lg">{cleanSubmission?.nilai}</span>
-                                    </p>
-                                </div>
-                            ) : (
-                                <div>
-                                    <div className="text-2xl mb-1">🏫</div>
-                                    <p className="text-sm font-bold text-gray-600">Kumpulkan di Kelas</p>
-                                    <p className="text-[11px] text-gray-400 mt-1">Tugas ini tidak perlu upload file.</p>
-                                </div>
-                            )}
-                        </div>
+                            <div className={`p-4 rounded-lg text-center border border-dashed transition-colors
+                                ${isDone ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}
+                            `}>
+                                {isDone ? (
+                                    <div>
+                                        <p className="text-xs font-bold text-green-700">✅ Sudah Dinilai Guru</p>
+                                        <p className="text-[10px] text-gray-500 mt-1">
+                                            Nilai: <span className="font-bold text-gray-800 text-sm">{cleanSubmission?.nilai}</span>
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-600">🏫 Kumpulkan di Kelas</p>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">Guru akan menginput nilai di sini.</p>
+                                    </div>
+                                )}
+                            </div>
                         )}
-
                     </div>
                 </div>
                 </div>
