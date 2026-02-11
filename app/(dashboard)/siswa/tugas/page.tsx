@@ -4,6 +4,7 @@ import { Tugas, Nilai, Member, User } from '@/models';
 import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import { redirect } from 'next/navigation';
 import Image from 'next/image'; // Gunakan Image Next.js untuk optimasi
+import ImagePreview from '@/components/ui/ImagePreview';
 
 export default async function HalamanTugasSiswa() {
   // 1. Cek Sesi Login
@@ -116,16 +117,11 @@ export default async function HalamanTugasSiswa() {
                         <div className="mb-4">
                             {isDone && cleanSubmission?.file_url ? (
                                 <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
-                                    <Image 
-                                        width={400}
-                                        height={300}
+                                    <ImagePreview 
                                         src={cleanSubmission.file_url} 
-                                        alt="Preview Tugas"
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                        <span className="text-white text-[10px] font-bold bg-black/40 px-2 py-1 rounded">Terkirim</span>
-                                    </div>
+                                        alt="Bukti Tugas"
+                                        className="w-full h-32 rounded-lg border border-gray-100 shadow-sm"
+                                        />
                                 </div>
                             ) : (
                                 <div className="w-full h-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
