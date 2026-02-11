@@ -49,6 +49,13 @@ export async function proxy(req: NextRequest) {
   if (pathname.startsWith('/siswa') && token.role !== 'siswa') {
     return NextResponse.redirect(new URL('/admin/siswa', req.url));
   }
+  if (pathname.startsWith('/uploads')) {
+   // Izinkan admin melihat semua, tapi siswa hanya bisa melihat file mereka sendiri
+   // (Logika tambahan bisa ditambahkan di sini jika perlu)
+   const response = NextResponse.next();
+   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+   return response;
+}
 
   return NextResponse.next();
 }

@@ -29,6 +29,7 @@ services:
     depends_on:
       - mongo
     volumes:
+      - ./public/uploads:/app/.next/standalone/public/uploads
       - ./public/uploads:/app/public/uploads
 
   mongo:

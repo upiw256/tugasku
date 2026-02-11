@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { JSX, useState } from "react";
+import { clearAppCache } from "@/actions/cache-actions"
 
 // Definisikan tipe untuk menu agar lebih rapi saat dikelompokkan
 type MenuItem = {
@@ -15,6 +16,7 @@ type MenuItem = {
 
 export default function Sidebar({ user }: { user: any }) {
   const pathname = usePathname();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOpen, setIsOpen] = useState(false); // Untuk mobile toggle
   const [isCollapsed, setIsCollapsed] = useState(false); // State baru untuk desktop collapse
 
@@ -69,7 +71,17 @@ export default function Sidebar({ user }: { user: any }) {
       icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>)
     },
   ];
-
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await clearAppCache(); // Memanggil revalidatePath('/', 'layout')
+      if (res.success) {
+        alert("Data aplikasi telah disegarkan!");
+      }
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   // Filter menu berdasarkan role user
   const filteredMenus = allMenus.filter(m => m.role === user.role);
 
@@ -215,6 +227,24 @@ export default function Sidebar({ user }: { user: any }) {
 
         {/* 4. LOGOUT BUTTON (Gelap & Merah) */}
         <div className="p-4 border-t border-slate-800 shrink-0">
+          <button 
+            onClick={handleRefreshData}
+            disabled={isRefreshing}
+            className={`group flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium transition-all duration-200
+                text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300
+                ${isCollapsed ? 'justify-center' : ''}
+                ${isRefreshing ? 'opacity-50' : ''}
+            `}
+            title={isCollapsed ? "Segarkan Data" : ""}
+          >
+            <svg 
+              className={`w-5 h-5 flex-shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} 
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            {!isCollapsed && <span className="truncate">{isRefreshing ? 'Menyegarkan...' : 'Segarkan Data'}</span>}
+          </button>
           <button 
             onClick={handleLogout}
             className={`group flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium transition-all duration-200

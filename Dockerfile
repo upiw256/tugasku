@@ -29,7 +29,7 @@ RUN groupadd --gid 1001 nodejs \
 # PERBAIKAN: Buat folder uploads dan atur izin akses (sebelum pindah ke USER nextjs)
 RUN mkdir -p public/uploads \
     && chown -R nextjs:nodejs public/uploads \
-    && chmod -R 755 public/uploads
+    && chmod -R 755 public/uploads \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
