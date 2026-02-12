@@ -19,10 +19,19 @@ const UserSchema = new Schema({
 const TugasSchema = new Schema({
   judul: { type: String, required: true },
   deskripsi: String,
-  deadline: Date,
-  // Tipe Mixed karena di JSON ada yang string "X 12" dan array ["XI 3", "XI 4"]
-  kelas: { type: Schema.Types.Mixed, required: true }, 
-}, { timestamps: false });
+  deadline: { type: Date, required: true },
+  kelas: { type: Schema.Types.Mixed, required: true },
+  is_active: { type: Boolean, default: true }, // Kolom gembok
+  tipe_pengumpulan: { 
+    type: String, 
+    enum: ['online', 'offline'], 
+    default: 'online' 
+  },
+  dibuat_pada: { type: Date, default: Date.now }
+}, { 
+  timestamps: false,
+  strict: false // Biar aman kalau ada kolom tambahan mendadak
+});
 
 // 4. Schema untuk Nilai (Pengumpulan Tugas)
 const NilaiSchema = new Schema({
@@ -55,20 +64,14 @@ const tugasSchema = new mongoose.Schema({
   deskripsi: { type: String },
   deadline: { type: Date, required: true },
   kelas: { type: mongoose.Schema.Types.Mixed, required: true },
-  
-  // 👇👇 PASTIKAN INI ADA DI DALAM 'tugasSchema' 👇👇
+  is_active: { type: Boolean, default: true },
   tipe_pengumpulan: { 
     type: String, 
     enum: ['online', 'offline'], 
     default: 'online' 
   },
-  // 👆👆 ------------------------------------------ 👆👆
-  
   dibuat_pada: { type: Date, default: Date.now }
-});
-if (mongoose.models.Tugas) {
-  delete mongoose.models.Tugas;
-}
+},{ strict: false });
 
 const logTugasSchema = new mongoose.Schema({
   admin_email: { type: String, required: true }, // Siapa yang ubah

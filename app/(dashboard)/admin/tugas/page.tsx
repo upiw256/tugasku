@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import Pagination from '@/components/ui/Pagination';
 import DeleteTaskButton from '@/components/ui/DeleteTaskButton';
-
+import ToggleStatusButton from '@/components/admin/ToggleStatusButton';
 export default async function KelolaTugasPage({
   searchParams,
 }: {
@@ -169,7 +169,10 @@ export default async function KelolaTugasPage({
                 >
                   Edit
                 </Link>
-
+                <ToggleStatusButton 
+                      id={t._id.toString()} 
+                      initialStatus={t.is_active ?? true} 
+                    />
                 <DeleteTaskButton 
                   id={t._id.toString()} 
                   judul={t.judul} 

@@ -4,12 +4,13 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { Nilai, User, Tugas } from '@/models';
 import { revalidatePath } from 'next/cache';
-import { uploadQueue } from '@/lib/queue'; // Import antrian yang sudah dibuat
+import { uploadQueue } from '@/lib/queue'; 
 import path from 'path';
 
+// --- FUNGSI 1: Kirim Tugas (Siswa) ---
 export async function submitTaskAction(formData: FormData) {
   try {
-    // 1. Validasi Sesi & Form
+    // 1. Validasi Sesi
     const session = await auth();
     if (!session?.user?.email) return { success: false, message: "Sesi habis" };
 
@@ -21,11 +22,17 @@ export async function submitTaskAction(formData: FormData) {
 
     await connectDB();
 
-    // 2. Ambil Data Pendukung
-    const user = await User.findOne({ user: session.user.email }).populate('member_id');
+    // 2. Ambil Data Tugas & Validasi Status Aktif
     const tugas = await Tugas.findById(tugasId);
-    
-    if (!user || !tugas) return { success: false, message: "Data tidak ditemukan" };
+    if (!tugas) return { success: false, message: "Tugas tidak ditemukan" };
+
+    // --- CEK APAKAH TUGAS DITUTUP ---
+    if (tugas.is_active === false) {
+      return { success: false, message: "🔒 Maaf, pengumpulan untuk tugas ini sudah ditutup." };
+    }
+
+    const user = await User.findOne({ user: session.user.email }).populate('member_id');
+    if (!user) return { success: false, message: "Data siswa tidak ditemukan" };
 
     const siswa = user.member_id;
     
@@ -39,21 +46,20 @@ export async function submitTaskAction(formData: FormData) {
     const uploadDir = path.join(baseUploadPath, folderName);
     const filePath = path.join(uploadDir, fileName);
 
-    // 4. KIRIM TUGAS KE ANTRIAN REDIS (Background Process)
+    // 4. Masuk Antrian Redis
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     await uploadQueue.add('proses-file', {
-      buffer: buffer, // BullMQ akan menyimpan buffer ini di Redis
+      buffer: buffer,
       filePath: filePath,
       uploadDir: uploadDir,
       isImage: isImage,
       fileName: fileName
     });
 
-    // 5. UPDATE MONGODB LANGSUNG
+    // 5. Update MongoDB
     const fileUrl = `/uploads/${folderName}/${fileName}`;
-
     await Nilai.findOneAndUpdate(
       { tugas_id: tugasId, member_id: siswa._id },
       { 
@@ -65,11 +71,47 @@ export async function submitTaskAction(formData: FormData) {
     );
 
     revalidatePath('/admin/tugas');
-    // Pesan sukses dikirim tanpa menunggu Sharp selesai
     return { success: true, message: "Tugas berhasil dikirim dan sedang diproses!" };
 
   } catch (e) {
     console.error("❌ Gagal memproses antrian upload:", e);
     return { success: false, message: "Gagal mengirim tugas, coba lagi nanti" };
+  }
+}
+
+// --- FUNGSI 2: Toggle Status Tugas (Admin) ---
+export async function toggleTugasStatus(tugasId: string, currentStatus: boolean) {
+  try {
+    console.log("--- DEBUG START ---");
+    console.log("1. Mencoba Hubungkan Database...");
+    await connectDB();
+
+    console.log("2. Mencari ID:", tugasId);
+    console.log("3. Status Saat Ini:", currentStatus);
+
+    // Kita paksa ubah status ke kebalikannya
+    const targetStatus = !currentStatus;
+
+    // Pakai findOneAndUpdate agar kita bisa kontrol lebih detail
+    const updated = await Tugas.findOneAndUpdate(
+      { _id: tugasId }, 
+      { $set: { is_active: targetStatus } },
+      { new: true, runValidators: true } // new: true agar mengembalikan data setelah berubah
+    );
+
+    if (!updated) {
+      console.log("❌ Gagal: Tugas tidak ditemukan di DB!");
+      return { success: false };
+    }
+
+    console.log("4. Berhasil Update! Status Baru di DB:", updated.is_active);
+    console.log("--- DEBUG END ---");
+
+    revalidatePath('/admin/tugas'); 
+    return { success: true };
+
+  } catch (error: any) {
+    console.error("❌ ERROR SERVER ACTION:", error.message);
+    return { success: false, error: error.message };
   }
 }

@@ -97,7 +97,7 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600 text-xs">{formatDate(item.tanggal_mengumpulkan)}</td>
-                  <td className="px-6 py-4 min-w-[200px]"><SmartNote text={item.catatan_siswa} limit={20} /></td>
+                  <td className="px-6 py-4 min-w-50"><SmartNote text={item.catatan_siswa} limit={20} /></td>
                   <td className="px-6 py-4 text-center">
                     {item.nilai > 0 ? (
                       <span className="text-green-700 font-black bg-green-100 px-2 py-1 rounded border border-green-200">{item.nilai}</span>
