@@ -4,8 +4,7 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { Nilai, User, Tugas } from '@/models';
 import { revalidatePath } from 'next/cache';
-import sharp from 'sharp';
-import fs from 'fs/promises';
+import { uploadQueue } from '@/lib/queue'; // Import antrian yang sudah dibuat
 import path from 'path';
 
 export async function submitTaskAction(formData: FormData) {
@@ -36,35 +35,23 @@ export async function submitTaskAction(formData: FormData) {
     const extension = isImage ? 'webp' : 'pdf';
     const fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis.trim().replace(/\s+/g, '')}.${extension}`;
 
-    // Fix Path untuk Docker Standalone
-    const isStandalone = process.env.NODE_ENV === 'production';
-    const baseUploadPath = isStandalone 
-      ? path.join(process.cwd(), '.next', 'standalone', 'public', 'uploads')
-      : path.join(process.cwd(), 'public', 'uploads');
-
+    const baseUploadPath = path.join(process.cwd(), 'public', 'uploads');
     const uploadDir = path.join(baseUploadPath, folderName);
     const filePath = path.join(uploadDir, fileName);
 
-    // 4. PROSES SIMPAN FILE KE DISK (DULUAN)
-    // Pastikan folder tersedia
-    await fs.mkdir(uploadDir, { recursive: true });
-    
+    // 4. KIRIM TUGAS KE ANTRIAN REDIS (Background Process)
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    if (isImage) {
-      // Jika Sharp gagal (misal file korup), ia akan melempar error ke blok catch
-      await sharp(buffer)
-        .resize(1200, null, { withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toFile(filePath);
-      console.log(`✅ Gambar berhasil dikompres: ${fileName}`);
-    } else {
-      await fs.writeFile(filePath, buffer);
-      console.log(`✅ PDF berhasil disimpan: ${fileName}`);
-    }
+    await uploadQueue.add('proses-file', {
+      buffer: buffer, // BullMQ akan menyimpan buffer ini di Redis
+      filePath: filePath,
+      uploadDir: uploadDir,
+      isImage: isImage,
+      fileName: fileName
+    });
 
-    // 5. UPDATE MONGODB (Hanya jalan jika proses file di atas sukses)
+    // 5. UPDATE MONGODB LANGSUNG
     const fileUrl = `/uploads/${folderName}/${fileName}`;
 
     await Nilai.findOneAndUpdate(
@@ -78,11 +65,11 @@ export async function submitTaskAction(formData: FormData) {
     );
 
     revalidatePath('/admin/tugas');
-    return { success: true, message: "Tugas berhasil diunggah!" };
+    // Pesan sukses dikirim tanpa menunggu Sharp selesai
+    return { success: true, message: "Tugas berhasil dikirim dan sedang diproses!" };
 
   } catch (e) {
-    // Jika error terjadi di Sharp atau fs.writeFile, MongoDB tidak akan terupdate
-    console.error("❌ Gagal memproses upload:", e);
-    return { success: false, message: "Gagal menyimpan file ke server" };
+    console.error("❌ Gagal memproses antrian upload:", e);
+    return { success: false, message: "Gagal mengirim tugas, coba lagi nanti" };
   }
 }
