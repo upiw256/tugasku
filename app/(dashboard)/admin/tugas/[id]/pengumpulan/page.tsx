@@ -3,8 +3,8 @@ import { Nilai, Tugas } from '@/models';
 import Link from 'next/link';
 import ImagePreview from '@/components/ui/ImagePreview';
 import SmartNote from '@/components/ui/LinkPreview';
+import QuickGrade from '@/components/ui/QuickGrade';
 
-// --- HELPER 1: Format Tanggal (Ditambahkan proteksi null) ---
 const formatDate = (date: Date) => {
   if (!date) return '-';
   return new Date(date).toLocaleDateString('id-ID', {
@@ -17,15 +17,12 @@ const formatDate = (date: Date) => {
   });
 };
 
-// --- HELPER 2: Cek PDF (DIPERBAIKI AGAR TIDAK ERROR a.match) ---
-// Kita gunakan optional chaining (?.) untuk memastikan url ada isinya sebelum di-match
 const isPdf = (url: string) => url?.toLowerCase()?.endsWith('.pdf') || false;
 
 export default async function HalamanPengumpulan({ params }: { params: Promise<{ id: string }> }) {
   await connectDB();
   const { id: tugasId } = await params;
 
-  // Validasi ID Tugas
   if (!tugasId.match(/^[0-9a-fA-F]{24}$/)) {
     return <div className="p-8 text-red-500 font-bold">⚠️ ID Tugas tidak valid.</div>;
   }
@@ -39,7 +36,6 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
 
   return (
     <div className="space-y-6 pb-20 md:pb-10">
-      {/* HEADER */}
       <div className="flex justify-between items-start px-2 md:px-0">
         <div>
           <Link href="/admin/tugas" className="text-xs text-gray-500 hover:text-blue-600 mb-2 inline-flex items-center gap-1">
@@ -57,17 +53,17 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
         </div>
       </div>
 
-      {/* TAMPILAN DESKTOP */}
+      {/* TAMPILAN DESKTOP - Perbaikan Struktur Tabel agar tidak Hydration Error */}
       <div className="hidden md:block bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
         <table className="w-full text-sm text-left border-collapse">
           <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b text-[11px] tracking-wider">
             <tr>
-              <th className="px-6 py-4 w-10">No</th>
+              <th className="px-6 py-4 w-10 text-center">No</th>
               <th className="px-6 py-4">Nama Siswa</th>
               <th className="px-6 py-4 text-center">Bukti / File</th>
               <th className="px-6 py-4">Waktu Kirim</th>
               <th className="px-6 py-4">Catatan</th>
-              <th className="px-6 py-4">Nilai</th>
+              <th className="px-6 py-4 text-center">Nilai</th>
               <th className="px-6 py-4 text-center">Aksi</th>
             </tr>
           </thead>
@@ -77,7 +73,7 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
               if (!siswa) return null;
               return (
                 <tr key={item._id.toString()} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-gray-400">{index + 1}</td>
+                  <td className="px-6 py-4 font-mono text-gray-400 text-center">{index + 1}</td>
                   <td className="px-6 py-4">
                     <div className="font-bold text-gray-800">{siswa.nama_lengkap}</div>
                     <div className="text-[11px] text-gray-500 uppercase">{siswa.nis} • {siswa.kelas}</div>
@@ -86,13 +82,12 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                     <div className="flex justify-center">
                       {item.file_url ? (
                         isPdf(item.file_url) ? (
-                          <a href={item.file_url} target="_blank" className="w-12 h-12 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center transition-transform hover:scale-105">
+                          <a href={item.file_url} target="_blank" className="w-12 h-12 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center">
                             <span className="text-lg">📄</span>
                             <span className="text-[8px] text-red-600 font-bold tracking-tighter">PDF</span>
                           </a>
                         ) : (
-                          <div className="w-12 h-12 shadow-sm border border-gray-200 rounded overflow-hidden bg-gray-50">
-                            {/* Tambahkan pengecekan file_url di sini juga */}
+                          <div className="w-12 h-12 shadow-sm border border-gray-200 rounded overflow-hidden">
                             <ImagePreview src={item.file_url} className="w-full h-full object-cover" />
                           </div>
                         )
@@ -100,16 +95,13 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600 text-xs">{formatDate(item.tanggal_mengumpulkan)}</td>
-                  <td className="px-6 py-4 min-w-50">
-                    <SmartNote text={item.catatan_siswa || ""} limit={20} />
+                  <td className="px-6 py-4"><SmartNote text={item.catatan_siswa || ""} limit={20} /></td>
+                  <td className="px-6 py-4 text-center">
+                    {/* KLIK NILAI LANGSUNG */}
+                    <QuickGrade submissionId={item._id.toString()} currentNilai={item.nilai} />
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {item.nilai > 0 ? (
-                      <span className="text-green-700 font-black bg-green-100 px-2 py-1 rounded border border-green-200">{item.nilai}</span>
-                    ) : <span className="text-orange-400 text-[10px] bg-orange-50 px-2 py-1 rounded border border-orange-100">PENDING</span>}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <Link href={`/admin/siswa/${siswa._id}/nilai`} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-[11px] font-bold transition-colors">Nilai ↗</Link>
+                    <Link href={`/admin/siswa/${siswa._id}/nilai`} className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-[11px] font-bold">Detail ↗</Link>
                   </td>
                 </tr>
               );
@@ -118,7 +110,7 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
         </table>
       </div>
 
-      {/* TAMPILAN MOBILE */}
+      {/* MOBILE (Grid) - Tidak terpengaruh Table Hydration Error */}
       <div className="grid grid-cols-1 gap-4 md:hidden px-2">
         {submissions.map((item: any, index: number) => {
           const siswa = item.member_id;
@@ -127,25 +119,18 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
             <div key={item._id.toString()} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
               <div className="p-3 bg-gray-50/50 flex justify-between items-center border-b">
                 <span className="text-[10px] font-bold text-gray-400">#{index + 1} — {siswa.kelas}</span>
-                {item.nilai > 0 ? (
-                  <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black border border-green-200">
-                    NILAI: {item.nilai}
-                  </div>
-                ) : (
-                  <span className="text-[9px] font-bold bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full border border-orange-100 animate-pulse">PENDING</span>
-                )}
+                <QuickGrade submissionId={item._id.toString()} currentNilai={item.nilai} />
               </div>
-
               <div className="p-4 flex gap-4">
                 <div className="shrink-0">
                   {item.file_url ? (
                     isPdf(item.file_url) ? (
-                      <a href={item.file_url} target="_blank" className="w-16 h-16 bg-red-50 border border-red-200 rounded-xl flex flex-col items-center justify-center shadow-sm">
+                      <div className="w-16 h-16 bg-red-50 border border-red-200 rounded-xl flex flex-col items-center justify-center">
                         <span className="text-xl">📄</span>
                         <span className="text-[9px] text-red-600 font-bold">PDF</span>
-                      </a>
+                      </div>
                     ) : (
-                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                         <ImagePreview src={item.file_url} className="w-full h-full object-cover" />
                       </div>
                     )
@@ -156,18 +141,6 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                   <p className="text-[10px] text-gray-500">{siswa.nis}</p>
                   <p className="text-[9px] text-blue-500 font-medium mt-1">{formatDate(item.tanggal_mengumpulkan)}</p>
                 </div>
-              </div>
-
-              <div className="px-4 pb-4">
-                <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                   <SmartNote text={item.catatan_siswa || ""} limit={40} />
-                </div>
-                <Link
-                  href={`/admin/siswa/${siswa._id}/nilai`}
-                  className="mt-3 flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-100 active:scale-95 transition-transform"
-                >
-                  Beri Nilai Siswa ↗
-                </Link>
               </div>
             </div>
           );
