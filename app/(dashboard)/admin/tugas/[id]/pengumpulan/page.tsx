@@ -4,11 +4,11 @@ import Link from 'next/link';
 import ImagePreview from '@/components/ui/ImagePreview';
 import SmartNote from '@/components/ui/LinkPreview';
 
-// --- HELPER 1: Format Tanggal ---
+// --- HELPER 1: Format Tanggal (Ditambahkan proteksi null) ---
 const formatDate = (date: Date) => {
   if (!date) return '-';
   return new Date(date).toLocaleDateString('id-ID', {
-    weekday: 'short', // Disingkat agar hemat ruang di mobile
+    weekday: 'short',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -17,12 +17,15 @@ const formatDate = (date: Date) => {
   });
 };
 
-const isPdf = (url: string) => url?.toLowerCase().endsWith('.pdf');
+// --- HELPER 2: Cek PDF (DIPERBAIKI AGAR TIDAK ERROR a.match) ---
+// Kita gunakan optional chaining (?.) untuk memastikan url ada isinya sebelum di-match
+const isPdf = (url: string) => url?.toLowerCase()?.endsWith('.pdf') || false;
 
 export default async function HalamanPengumpulan({ params }: { params: Promise<{ id: string }> }) {
   await connectDB();
   const { id: tugasId } = await params;
 
+  // Validasi ID Tugas
   if (!tugasId.match(/^[0-9a-fA-F]{24}$/)) {
     return <div className="p-8 text-red-500 font-bold">⚠️ ID Tugas tidak valid.</div>;
   }
@@ -54,7 +57,7 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
         </div>
       </div>
 
-      {/* TAMPILAN DESKTOP (Tabel Muncul di Layar MD ke atas) */}
+      {/* TAMPILAN DESKTOP */}
       <div className="hidden md:block bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
         <table className="w-full text-sm text-left border-collapse">
           <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b text-[11px] tracking-wider">
@@ -80,31 +83,33 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                     <div className="text-[11px] text-gray-500 uppercase">{siswa.nis} • {siswa.kelas}</div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {/* Render File Preview Desktop */}
                     <div className="flex justify-center">
                       {item.file_url ? (
                         isPdf(item.file_url) ? (
-                          <a href={item.file_url} target="_blank" className="w-12 h-12 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center">
+                          <a href={item.file_url} target="_blank" className="w-12 h-12 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center transition-transform hover:scale-105">
                             <span className="text-lg">📄</span>
                             <span className="text-[8px] text-red-600 font-bold tracking-tighter">PDF</span>
                           </a>
                         ) : (
-                          <div className="w-12 h-12 shadow-sm border border-gray-200 rounded overflow-hidden">
-                            <ImagePreview src={item.file_url} className="w-full h-full" />
+                          <div className="w-12 h-12 shadow-sm border border-gray-200 rounded overflow-hidden bg-gray-50">
+                            {/* Tambahkan pengecekan file_url di sini juga */}
+                            <ImagePreview src={item.file_url} className="w-full h-full object-cover" />
                           </div>
                         )
                       ) : <span className="text-[10px] text-gray-300 italic">-</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600 text-xs">{formatDate(item.tanggal_mengumpulkan)}</td>
-                  <td className="px-6 py-4 min-w-50"><SmartNote text={item.catatan_siswa} limit={20} /></td>
+                  <td className="px-6 py-4 min-w-50">
+                    <SmartNote text={item.catatan_siswa || ""} limit={20} />
+                  </td>
                   <td className="px-6 py-4 text-center">
                     {item.nilai > 0 ? (
                       <span className="text-green-700 font-black bg-green-100 px-2 py-1 rounded border border-green-200">{item.nilai}</span>
                     ) : <span className="text-orange-400 text-[10px] bg-orange-50 px-2 py-1 rounded border border-orange-100">PENDING</span>}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <Link href={`/admin/siswa/${siswa._id}/nilai`} className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-[11px] font-bold">Nilai ↗</Link>
+                    <Link href={`/admin/siswa/${siswa._id}/nilai`} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-[11px] font-bold transition-colors">Nilai ↗</Link>
                   </td>
                 </tr>
               );
@@ -113,14 +118,13 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
         </table>
       </div>
 
-      {/* TAMPILAN MOBILE (Muncul di Layar Kecil) */}
+      {/* TAMPILAN MOBILE */}
       <div className="grid grid-cols-1 gap-4 md:hidden px-2">
         {submissions.map((item: any, index: number) => {
           const siswa = item.member_id;
           if (!siswa) return null;
           return (
             <div key={item._id.toString()} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-              {/* Card Header */}
               <div className="p-3 bg-gray-50/50 flex justify-between items-center border-b">
                 <span className="text-[10px] font-bold text-gray-400">#{index + 1} — {siswa.kelas}</span>
                 {item.nilai > 0 ? (
@@ -132,18 +136,17 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                 )}
               </div>
 
-              {/* Card Body */}
               <div className="p-4 flex gap-4">
                 <div className="shrink-0">
                   {item.file_url ? (
                     isPdf(item.file_url) ? (
-                      <a href={item.file_url} target="_blank" className="w-16 h-16 bg-red-50 border border-red-200 rounded-xl flex flex-col items-center justify-center">
+                      <a href={item.file_url} target="_blank" className="w-16 h-16 bg-red-50 border border-red-200 rounded-xl flex flex-col items-center justify-center shadow-sm">
                         <span className="text-xl">📄</span>
                         <span className="text-[9px] text-red-600 font-bold">PDF</span>
                       </a>
                     ) : (
-                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                        <ImagePreview src={item.file_url} className="w-full h-full" />
+                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
+                        <ImagePreview src={item.file_url} className="w-full h-full object-cover" />
                       </div>
                     )
                   ) : <div className="w-16 h-16 bg-gray-50 rounded-xl border border-dashed flex items-center justify-center text-[10px] text-gray-300">N/A</div>}
@@ -155,14 +158,13 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                 </div>
               </div>
 
-              {/* Catatan Section */}
               <div className="px-4 pb-4">
                 <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                   <SmartNote text={item.catatan_siswa} limit={40} />
+                   <SmartNote text={item.catatan_siswa || ""} limit={40} />
                 </div>
                 <Link
                   href={`/admin/siswa/${siswa._id}/nilai`}
-                  className="mt-3 flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-100"
+                  className="mt-3 flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-md shadow-blue-100 active:scale-95 transition-transform"
                 >
                   Beri Nilai Siswa ↗
                 </Link>
