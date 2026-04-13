@@ -4,11 +4,13 @@ import { updateStudentAction } from '@/actions/admin-actions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
-export default async function EditSiswaPage({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   await connectDB();
   
+  const { id } = await params;
+  
   // Ambil data siswa berdasarkan ID di URL
-  const student = await Member.findById(params.id);
+  const student = await Member.findById(id);
   
   if (!student) return <div>Siswa tidak ditemukan</div>;
 
@@ -21,7 +23,7 @@ export default async function EditSiswaPage({ params }: { params: { id: string }
 
       <form action={async (formData) => {
         'use server'
-        await updateStudentAction(params.id, formData);
+        await updateStudentAction(id, formData);
         redirect('/admin/siswa');
       }} className="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
         
