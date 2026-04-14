@@ -65,12 +65,18 @@ export default async function KelolaTugasPage({
             </button>
           </form>
 
-          {/* Tombol Tambah Manual (Nanti kita buat halamannya) */}
+          {/* Tombol Tambah Manual */}
           <Link
             href="/admin/tugas/tambah"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 whitespace-nowrap"
           >
             + Buat Tugas
+          </Link>
+          <Link
+            href="/admin/tugas/tambah-kelompok"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 whitespace-nowrap"
+          >
+            👥 Buat Tugas Kelompok
           </Link>
           <Link
             href="/admin/nilai/rekap"
@@ -103,7 +109,12 @@ export default async function KelolaTugasPage({
             <tr key={t._id} className="hover:bg-gray-50">
               {/* 1. JUDUL */}
               <td className="px-6 py-4">
-                <div className="font-bold text-gray-900">{t.judul}</div>
+                <div className="font-bold text-gray-900 flex items-center gap-2">
+                  {t.judul}
+                  {t.tipe_tugas === 'kelompok' && (
+                    <span className="bg-indigo-100 text-indigo-800 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold">Kelompok</span>
+                  )}
+                </div>
                 <div className="text-xs text-gray-500 line-clamp-1">
                   {t.deskripsi || '-'}
                 </div>

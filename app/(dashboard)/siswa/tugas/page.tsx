@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Tugas, Nilai, Member, User } from '@/models';
+import { Tugas, Nilai, Member, User, Kelompok } from '@/models';
 import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import { redirect } from 'next/navigation';
 import ImagePreview from '@/components/ui/ImagePreview';
@@ -22,7 +22,7 @@ export default async function HalamanTugasSiswa() {
   if (!member) return <div className="p-8 text-red-500 font-bold">Profil siswa belum terhubung.</div>;
 
   // 3. Ambil Semua Tugas yang sesuai kelas siswa
-  const tasks = await Tugas.find({
+  const rawTasks = await Tugas.find({
     $or: [
       { kelas: member.kelas },             
       { kelas: { $in: [member.kelas] } }   
@@ -30,6 +30,20 @@ export default async function HalamanTugasSiswa() {
   })
   .sort({ deadline: -1 })
   .lean();
+
+  const myGroups = await Kelompok.find({ anggota: member._id }).lean();
+
+  // Filter tugas: Jika tipe_tugas 'kelompok', sembunyikan untuk member yang BUKAN ketua
+  const tasks = rawTasks.filter((task: any) => {
+    if (task.tipe_tugas === 'kelompok') {
+        const group = myGroups.find((g: any) => g.kelas === task.kelas || (Array.isArray(task.kelas) && task.kelas.includes(g.kelas)));
+        // Jika tidak ada kelompok atau dia bukan ketua, jangan tampilkan tugas ini
+        if (!group || group.ketua?.toString() !== member._id.toString()) {
+            return false;
+        }
+    }
+    return true;
+  });
 
   // 4. Ambil Data Pengumpulan (Nilai) punya siswa ini
   const mySubmissions = await Nilai.find({ member_id: member._id }).lean();

@@ -27,6 +27,11 @@ const TugasSchema = new Schema({
     enum: ['online', 'offline'], 
     default: 'online' 
   },
+  tipe_tugas: {
+    type: String,
+    enum: ['individu', 'kelompok'],
+    default: 'individu'
+  },
   dibuat_pada: { type: Date, default: Date.now }
 }, { 
   timestamps: false,
@@ -70,6 +75,11 @@ const tugasSchema = new mongoose.Schema({
     enum: ['online', 'offline'], 
     default: 'online' 
   },
+  tipe_tugas: {
+    type: String,
+    enum: ['individu', 'kelompok'],
+    default: 'individu'
+  },
   dibuat_pada: { type: Date, default: Date.now }
 },{ strict: false });
 
@@ -85,6 +95,14 @@ const logTugasSchema = new mongoose.Schema({
   waktu: { type: Date, default: Date.now }
 });
 
+// Model untuk Kelompok (digunakan pada Tugas Kelompok)
+const KelompokSchema = new mongoose.Schema({
+  nama_kelompok: { type: String, required: true },
+  kelas: { type: String, required: true },
+  ketua: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
+  anggota: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Member' }]
+}, { timestamps: true });
+
 // Cek apakah model sudah ada (biar gak error overwrite saat reload), kalau belum buat baru
 export const Member = models.Member || model('Member', MemberSchema);
 export const User = models.User || model('User', UserSchema);
@@ -94,3 +112,7 @@ export const Absensi = mongoose.models.Absensi || mongoose.model('Absensi', Abse
 export const Pengumuman = mongoose.models.Pengumuman || mongoose.model('Pengumuman', announcementSchema);
 export const TugasExtended = mongoose.models.TugasExtended || mongoose.model('TugasExtended', tugasSchema);
 export const LogTugas = mongoose.models.LogTugas || mongoose.model('LogTugas', logTugasSchema);
+if (mongoose.models.Kelompok) {
+  delete mongoose.models.Kelompok;
+}
+export const Kelompok = mongoose.model('Kelompok', KelompokSchema);

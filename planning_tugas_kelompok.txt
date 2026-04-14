@@ -1,0 +1,33 @@
+Rencana Pengembangan Fitur Tugas Kelompok
+
+1. Fase 1: Pemilihan Kelas (Class Selection)
+   - Antarmuka: Dropdown atau list untuk memilih kelas yang tersedia.
+   - Aksi: Saat kelas dipilih, sistem akan memuat data siswa berdasarkan kelas tersebut lewat API/database.
+
+2. Fase 2: Daftar Siswa (Student List)
+   - Antarmuka: Menampilkan tabel atau list nama-nama siswa (beserta NIS/NIPD jika perlu) dari kelas yang baru saja dipilih.
+   - Status: Data siswa ini nantinya akan digunakan sebagai sumber (pool) untuk pembagian kelompok.
+
+3. Fase 3: Pengaturan Kelompok
+   Terdapat dua opsi utama untuk pembagian:
+   a) Generate (Otomatis)
+      - Pengguna memasukkan "banyak anggota" per kelompok.
+      - Sistem akan mengacak (shuffle) daftar siswa dan membaginya rata ke dalam kelompok-kelompok. (Jika ada sisa siswa, bisa dimasukkan ke kelompok terakhir atau disebar).
+   
+   b) Manual
+      - Pengguna menentukan "jumlah kelompok".
+      - Antarmuka menyediakan wadah (container) untuk masing-masing kelompok (misal Kelompok 1, Kelompok 2).
+      - Pengguna secara manual memilih siswa (menggunakan checkbox atau fitur drag-and-drop) ke dalam setiap kelompok.
+
+4. Fase 4: Konfirmasi dan Simpan Kelompok
+   - Menampilkan preview/pratinjau hasil pembagian kelompok.
+   - Pengguna dapat melakukan perbaikan kecil (memindah siswa).
+   - Tombol "Simpan Kelompok" yang menyimpan data ke database (tabel Group/Kelompok dan GroupMembers).
+
+5. Fase 5: Fitur Utama Tugas Kelompok (Group Assignment)
+   - Setelah kelompok ditetapkan, pengguna dialihkan ke halaman "Tugas Kelompok".
+   - Antarmuka: Menampilkan daftar kelompok (Kelompok 1, Kelompok 2, dst) beserta anggotanya.
+   - Fungsionalitas Tugas:
+     1. Pemberian Tugas: Form untuk memasukkan deskripsi tugas, melampirkan file, dan mengatur tenggat waktu (deadline).
+     2. Pengumpulan Tugas: Siswa (perwakilan kelompok) bisa mengunggah hasil tugas mereka.
+     3. Penilaian: Guru bisa memberikan nilai untuk tugas tersebut, di mana nilai sistem otomatis diterapkan ke semua siswa dalam kelompok yang sama.

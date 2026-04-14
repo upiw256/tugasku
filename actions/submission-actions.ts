@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Nilai, User, Tugas } from '@/models';
+import { Nilai, User, Tugas, Kelompok } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { uploadQueue } from '@/lib/queue'; 
 import path from 'path';
@@ -35,6 +35,24 @@ export async function submitTaskAction(formData: FormData) {
     if (!user) return { success: false, message: "Data siswa tidak ditemukan" };
 
     const siswa = user.member_id;
+
+    // --- CEK LOGIKA KELOMPOK (HANYA KETUA) ---
+    let targetAnggotaIds: any[] = [siswa._id]; // Default: hanya dirinya sendiri
+
+    if (tugas.tipe_tugas === 'kelompok') {
+      const kelompok = await Kelompok.findOne({ anggota: siswa._id });
+      if (!kelompok) {
+        return { success: false, message: "Kamu belum memiliki kelompok untuk kelas ini!" };
+      }
+      
+      // Cek apakah dia ketua
+      if (kelompok.ketua?.toString() !== siswa._id.toString()) {
+        return { success: false, message: "❌ Hanya ketua kelas/kelompok yang diizinkan untuk mengumpulkan presentasi/file laporan ini!" };
+      }
+
+      // Ambil seluruh ID anggota kelompok untuk diforward nilainya
+      targetAnggotaIds = kelompok.anggota;
+    }
     
     // 3. Konfigurasi Path & Nama File
     const folderName = tugas.judul.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -58,14 +76,16 @@ export async function submitTaskAction(formData: FormData) {
       fileName: fileName
     });
 
-    // 5. Update MongoDB
+    // 5. Update MongoDB (Forward ke Semua Anggota Jika Kelompok)
     const fileUrl = `/uploads/${folderName}/${fileName}`;
-    await Nilai.findOneAndUpdate(
-      { tugas_id: tugasId, member_id: siswa._id },
+    await Nilai.updateMany(
+      { tugas_id: tugasId, member_id: { $in: targetAnggotaIds } },
       { 
-        file_url: fileUrl,
-        catatan_siswa: catatan,
-        tanggal_mengumpulkan: new Date()
+        $set: {
+          file_url: fileUrl,
+          catatan_siswa: catatan,
+          tanggal_mengumpulkan: new Date()
+        }
       },
       { upsert: true }
     );
