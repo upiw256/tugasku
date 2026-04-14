@@ -70,10 +70,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-gray-200 relative">
-        
         {/* === INDIKATOR POJOK KANAN ATAS === */}
-        <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
+        <div className="absolute top-4 right-4 flex flex-col items-start gap-2">
           
           {/* 1. Status Internet */}
           <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shadow-sm">
@@ -95,6 +93,8 @@ export default function LoginPage() {
 
         </div>
         {/* ================================== */}
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-gray-200 relative">
+        
 
         <div className="text-center mb-8 mt-4">
           <h1 className="text-3xl font-bold text-blue-600">TugasKu</h1>

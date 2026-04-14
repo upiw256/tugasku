@@ -88,7 +88,7 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                           </a>
                         ) : (
                           <div className="w-12 h-12 shadow-sm border border-gray-200 rounded overflow-hidden">
-                            <ImagePreview src={item.file_url} className="w-full h-full object-cover" />
+                            <ImagePreview src={`/api${item.file_url}`} className="w-full h-full object-cover" />
                           </div>
                         )
                       ) : <span className="text-[10px] text-gray-300 italic">-</span>}
@@ -131,7 +131,7 @@ export default async function HalamanPengumpulan({ params }: { params: Promise<{
                       </div>
                     ) : (
                       <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                        <ImagePreview src={item.file_url} className="w-full h-full object-cover" />
+                        <ImagePreview src={`/api${item.file_url}`} className="w-full h-full object-cover" />
                       </div>
                     )
                   ) : <div className="w-16 h-16 bg-gray-50 rounded-xl border border-dashed flex items-center justify-center text-[10px] text-gray-300">N/A</div>}
