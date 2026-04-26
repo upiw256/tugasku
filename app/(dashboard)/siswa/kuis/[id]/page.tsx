@@ -4,7 +4,7 @@ import { SoalPG, Member, PengerjaanKuis, User } from '@/models';
 import { redirect } from 'next/navigation';
 import QuizPengerjaan from '@/components/siswa/QuizPengerjaan';
 
-export default async function QuizDetailPage({ params }: { params: { id: string } }) {
+export default async function QuizDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   
   if (!session || session.user.role !== 'siswa') {

@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -43,7 +43,7 @@ export async function PUT(
 
     const { LogKuis } = await import('@/models');
     await LogKuis.create({
-      admin_email: session.user.email,
+      admin_email: session.user.email ?? '',
       kuis_judul: judul,
       aksi: 'UPDATE',
       keterangan: 'Data kuis atau daftar soal diperbarui'
@@ -57,7 +57,7 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -92,7 +92,7 @@ export async function DELETE(
 
     const { LogKuis } = await import('@/models');
     await LogKuis.create({
-      admin_email: session.user.email,
+      admin_email: session.user.email ?? '',
       kuis_judul: (kuis as any).judul,
       aksi: 'DELETE',
       keterangan: force ? 'Kuis dihapus paksa beserta seluruh nilai siswa' : 'Kuis dihapus normal'

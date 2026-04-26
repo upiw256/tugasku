@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -29,7 +29,7 @@ export async function PATCH(
     if (updated) {
       const { LogKuis } = await import('@/models');
       await LogKuis.create({
-        admin_email: session.user.email,
+        admin_email: session.user.email ?? '',
         kuis_judul: updated.judul,
         aksi: 'TOGGLE_STATUS',
         keterangan: `Status manual diubah menjadi: ${status}`
