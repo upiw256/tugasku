@@ -97,6 +97,7 @@ const logTugasSchema = new mongoose.Schema({
 
 // Model untuk Kelompok (digunakan pada Tugas Kelompok)
 const KelompokSchema = new mongoose.Schema({
+  tugas_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Tugas' },
   nama_kelompok: { type: String, required: true },
   kelas: { type: String, required: true },
   ketua: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
