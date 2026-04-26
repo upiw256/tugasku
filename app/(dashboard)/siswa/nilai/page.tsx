@@ -21,7 +21,7 @@ export default async function SiswaNilaiPage() {
   const history = await PengerjaanKuis.find({ 
     member_id: student._id, 
     status: 'SUBMITTED' 
-  }).populate('kuis_id', 'judul').sort({ updatedAt: -1 }).lean();
+  }).populate('kuis_id', 'judul').sort({ updatedAt: -1 }).lean() as any[];
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
