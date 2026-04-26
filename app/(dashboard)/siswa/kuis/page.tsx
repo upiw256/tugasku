@@ -1,10 +1,14 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { SoalPG, Member, PengerjaanKuis } from '@/models';
+import { SoalPG, Member, PengerjaanKuis, User } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
+
+export const dynamic = 'force-dynamic';
 
 export default async function SiswaKuisPage() {
+  noStore();
   const session = await auth();
   
   if (!session || session.user.role !== 'siswa') {
@@ -13,15 +17,24 @@ export default async function SiswaKuisPage() {
 
   await connectDB();
   
-  const student = await Member.findOne({ nis: session.user.email }).lean();
+  // Ambil data User untuk mendapatkan member_id
+  const currentUser = await User.findById(session.user.id).lean();
+  if (!currentUser || !currentUser.member_id) {
+    return <div className="p-10 text-center">Profil siswa tidak terhubung. Silakan hubungi admin.</div>;
+  }
+
+  const student = await Member.findById(currentUser.member_id).lean();
   if (!student) {
     return <div className="p-10 text-center">Data siswa tidak ditemukan.</div>;
   }
 
   // Ambil kuis yang sesuai dengan kelas siswa
-  const quizzes = await SoalPG.find({ 
+  const rawQuizzes = await SoalPG.find({ 
     $or: [{ kelas: student.kelas }, { kelas: { $in: [student.kelas] } }]
   }).sort({ waktu_mulai: 1 }).lean();
+
+  // Deep cleaning untuk menghindari isu serialisasi Mongoose
+  const quizzes = JSON.parse(JSON.stringify(rawQuizzes));
 
   // Ambil status pengerjaan siswa
   const pengerjaan = await PengerjaanKuis.find({ member_id: student._id }).lean();
@@ -65,21 +78,41 @@ export default async function SiswaKuisPage() {
                   const startTime = new Date(kuis.waktu_mulai);
                   const endTime = new Date(kuis.waktu_selesai);
                   
-                  let canTake = now >= startTime && now <= endTime;
+                  let canTake = false;
                   let colorClass = "text-gray-400";
                   let statusText = "Belum Terbuka";
+ 
+                  // 1. Cek Status Manual Admin
+                  if (kuis.status_manual === 'OPEN') {
+                    canTake = true;
+                    statusText = "Tersedia (Dibuka Manual)";
+                    colorClass = "text-blue-600 font-bold";
+                  } else if (kuis.status_manual === 'CLOSED') {
+                    canTake = false;
+                    statusText = "Ditutup (Manual)";
+                    colorClass = "text-red-500";
+                  } else {
+                    // 2. Status AUTO (Berdasarkan Waktu)
+                    if (now > endTime) {
+                      statusText = "Sudah Terlewat";
+                      colorClass = "text-red-500";
+                      canTake = false;
+                    } else if (now >= startTime) {
+                      statusText = "Tersedia";
+                      colorClass = "text-blue-600 font-bold";
+                      canTake = true;
+                    }
+                  }
 
+                  // 3. Cek Status Pengerjaan (Override)
                   if (statusPengerjaan?.status === 'SUBMITTED') {
                     statusText = `Selesai (Skor: ${statusPengerjaan.nilai})`;
                     colorClass = "text-green-600 font-bold";
                     canTake = false;
-                  } else if (now > endTime) {
-                    statusText = "Sudah Terlewat";
-                    colorClass = "text-red-500";
-                    canTake = false;
-                  } else if (now >= startTime) {
-                    statusText = statusPengerjaan?.status === 'DRAFT' ? "Sedang Dikerjakan" : "Tersedia";
-                    colorClass = "text-blue-600 font-bold";
+                  } else if (statusPengerjaan?.status === 'DRAFT' && kuis.status_manual !== 'CLOSED' && (kuis.status_manual === 'OPEN' || (now >= startTime && now <= endTime))) {
+                    statusText = "Sedang Dikerjakan";
+                    colorClass = "text-orange-500 font-bold";
+                    canTake = true;
                   }
 
                   return (

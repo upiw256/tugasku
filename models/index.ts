@@ -133,6 +133,7 @@ const SoalPGSchema = new mongoose.Schema({
   dibuat_oleh: { type: String, required: true }, // Nama pembuat (Admin / Guru)
   waktu_mulai: { type: Date, required: true },
   waktu_selesai: { type: Date, required: true },
+  status_manual: { type: String, enum: ['AUTO', 'OPEN', 'CLOSED'], default: 'AUTO' },
   tanggal_dibuat: { type: Date, default: Date.now }
 });
 
@@ -146,6 +147,19 @@ const PengerjaanKuisSchema = new mongoose.Schema({
   mulai_mengerjakan: { type: Date, default: Date.now },
   selesai_mengerjakan: { type: Date }
 }, { timestamps: true });
+
+// Schema untuk Log Aktivitas Kuis
+const logKuisSchema = new mongoose.Schema({
+  admin_email: { type: String, required: true },
+  kuis_judul: { type: String, required: true },
+  aksi: { 
+    type: String, 
+    enum: ['CREATE', 'UPDATE', 'DELETE', 'TOGGLE_STATUS'], 
+    required: true 
+  },
+  keterangan: { type: String },
+  waktu: { type: Date, default: Date.now }
+});
 
 // Cek apakah model sudah ada (biar gak error overwrite saat reload), kalau belum buat baru
 export const Member = models.Member || model('Member', MemberSchema);
@@ -163,5 +177,12 @@ export const Kelompok = mongoose.model('Kelompok', KelompokSchema);
 
 // Export model baru jika belum diinisialisasi
 export const Materi = mongoose.models.Materi || mongoose.model('Materi', MateriSchema);
-export const SoalPG = mongoose.models.SoalPG || mongoose.model('SoalPG', SoalPGSchema);
-export const PengerjaanKuis = mongoose.models.PengerjaanKuis || mongoose.model('PengerjaanKuis', PengerjaanKuisSchema);
+
+if (mongoose.models.SoalPG) delete mongoose.models.SoalPG;
+export const SoalPG = mongoose.model('SoalPG', SoalPGSchema);
+
+if (mongoose.models.PengerjaanKuis) delete mongoose.models.PengerjaanKuis;
+export const PengerjaanKuis = mongoose.model('PengerjaanKuis', PengerjaanKuisSchema);
+
+if (mongoose.models.LogKuis) delete mongoose.models.LogKuis;
+export const LogKuis = mongoose.model('LogKuis', logKuisSchema);

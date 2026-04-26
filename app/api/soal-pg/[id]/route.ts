@@ -40,6 +40,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Kuis tidak ditemukan' }, { status: 404 });
     }
 
+    const { LogKuis } = await import('@/models');
+    await LogKuis.create({
+      admin_email: session.user.email,
+      kuis_judul: judul,
+      aksi: 'UPDATE',
+      keterangan: 'Data kuis atau daftar soal diperbarui'
+    });
+
     return NextResponse.json(updatedKuis);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -57,16 +65,38 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const { searchParams } = new URL(req.url);
+    const force = searchParams.get('force') === 'true';
+
     await connectDB();
 
-    const sudahAdaJawaban = await PengerjaanKuis.exists({ kuis_id: id });
-    if (sudahAdaJawaban) {
-      return NextResponse.json({ 
-        error: 'Kuis tidak dapat dihapus karena sudah ada data pengerjaan.' 
-      }, { status: 403 });
+    const kuis = await SoalPG.findById(id).lean();
+    if (!kuis) {
+      return NextResponse.json({ error: 'Kuis tidak ditemukan' }, { status: 404 });
+    }
+
+    if (force) {
+      // Hapus semua data pengerjaan terkait kuis ini
+      await PengerjaanKuis.deleteMany({ kuis_id: id });
+    } else {
+      const sudahAdaJawaban = await PengerjaanKuis.exists({ kuis_id: id });
+      if (sudahAdaJawaban) {
+        return NextResponse.json({ 
+          error: 'Kuis tidak dapat dihapus karena sudah ada data pengerjaan.' 
+        }, { status: 403 });
+      }
     }
 
     await SoalPG.findByIdAndDelete(id);
+
+    const { LogKuis } = await import('@/models');
+    await LogKuis.create({
+      admin_email: session.user.email,
+      kuis_judul: (kuis as any).judul,
+      aksi: 'DELETE',
+      keterangan: force ? 'Kuis dihapus paksa beserta seluruh nilai siswa' : 'Kuis dihapus normal'
+    });
+
     return NextResponse.json({ message: 'Kuis berhasil dihapus' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

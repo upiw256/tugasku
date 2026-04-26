@@ -3,8 +3,12 @@ import { connectDB } from '@/lib/db';
 import { Member, SoalPG, PengerjaanKuis } from '@/models';
 import { redirect } from 'next/navigation';
 import KuisManager from '@/components/admin/KuisManager';
+import { unstable_noStore as noStore } from 'next/cache';
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminKuisPage() {
+  noStore();
   const session = await auth();
   
   if (!session || (session.user.role !== 'admin' && session.user.role !== 'guru')) {
@@ -19,7 +23,7 @@ export default async function AdminKuisPage() {
     
     // Ambil kuis yang sudah ada
     const dataKuis = await SoalPG.find({}).sort({ tanggal_dibuat: -1 }).lean();
-
+ 
     // Cek apakah setiap kuis sudah ada pengerjaan
     const existingKuis = await Promise.all(dataKuis.map(async (k: any) => {
       const sudahAdaJawaban = await PengerjaanKuis.exists({ kuis_id: k._id });
@@ -31,9 +35,13 @@ export default async function AdminKuisPage() {
         daftar_soal: k.daftar_soal || [],
         waktu_mulai: k.waktu_mulai ? k.waktu_mulai.toISOString() : new Date().toISOString(),
         waktu_selesai: k.waktu_selesai ? k.waktu_selesai.toISOString() : new Date().toISOString(),
+        status_manual: k.status_manual || 'AUTO',
         sudahAdaJawaban: !!sudahAdaJawaban
       };
     }));
+
+    // Deep cleaning untuk menghindari isu serialisasi (Next.js plain object error)
+    const serializedKuis = JSON.parse(JSON.stringify(existingKuis));
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -44,7 +52,7 @@ export default async function AdminKuisPage() {
         </div>
       </div>
 
-      <KuisManager availableClasses={availableClasses} initialKuis={existingKuis} />
+      <KuisManager availableClasses={availableClasses} initialKuis={serializedKuis} />
     </div>
   );
   } catch (error: any) {

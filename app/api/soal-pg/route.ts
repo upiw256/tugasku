@@ -48,6 +48,14 @@ export async function POST(req: Request) {
       tanggal_dibuat: new Date()
     });
 
+    const { LogKuis } = await import('@/models');
+    await LogKuis.create({
+      admin_email: session.user.email,
+      kuis_judul: judul,
+      aksi: 'CREATE',
+      keterangan: `Kuis baru dibuat untuk kelas: ${Array.isArray(kelas) ? kelas.join(', ') : kelas}`
+    });
+
     // Trigger Pusher
     await pusherServer.trigger('admin-updates', 'new-soal-pg', {
       judul,
