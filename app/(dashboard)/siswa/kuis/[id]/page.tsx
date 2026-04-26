@@ -17,7 +17,7 @@ export default async function QuizDetailPage({
     redirect('/login');
   }
 
-  const { id } = await params;
+  const id = (await params).id;
   await connectDB();
   
   // Ambil data User untuk mendapatkan member_id
