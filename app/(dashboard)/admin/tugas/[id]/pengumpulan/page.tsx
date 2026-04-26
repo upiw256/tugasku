@@ -19,7 +19,13 @@ const formatDate = (date: Date) => {
 
 const isPdf = (url: string) => url?.toLowerCase()?.endsWith('.pdf') || false;
 
-export default async function HalamanPengumpulan({ params }: { params: Promise<{ id: string }> }) {
+export default async function HalamanPengumpulan({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   await connectDB();
   const { id: tugasId } = await params;
 

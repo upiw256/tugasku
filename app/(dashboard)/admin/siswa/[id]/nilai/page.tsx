@@ -6,7 +6,13 @@ import Link from 'next/link';
 import { submitGradeAction } from '@/actions/grade-actions';
 import GradeHistoryRow from '@/components/ui/GradeHistoryRow'; // Import Komponen Baru
 
-export default async function InputNilaiPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function InputNilaiPage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const session = await auth();
   if (session?.user?.role !== 'admin') redirect('/login');
 

@@ -4,7 +4,13 @@ import { updateStudentAction } from '@/actions/admin-actions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   await connectDB();
   
   const { id } = await params;
