@@ -102,11 +102,14 @@ export default async function QuizDetailPage({ params }: { params: { id: string 
   // Batas 1: Durasi pengerjaan sejak klik mulai
   let sisaDetik = Math.max(0, durasiKuisDetik - detikBerlalu);
 
-  // Batas 2: Waktu selesai global kuis (tidak boleh melebihi jam selesai sekolah)
-  const sisaDetikGlobal = Math.max(0, Math.floor((endTime.getTime() - new Date().getTime()) / 1000));
+  // Batas 2: Waktu selesai global kuis (hanya berlaku jika status adalah AUTO)
+  // Jika OPEN manual, kita abaikan jadwal global agar siswa tetap bisa mengerjakan sampai durasinya habis
+  let initialTimeLeft = sisaDetik;
   
-  // Ambil yang paling kecil
-  const initialTimeLeft = Math.min(sisaDetik, sisaDetikGlobal);
+  if (kuis.status_manual !== 'OPEN') {
+    const sisaDetikGlobal = Math.max(0, Math.floor((endTime.getTime() - new Date().getTime()) / 1000));
+    initialTimeLeft = Math.min(sisaDetik, sisaDetikGlobal);
+  }
 
   // Serialisasi data untuk Client Component
   const serializedKuis = JSON.parse(JSON.stringify(kuis));

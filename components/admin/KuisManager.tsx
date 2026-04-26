@@ -4,6 +4,7 @@ import { useState } from 'react';
 import FormBuatSoal from './FormBuatSoal';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export default function KuisManager({ 
   availableClasses, 
@@ -14,6 +15,9 @@ export default function KuisManager({
 }) {
   const router = useRouter();
   const [editingKuis, setEditingKuis] = useState<any | null>(null);
+  const [monitoringKuis, setMonitoringKuis] = useState<any | null>(null);
+  const [pesertaList, setPesertaList] = useState<any[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(false);
 
   const startEdit = (kuis: any) => {
     if (kuis.sudahAdaJawaban) {
@@ -28,14 +32,62 @@ export default function KuisManager({
     setEditingKuis(null);
   };
 
-  const handleToggleStatus = async (id: string, nextStatus: string, judul: string) => {
-    const confirmMessage = nextStatus === 'OPEN' 
-      ? `Yakin ingin MEMBUKA kuis "${judul}" sekarang (Abaikan jadwal)?` 
-      : nextStatus === 'CLOSED' 
-      ? `Yakin ingin MENUTUP kuis "${judul}" sekarang (Abaikan jadwal)?` 
-      : `Kembalikan kuis "${judul}" ke JADWAL OTOMATIS?`;
+  const openMonitoring = async (kuis: any) => {
+    setMonitoringKuis(kuis);
+    setIsDataLoading(true);
+    try {
+      const res = await fetch(`/api/soal-pg/${kuis._id}/peserta`);
+      const data = await res.json();
+      setPesertaList(data);
+    } catch (err) {
+      toast.error("Gagal mengambil daftar peserta");
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
 
-    if (!window.confirm(confirmMessage)) return;
+  const handleResetTimer = async (pengerjaanId: string, namaSiswa: string) => {
+    const result = await Swal.fire({
+      title: 'Reset Waktu?',
+      text: `Yakin ingin mereset waktu pengerjaan untuk ${namaSiswa}? Siswa akan mendapatkan waktu penuh kembali.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#9333ea',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ya, Reset Waktu',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/api/kuis/reset-timer`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pengerjaan_id: pengerjaanId })
+        });
+        if (res.ok) {
+          toast.success("Waktu berhasil direset");
+          // Refresh list peserta
+          openMonitoring(monitoringKuis);
+        }
+      } catch (err) {
+        toast.error("Gagal mereset waktu");
+      }
+    }
+  };
+
+  const handleToggleStatus = async (id: string, nextStatus: string, judul: string) => {
+    const confirmResult = await Swal.fire({
+      title: 'Ubah Akses Kuis?',
+      text: `Ubah status kuis "${judul}" menjadi ${nextStatus}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'Ya, Ubah',
+      cancelButtonText: 'Batal'
+    });
+
+    if (!confirmResult.isConfirmed) return;
 
     try {
       const res = await fetch(`/api/soal-pg/${id}/toggle-status`, {
@@ -53,16 +105,27 @@ export default function KuisManager({
   };
 
   const handleDeleteKuis = async (id: string, judul: string, sudahAdaJawaban: boolean) => {
-    let confirmMsg = `Yakin ingin menghapus kuis "${judul}"?`;
+    let confirmTitle = 'Hapus Kuis?';
+    let confirmText = `Yakin ingin menghapus kuis "${judul}"?`;
     let force = false;
 
     if (sudahAdaJawaban) {
-      confirmMsg = `PERINGATAN: Kuis "${judul}" sudah memiliki data pengerjaan siswa. Menghapus kuis ini juga akan MENGHAPUS SEMUA NILAI SISWA terkait kuis ini secara permanen. Apakah Anda benar-benar yakin ingin hapus paksa?`;
+      confirmTitle = '🔥 HAPUS PAKSA?';
+      confirmText = `PERINGATAN: Kuis "${judul}" sudah memiliki data pengerjaan. Menghapus kuis ini juga akan MENGHAPUS SEMUA NILAI SISWA secara permanen. Lanjutkan?`;
       force = true;
     }
 
-    if (!window.confirm(confirmMsg)) return;
-    if (force && !window.confirm("KALI KEDUA: Data nilai akan hilang selamanya. Lanjutkan?")) return;
+    const result = await Swal.fire({
+      title: confirmTitle,
+      text: confirmText,
+      icon: force ? 'error' : 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const res = await fetch(`/api/soal-pg/${id}${force ? '?force=true' : ''}`, {
@@ -80,8 +143,79 @@ export default function KuisManager({
     }
   };
 
+  // ... (kode render kuis tetap sama sampai bagian <td className="px-6 py-4 text-right">)
+  
   return (
     <div className="grid grid-cols-1 gap-8">
+      {/* Modal Monitoring */}
+      {monitoringKuis && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold">📊 Monitoring Kuis: {monitoringKuis.judul}</h3>
+                <p className="text-purple-100 text-sm">Pilih siswa untuk mereset waktu pengerjaan</p>
+              </div>
+              <button onClick={() => setMonitoringKuis(null)} className="p-2 hover:bg-white/20 rounded-full transition text-2xl font-bold leading-none">&times;</button>
+            </div>
+            
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              {isDataLoading ? (
+                <div className="flex justify-center py-20">
+                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                </div>
+              ) : pesertaList.length === 0 ? (
+                <div className="text-center py-20 text-gray-400">Belum ada siswa yang mulai mengerjakan kuis ini.</div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Siswa</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-center">Score</th>
+                      <th className="px-4 py-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {pesertaList.map((p) => (
+                      <tr key={p._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4">
+                          <p className="font-bold text-gray-800">{p.member_id?.nama_lengkap || 'Unknown'}</p>
+                          <p className="text-[10px] text-gray-500">Kelas: {p.member_id?.kelas} • NIS: {p.member_id?.nis}</p>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${p.status === 'SUBMITTED' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {p.status === 'SUBMITTED' ? '✅ Selesai' : '✍️ Mengerjakan'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-center font-bold text-lg text-gray-700">{p.nilai || 0}</td>
+                        <td className="px-4 py-4 text-right">
+                          <button 
+                            onClick={() => handleResetTimer(p._id, p.member_id?.nama_lengkap)}
+                            className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-purple-200 transition"
+                          >
+                             🔄 Reset Waktu
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            
+            <div className="p-4 bg-gray-50 flex justify-end">
+              <button 
+                onClick={() => setMonitoringKuis(null)} 
+                className="px-6 py-2 bg-white border border-gray-300 rounded-xl font-bold text-gray-600 hover:bg-gray-100"
+              >
+                Tutup Monitoring
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Form Section */}
       <section>
         <h2 className="text-xl font-bold text-gray-800 mb-4 px-2">
@@ -173,6 +307,13 @@ export default function KuisManager({
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1">
+                        <button 
+                          onClick={() => openMonitoring(kuis)}
+                          className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                          title="Monitor Peserta (Reset Waktu)"
+                        >
+                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </button>
                         <a 
                           href={`/api/kuis/export-soal/${kuis._id}`} 
                           className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
@@ -213,4 +354,5 @@ export default function KuisManager({
       </section>
     </div>
   );
+
 }

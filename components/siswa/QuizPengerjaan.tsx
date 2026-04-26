@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 interface Soal {
   id: string;
@@ -28,8 +29,64 @@ export default function QuizPengerjaan({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    // 1. Cek jika waktu sudah habis saat pertama kali masuk
+    if (timeLeft <= 0) {
+      Swal.fire({
+        title: 'Waktu Habis!',
+        text: 'Waktu pengerjaan kuis ini sudah berakhir.',
+        icon: 'error',
+        confirmButtonText: 'Kembali ke Daftar Kuis',
+        confirmButtonColor: '#9333ea',
+        allowOutsideClick: false,
+      }).then(() => {
+        router.replace('/siswa/kuis');
+      });
+      return;
+    }
 
+    // 2. Deteksi Pindah Halaman/Tab (Penalti 20 Detik)
+    const handleViolation = async () => {
+      if (isSubmitting) return;
+
+      console.log("Violation detected: Student left the page/tab");
+      
+      // Berikan penalti di server
+      try {
+        await fetch('/api/kuis/penalti', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kuis_id: kuis._id,
+            member_id: memberId,
+            penalti_detik: 20
+          })
+        });
+      } catch (err) {}
+
+      Swal.fire({
+        title: '🚨 Pelanggaran!',
+        text: 'Anda terdeteksi meninggalkan halaman kuis. Waktu pengerjaan dikurangi 20 detik sebagai penalti.',
+        icon: 'warning',
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#ef4444',
+        allowOutsideClick: false,
+      }).then(() => {
+        router.replace('/siswa/kuis');
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') handleViolation();
+    };
+
+    const handleBlur = () => {
+      handleViolation();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+
+    // 3. Timer Countdown
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1000) {
@@ -41,7 +98,11 @@ export default function QuizPengerjaan({
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    };
   }, []);
 
   const handlePilihJawaban = async (soalId: string, pilihan: string) => {
