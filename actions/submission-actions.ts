@@ -2,19 +2,18 @@
 
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Nilai, User } from '@/models';
+import { Nilai, User, Tugas, Kelompok } from '@/models';
 import { revalidatePath } from 'next/cache';
-import { v2 as cloudinary } from 'cloudinary';
+import { uploadQueue } from '@/lib/queue'; 
+import path from 'path';
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
+// --- FUNGSI 1: Kirim Tugas (Siswa) ---
 export async function submitTaskAction(formData: FormData) {
   try {
+    // 1. Validasi Sesi
     const session = await auth();
+    if (!session?.user?.email) return { success: false, message: "Sesi habis" };
+
     const tugasId = formData.get('tugasId');
     const file = formData.get('file') as File;
     const catatan = formData.get('catatan');
@@ -23,31 +22,116 @@ export async function submitTaskAction(formData: FormData) {
 
     await connectDB();
 
-    // 1. Upload ke Cloudinary
+    // 2. Ambil Data Tugas & Validasi Status Aktif
+    const tugas = await Tugas.findById(tugasId);
+    if (!tugas) return { success: false, message: "Tugas tidak ditemukan" };
+
+    // --- CEK APAKAH TUGAS DITUTUP ---
+    if (tugas.is_active === false) {
+      return { success: false, message: "🔒 Maaf, pengumpulan untuk tugas ini sudah ditutup." };
+    }
+
+    const user = await User.findOne({ user: session.user.email }).populate('member_id');
+    if (!user) return { success: false, message: "Data siswa tidak ditemukan" };
+
+    const siswa = user.member_id;
+
+    // --- CEK LOGIKA KELOMPOK (HANYA KETUA) ---
+    let targetAnggotaIds: any[] = [siswa._id]; // Default: hanya dirinya sendiri
+
+    if (tugas.tipe_tugas === 'kelompok') {
+      const kelompok = await Kelompok.findOne({ anggota: siswa._id });
+      if (!kelompok) {
+        return { success: false, message: "Kamu belum memiliki kelompok untuk kelas ini!" };
+      }
+      
+      // Cek apakah dia ketua
+      if (kelompok.ketua?.toString() !== siswa._id.toString()) {
+        return { success: false, message: "❌ Hanya ketua kelas/kelompok yang diizinkan untuk mengumpulkan presentasi/file laporan ini!" };
+      }
+
+      // Ambil seluruh ID anggota kelompok untuk diforward nilainya
+      targetAnggotaIds = kelompok.anggota;
+    }
+    
+    // 3. Konfigurasi Path & Nama File
+    const folderName = tugas.judul.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const isImage = file.type.startsWith('image/');
+    const extension = isImage ? 'webp' : 'pdf';
+    const fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis.trim().replace(/\s+/g, '')}.${extension}`;
+
+    const baseUploadPath = path.join(process.cwd(), 'public', 'uploads');
+    const uploadDir = path.join(baseUploadPath, folderName);
+    const filePath = path.join(uploadDir, fileName);
+
+    // 4. Masuk Antrian Redis
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const uploadRes: any = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream({ folder: "tugas_siswa" }, (err, res) => {
-        if (err) reject(err);
-        else resolve(res);
-      }).end(buffer);
+
+    await uploadQueue.add('proses-file', {
+      buffer: buffer,
+      filePath: filePath,
+      uploadDir: uploadDir,
+      isImage: isImage,
+      fileName: fileName
     });
 
-    // 2. Simpan ke DB
-    const user = await User.findOne({ user: session?.user?.email });
-    await Nilai.findOneAndUpdate(
-      { tugas_id: tugasId, member_id: user.member_id },
+    // 5. Update MongoDB (Forward ke Semua Anggota Jika Kelompok)
+    const fileUrl = `/uploads/${folderName}/${fileName}`;
+    await Nilai.updateMany(
+      { tugas_id: tugasId, member_id: { $in: targetAnggotaIds } },
       { 
-        file_url: uploadRes.secure_url, // URL dari Cloudinary
-        catatan_siswa: catatan,
-        tanggal_mengumpulkan: new Date()
+        $set: {
+          file_url: fileUrl,
+          catatan_siswa: catatan,
+          tanggal_mengumpulkan: new Date()
+        }
       },
       { upsert: true }
     );
 
     revalidatePath('/admin/tugas');
-    return { success: true };
+    return { success: true, message: "Tugas berhasil dikirim dan sedang diproses!" };
+
   } catch (e) {
-    return { success: false, message: "Gagal mengunggah" };
+    console.error("❌ Gagal memproses antrian upload:", e);
+    return { success: false, message: "Gagal mengirim tugas, coba lagi nanti" };
+  }
+}
+
+// --- FUNGSI 2: Toggle Status Tugas (Admin) ---
+export async function toggleTugasStatus(tugasId: string, currentStatus: boolean) {
+  try {
+    console.log("--- DEBUG START ---");
+    console.log("1. Mencoba Hubungkan Database...");
+    await connectDB();
+
+    console.log("2. Mencari ID:", tugasId);
+    console.log("3. Status Saat Ini:", currentStatus);
+
+    // Kita paksa ubah status ke kebalikannya
+    const targetStatus = !currentStatus;
+
+    // Pakai findOneAndUpdate agar kita bisa kontrol lebih detail
+    const updated = await Tugas.findOneAndUpdate(
+      { _id: tugasId }, 
+      { $set: { is_active: targetStatus } },
+      { new: true, runValidators: true } // new: true agar mengembalikan data setelah berubah
+    );
+
+    if (!updated) {
+      console.log("❌ Gagal: Tugas tidak ditemukan di DB!");
+      return { success: false };
+    }
+
+    console.log("4. Berhasil Update! Status Baru di DB:", updated.is_active);
+    console.log("--- DEBUG END ---");
+
+    revalidatePath('/admin/tugas'); 
+    return { success: true };
+
+  } catch (error: any) {
+    console.error("❌ ERROR SERVER ACTION:", error.message);
+    return { success: false, error: error.message };
   }
 }

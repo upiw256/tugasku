@@ -1,6 +1,7 @@
 // app/(dashboard)/layout.tsx
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import AdminRealtimeNotifier from '@/components/admin/AdminRealtimeNotifier';
 import Sidebar from '@/components/ui/Sidebar';
 
 export default async function DashboardLayout({
@@ -20,8 +21,12 @@ export default async function DashboardLayout({
     role: session.user.role || 'siswa',
   };
 
+  const isStaff = session.user.role === 'admin' || session.user.role === 'guru';
+
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
+      {/* Notifikasi Real-time untuk Admin/Guru */}
+      {isStaff && <AdminRealtimeNotifier />}
       
       {/* 1. SIDEBAR (Client Component) */}
       <Sidebar user={userForSidebar} />

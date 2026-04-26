@@ -24,7 +24,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         path: "/",
         // PENTING: Set 'false' agar bisa login di HTTP (non-SSL) atau di balik proxy
         // Jika nanti sudah full HTTPS di production, boleh diganti jadi 'true'
-        secure: false, 
+        secure: process.env.NODE_ENV === 'production', 
       },
     },
   },

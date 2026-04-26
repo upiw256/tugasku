@@ -125,3 +125,62 @@ export async function createTaskAction(formData: FormData) {
     return { success: false, message: 'Gagal membuat tugas. Cek koneksi server.' };
   }
 }
+
+export async function createTaskKelompokAction(formData: FormData) {
+  try {
+    await connectDB();
+
+    const judul = formData.get('judul') as string;
+    const deskripsi = formData.get('deskripsi') as string;
+    const deadlineString = formData.get('deadline') as string;
+    const kelasRaw = formData.get('kelas') as string;
+    const tipe_pengumpulan = formData.get('tipe_pengumpulan') as string || 'online';
+
+    if (!judul || !deadlineString || !kelasRaw) {
+      return { success: false, message: 'Judul, Deadline, dan Kelas wajib diisi!' };
+    }
+
+    const listKelas = kelasRaw.includes(',') 
+      ? kelasRaw.split(',').map(k => k.trim()) 
+      : [kelasRaw.trim()];
+
+    const newTugas = await Tugas.create({
+      judul,
+      deskripsi,
+      deadline: new Date(deadlineString),
+      kelas: listKelas,
+      tipe_pengumpulan,
+      tipe_tugas: 'kelompok'
+    });
+
+    // Ambil semua kelompok yang ada di kelas-kelas tersebut
+    // Kita anggap Kelompok sudah direfactor importnya jika butuh.
+    // Karena kita tidak impor Kelompok di atas, kita perlu pastikan modelnya jalan.
+    const { Kelompok } = await import('@/models');
+    
+    const groups = await Kelompok.find({ kelas: { $in: listKelas } });
+    
+    // Siapkan nilai untuk semua anggota grup yang eksis
+    if (groups.length > 0) {
+      const nilaiPromises: any[] = [];
+      groups.forEach((g: any) => {
+        g.anggota.forEach((memberId: string) => {
+          nilaiPromises.push(
+            Nilai.create({
+              member_id: memberId,
+              tugas_id: newTugas._id,
+              nilai: 0
+            })
+          );
+        });
+      });
+      await Promise.all(nilaiPromises);
+    }
+
+    revalidatePath('/admin/tugas');
+    return { success: true, message: 'Berhasil membuat tugas kelompok!' };
+  } catch (error: any) {
+    console.error("Create task kelompok error:", error);
+    return { success: false, message: error.message || 'Gagal membuat tugas kelompok.' };
+  }
+}
