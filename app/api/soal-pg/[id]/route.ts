@@ -25,7 +25,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { judul, deskripsi, kelas, daftar_soal, waktu_mulai, waktu_selesai } = body;
+    const { judul, deskripsi, kelas, daftar_soal, waktu_mulai, waktu_selesai, durasi } = body;
 
     const updatedKuis = await SoalPG.findByIdAndUpdate(id, {
       judul,
@@ -34,6 +34,7 @@ export async function PUT(
       daftar_soal,
       waktu_mulai: new Date(waktu_mulai),
       waktu_selesai: new Date(waktu_selesai),
+      durasi: durasi || 60
     }, { new: true });
 
     if (!updatedKuis) {

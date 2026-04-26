@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     await connectDB();
     const body = await req.json();
-    const { judul, deskripsi, kelas, daftar_soal, waktu_mulai, waktu_selesai } = body;
+    const { judul, deskripsi, kelas, daftar_soal, waktu_mulai, waktu_selesai, durasi } = body;
 
     if (!judul || !kelas || !daftar_soal || !waktu_mulai || !waktu_selesai) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -44,13 +44,14 @@ export async function POST(req: Request) {
       daftar_soal,
       waktu_mulai: new Date(waktu_mulai),
       waktu_selesai: new Date(waktu_selesai),
-      dibuat_oleh: session.user.email,
+      durasi: durasi || 60,
+      dibuat_oleh: session.user.email ?? '',
       tanggal_dibuat: new Date()
     });
 
     const { LogKuis } = await import('@/models');
     await LogKuis.create({
-      admin_email: session.user.email,
+      admin_email: session.user.email ?? '',
       kuis_judul: judul,
       aksi: 'CREATE',
       keterangan: `Kuis baru dibuat untuk kelas: ${Array.isArray(kelas) ? kelas.join(', ') : kelas}`
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
     // Trigger Pusher
     await pusherServer.trigger('admin-updates', 'new-soal-pg', {
       judul,
-      pembuat: session.user.email,
+      pembuat: session.user.email ?? '',
       waktu: new Date()
     });
 

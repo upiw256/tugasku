@@ -133,6 +133,7 @@ const SoalPGSchema = new mongoose.Schema({
   dibuat_oleh: { type: String, required: true }, // Nama pembuat (Admin / Guru)
   waktu_mulai: { type: Date, required: true },
   waktu_selesai: { type: Date, required: true },
+  durasi: { type: Number, default: 60 }, // Durasi dalam menit
   status_manual: { type: String, enum: ['AUTO', 'OPEN', 'CLOSED'], default: 'AUTO' },
   tanggal_dibuat: { type: Date, default: Date.now }
 });

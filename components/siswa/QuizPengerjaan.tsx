@@ -14,34 +14,35 @@ interface Soal {
 export default function QuizPengerjaan({ 
   kuis, 
   initialJawaban = {},
-  memberId 
+  memberId,
+  initialTimeLeft
 }: { 
   kuis: any; 
   initialJawaban: Record<string, string>;
   memberId: string;
+  initialTimeLeft: number;
 }) {
   const router = useRouter();
   const [jawaban, setJawaban] = useState<Record<string, string>>(initialJawaban);
-  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(initialTimeLeft * 1000);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Hitung waktu tersisa
-    const endTime = new Date(kuis.waktu_selesai).getTime();
+    if (timeLeft <= 0) return;
+
     const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = endTime - now;
-      if (distance <= 0) {
-        clearInterval(timer);
-        setTimeLeft(0);
-        if (!isSubmitting) autoSubmit();
-      } else {
-        setTimeLeft(distance);
-      }
+      setTimeLeft(prev => {
+        if (prev <= 1000) {
+          clearInterval(timer);
+          if (!isSubmitting) autoSubmit();
+          return 0;
+        }
+        return prev - 1000;
+      });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [kuis.waktu_selesai]);
+  }, []);
 
   const handlePilihJawaban = async (soalId: string, pilihan: string) => {
     const barujawaban = { ...jawaban, [soalId]: pilihan };

@@ -83,13 +83,30 @@ export default async function QuizDetailPage({ params }: { params: { id: string 
     );
   }
 
-  // Jika belum ada, buat draft pengerjaan
+  // Jika belum ada pengerjaan, buat track record baru agar waktu mulai tercatat
   if (!pengerjaan) {
-    // Note: Creating in Page component is usually bad practice, 
-    // but for simple logic we can do it via a separate API call later or here if we use .create
-    // Better: the QuizPengerjaan component will handle initial save if needed.
-    // For now, pass empty object for answers.
+    pengerjaan = await PengerjaanKuis.create({
+      kuis_id: kuis._id,
+      member_id: student._id,
+      status: 'DRAFT',
+      mulai_mengerjakan: new Date(),
+      jawaban: {}
+    });
   }
+
+  // HITUNG SISA WAKTU (Agar waktu terus berjalan meski pindah page)
+  const durasiKuisDetik = (kuis.durasi || 60) * 60;
+  const mulaiAt = pengerjaan.mulai_mengerjakan ? new Date(pengerjaan.mulai_mengerjakan) : new Date();
+  const detikBerlalu = Math.floor((new Date().getTime() - mulaiAt.getTime()) / 1000);
+  
+  // Batas 1: Durasi pengerjaan sejak klik mulai
+  let sisaDetik = Math.max(0, durasiKuisDetik - detikBerlalu);
+
+  // Batas 2: Waktu selesai global kuis (tidak boleh melebihi jam selesai sekolah)
+  const sisaDetikGlobal = Math.max(0, Math.floor((endTime.getTime() - new Date().getTime()) / 1000));
+  
+  // Ambil yang paling kecil
+  const initialTimeLeft = Math.min(sisaDetik, sisaDetikGlobal);
 
   // Serialisasi data untuk Client Component
   const serializedKuis = JSON.parse(JSON.stringify(kuis));
@@ -100,6 +117,7 @@ export default async function QuizDetailPage({ params }: { params: { id: string 
       kuis={serializedKuis} 
       initialJawaban={initialJawaban} 
       memberId={student._id.toString()} 
+      initialTimeLeft={initialTimeLeft}
     />
   );
 }
