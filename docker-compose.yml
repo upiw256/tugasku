@@ -4,6 +4,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_VERSION=${NEXT_PUBLIC_VERSION}
+        - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
+        - NEXT_PUBLIC_PUSHER_CLUSTER=${NEXT_PUBLIC_PUSHER_CLUSTER}
+        - NEXT_PUBLIC_CLOUDINARY_PRESET=${NEXT_PUBLIC_CLOUDINARY_PRESET}
+        - NEXT_PUBLIC_CLOUDINARY_API_KEY=${NEXT_PUBLIC_CLOUDINARY_API_KEY}
     restart: always
     
     # Mapping Port Aplikasi (Kiri: Laptop, Kanan: Docker)
@@ -12,20 +18,13 @@ services:
     
     # Gunakan .env
     env_file:
-      - .env
+      - .env.local
 
     environment:
-      # Koneksi ke Service Mongo di port ASLI (27017)
       - MONGODB_URI=mongodb://mongo:27017/tugasku
-      
-      # URL Login (Sesuaikan dengan Port Aplikasi)
-      - NEXTAUTH_URL=https://tugas.sman1margaasih.sch.id
-      
-      # WAJIB: Agar Auth jalan di Docker
+      - REDIS_URL=redis://redis:6379
       - AUTH_TRUST_HOST=true
-      
-      - NEXTAUTH_SECRET=rahasia_sekolah_12345 
-
+      # Variabel lainnya (NEXTAUTH_URL, AUTH_SECRET, dll) diambil dari .env.local
     depends_on:
       - mongo
     volumes:
