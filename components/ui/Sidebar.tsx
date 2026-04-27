@@ -65,6 +65,24 @@ export default function Sidebar({ user }: { user: any }) {
       icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>)
     },
     {
+      role: 'admin',
+      label: 'Leaderboard',
+      href: '/admin/leaderboard',
+      icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>)
+    },
+    {
+      role: 'admin',
+      label: 'Rekap Nilai',
+      href: '/admin/nilai/rekap',
+      icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2a4 4 0 014-4h4m10 10l-4-4m0 0l-4 4m4-4v12"></path></svg>)
+    },
+    {
+      role: 'admin',
+      label: 'Rekap Absensi',
+      href: '/admin/absensi/rekap',
+      icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>)
+    },
+    {
       role: 'siswa',
       label: 'Dashboard',
       href: '/siswa',
@@ -93,6 +111,12 @@ export default function Sidebar({ user }: { user: any }) {
       label: 'Tugas Saya',
       href: '/siswa/tugas',
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+    },
+    {
+      role: 'siswa',
+      label: 'Rank & Juara',
+      href: '/siswa/leaderboard',
+      icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>)
     },
     {
       role: 'admin',

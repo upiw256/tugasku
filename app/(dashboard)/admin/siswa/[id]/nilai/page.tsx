@@ -20,14 +20,18 @@ export default async function InputNilaiPage({
   const { id } = await params; 
 
   // 1. Ambil Data Siswa
-  const student = await Member.findById(id);
-  if (!student) return <div>Siswa tidak ditemukan</div>;
+  const studentRaw = await Member.findById(id).lean();
+  if (!studentRaw) return <div>Siswa tidak ditemukan</div>;
+  const student = JSON.parse(JSON.stringify(studentRaw));
 
   // 2. Ambil Nilai yang SUDAH ada (untuk Riwayat & Validasi)
-  const existingGrades = await Nilai.find({ member_id: id })
+  const gradesRaw = await Nilai.find({ member_id: id })
     .populate('tugas_id', 'judul')
     .sort({ tanggal_dinilai: -1 })
     .lean();
+
+  // Serialisasi manual agar aman untuk Client Component
+  const existingGrades = JSON.parse(JSON.stringify(gradesRaw));
 
   // Buat list ID tugas yang sudah dinilai
   const gradedTaskIds = existingGrades.map((g: any) => g.tugas_id?._id?.toString());
@@ -35,7 +39,7 @@ export default async function InputNilaiPage({
   // 3. Ambil Tugas:
   //    - Filter A: Hanya tugas sesuai kelas siswa (Logic OR: string persis atau ada di array)
   //    - Filter B: Exclude tugas yang ID-nya sudah ada di gradedTaskIds
-  const tasksToGrade = await Tugas.find({
+  const tasksRaw = await Tugas.find({
     $and: [
       {
         $or: [
@@ -45,7 +49,9 @@ export default async function InputNilaiPage({
       },
       { _id: { $nin: gradedTaskIds } }       // Exclude yang sudah dinilai
     ]
-  }).sort({ deadline: -1 });
+  }).sort({ deadline: -1 }).lean();
+  
+  const tasksToGrade = JSON.parse(JSON.stringify(tasksRaw));
 
 
   return (

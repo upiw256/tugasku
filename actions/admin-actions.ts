@@ -195,3 +195,17 @@ export async function createStudentAction(formData: FormData) {
     return { success: false, message: 'Terjadi kesalahan server.' };
   }
 }
+
+export async function addActivityPoint(memberId: string, points: number = 5): Promise<ActionState> {
+  try {
+    await connectDB();
+    await Member.findByIdAndUpdate(memberId, {
+      $inc: { poin_keaktifan: points }
+    });
+    revalidatePath('/admin/siswa');
+    revalidatePath('/admin/leaderboard');
+    return { success: true, message: `Berhasil menambah ${points} poin keaktifan!` };
+  } catch (error) {
+    return { success: false, message: 'Gagal menambah poin keaktifan.' };
+  }
+}

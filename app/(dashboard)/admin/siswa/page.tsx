@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation';
 import ResetPasswordButton from '@/components/ui/ResetPasswordButton';
 import DeleteStudentButton from '@/components/ui/DeleteStudentButton';
 import Pagination from '@/components/ui/Pagination';
+import GivePointButton from '@/components/admin/GivePointButton';
+import KelasFilter from '@/components/admin/KelasFilter';
 // Import komponen baru
 import DownloadAkunSiswa from '@/components/admin/DownloadButton';
 
@@ -22,20 +24,25 @@ export default async function DataSiswaPage({
   const params = await searchParams;
   
   const query = params.q || '';
+  const selectedKelas = params.kelas || '';
   const page = Number(params.page) || 1;
   const LIMIT = 10;
   const skip = (page - 1) * LIMIT;
 
-  const filter = query
-    ? { nama_lengkap: { $regex: query, $options: 'i' } }
-    : {};
+  // Bangun Filter Query secara dinamis
+  const filter: any = {};
+  if (query) {
+    filter.nama_lengkap = { $regex: query, $options: 'i' };
+  }
+  if (selectedKelas) {
+    filter.kelas = selectedKelas;
+  }
 
   const students = await Member.find(filter)
     .sort({ kelas: 1, nama_lengkap: 1 })
     .skip(skip)
     .limit(LIMIT);
     
-  const selectedKelas = params.kelas || '';
   const totalStudents = await Member.countDocuments(filter);
   const totalPages = Math.ceil(totalStudents / LIMIT);
   
@@ -57,19 +64,7 @@ export default async function DataSiswaPage({
           <div className="hidden md:block w-[1px] h-[30px] bg-gray-300 mx-1"></div>
 
           {/* Filter Tampilan Tabel */}
-          <div className="flex flex-col">
-            <label className="text-xs font-bold text-gray-600 mb-1">Filter Tabel</label>
-            <select 
-              name="kelas" 
-              defaultValue={selectedKelas}
-              className="border p-2 rounded text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
-            >
-              <option value="">-- Semua --</option>
-              {sortedClasses.map((cls: string) => (
-                <option key={cls} value={cls}>{cls}</option>
-              ))}
-            </select>
-          </div>      
+          <KelasFilter sortedClasses={sortedClasses} defaultValue={selectedKelas} />      
           
           {/* Form Search */}
           <form className="flex gap-2 items-end">
@@ -117,19 +112,26 @@ export default async function DataSiswaPage({
               <tr key={s._id} className="hover:bg-gray-50">
                 <td className="px-6 py-3 font-mono text-gray-600">{s.nis}</td>
                 <td className="px-6 py-3 font-medium text-gray-900">
-                  {s.nama_lengkap}
+                  <div className="flex flex-col">
+                    <span>{s.nama_lengkap}</span>
+                    <span className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5">
+                      ⭐ {s.poin_keaktifan || 0} Poin Aktif
+                    </span>
+                  </div>
                 </td>
                 <td className="px-6 py-3">
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">
                     {s.kelas}
                   </span>
                 </td>
-                <td className="px-6 py-3 flex justify-center gap-4 items-center">
+                <td className="px-6 py-3 flex justify-center gap-3 items-center">
+                  <GivePointButton memberId={s._id.toString()} />
+                  <div className="w-[1px] h-4 bg-gray-200 mx-1"></div>
                   <Link 
                     href={`/admin/siswa/${s._id}/nilai`} 
-                    className="bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 text-xs px-3 py-1 rounded font-bold transition"
+                    className="bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 text-[10px] px-2 py-1 rounded font-bold transition"
                   >
-                    ★ Input Nilai
+                    ★ Nilai
                   </Link>
                   <Link
                     href={`/admin/siswa/${s._id}`}

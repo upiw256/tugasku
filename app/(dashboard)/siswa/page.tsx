@@ -90,15 +90,62 @@ export default async function SiswaDashboard() {
     tanggal: item.tanggal.toISOString(),
   }));
 
+  // --- 9. LOGIKA PERINGKAT (GLOBAL & KELAS) ---
+  const allMembers = await Member.find({}).lean();
+  const studentTotalScores = await Promise.all(allMembers.map(async (m: any) => {
+      // Hitung cepat total (bisa dioptimasi nanti dengan field total_poin di DB untuk skala besar)
+      const tTugas = await Nilai.aggregate([{ $match: { member_id: m._id } }, { $group: { _id: null, total: { $sum: "$nilai" } } }]);
+      const tKuis = await PengerjaanKuis.aggregate([{ $match: { member_id: m._id, status: 'SUBMITTED' } }, { $group: { _id: null, total: { $sum: "$nilai" } } }]);
+      return { 
+          _id: m._id.toString(), 
+          kelas: m.kelas, 
+          score: (tTugas[0]?.total || 0) + (tKuis[0]?.total || 0) + (m.poin_keaktifan || 0) 
+      };
+  }));
+
+  // Hitung Rank Global
+  const sortedGlobal = [...studentTotalScores].sort((a, b) => b.score - a.score);
+  const globalRank = sortedGlobal.findIndex(s => s._id === student._id.toString()) + 1;
+
+  // Hitung Rank Kelas
+  const sortedKelas = studentTotalScores
+    .filter(s => s.kelas === student.kelas)
+    .sort((a, b) => b.score - a.score);
+  const kelasRank = sortedKelas.findIndex(s => s._id === student._id.toString()) + 1;
+
   return (
     <div className="space-y-8 max-w-6xl mx-auto p-4 md:p-6">
       
       {/* HEADER */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Halo, {student.nama_lengkap} 👋</h1>
-          <p className="opacity-90 text-lg">Kelas: <span className="font-bold bg-white/20 px-2 py-1 rounded">{student.kelas}</span></p>
-          <p className="opacity-80 text-sm mt-1">NIS: {student.nis}</p>
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-800 text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        {/* Dekorasi Background */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold">Halo, {student.nama_lengkap}</h1>
+            {globalRank <= 3 && (
+                <span className="text-3xl animate-bounce" title={`Top ${globalRank} Global!`}>
+                    {globalRank === 1 ? '🥇' : globalRank === 2 ? '🥈' : '🥉'}
+                </span>
+            )}
+          </div>
+          
+          <div className="flex flex-wrap gap-2 items-center">
+            <p className="opacity-90 font-medium">Kelas: <span className="font-bold bg-white/20 px-2 py-0.5 rounded">{student.kelas}</span></p>
+            <span className="w-1 h-1 bg-white/40 rounded-full"></span>
+            
+            {/* BADGE RANKING */}
+            <div className="flex gap-2">
+                <span className="bg-amber-400/20 border border-amber-400/40 text-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    🏆 Rank #{kelasRank} Kelas
+                </span>
+                <span className="bg-blue-400/20 border border-blue-400/40 text-blue-100 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    🌍 Rank #{globalRank} Sekolah
+                </span>
+            </div>
+          </div>
+          <p className="opacity-60 text-xs mt-3 uppercase tracking-widest font-bold">NIS: {student.nis}</p>
         </div>
         {/* Tombol Absen (Jika ingin diaktifkan, uncomment baris bawah) */}
         {/* <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
@@ -107,13 +154,22 @@ export default async function SiswaDashboard() {
       </div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="p-3 bg-green-100 text-green-600 rounded-full text-2xl">📅</div>
             <div>
                 <p className="text-gray-500 text-sm">Kehadiran</p>
                 <h3 className="text-2xl font-bold text-gray-800">{persentaseKehadiran}%</h3>
                 <p className="text-xs text-gray-400">{totalHadir} kali Hadir</p>
+            </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+            <div className="p-3 bg-amber-100 text-amber-600 rounded-full text-2xl">⭐</div>
+            <div>
+                <p className="text-gray-500 text-sm">Poin Aktif</p>
+                <h3 className="text-2xl font-bold text-amber-600">{student.poin_keaktifan || 0}</h3>
+                <p className="text-[10px] text-gray-400">Bonus dari Guru</p>
             </div>
         </div>
         

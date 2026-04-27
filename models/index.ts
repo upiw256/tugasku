@@ -5,6 +5,7 @@ const MemberSchema = new Schema({
   nis: { type: String, required: true, unique: true },
   nama_lengkap: { type: String, required: true },
   kelas: { type: String, required: true },
+  poin_keaktifan: { type: Number, default: 0 },
 }, { timestamps: false });
 
 // 2. Schema untuk Login (Users)
@@ -165,28 +166,18 @@ const logKuisSchema = new mongoose.Schema({
   waktu: { type: Date, default: Date.now }
 });
 
-// Cek apakah model sudah ada (biar gak error overwrite saat reload), kalau belum buat baru
+// Export model menggunakan pola yang aman untuk Next.js (Hot Reload)
+// Definisi model yang bersih untuk Next.js
 export const Member = models.Member || model('Member', MemberSchema);
 export const User = models.User || model('User', UserSchema);
-export const Tugas = mongoose.models.Tugas || model('Tugas', TugasSchema);
+export const Tugas = models.Tugas || model('Tugas', TugasSchema);
 export const Nilai = models.Nilai || model('Nilai', NilaiSchema);
-export const Absensi = mongoose.models.Absensi || mongoose.model('Absensi', AbsensiSchema);
-export const Pengumuman = mongoose.models.Pengumuman || mongoose.model('Pengumuman', announcementSchema);
-export const TugasExtended = mongoose.models.TugasExtended || mongoose.model('TugasExtended', tugasSchema);
-export const LogTugas = mongoose.models.LogTugas || mongoose.model('LogTugas', logTugasSchema);
-if (mongoose.models.Kelompok) {
-  delete mongoose.models.Kelompok;
-}
-export const Kelompok = mongoose.model('Kelompok', KelompokSchema);
-
-// Export model baru jika belum diinisialisasi
-export const Materi = mongoose.models.Materi || mongoose.model('Materi', MateriSchema);
-
-if (mongoose.models.SoalPG) delete mongoose.models.SoalPG;
-export const SoalPG = mongoose.model('SoalPG', SoalPGSchema);
-
-if (mongoose.models.PengerjaanKuis) delete mongoose.models.PengerjaanKuis;
-export const PengerjaanKuis = mongoose.model('PengerjaanKuis', PengerjaanKuisSchema);
-
-if (mongoose.models.LogKuis) delete mongoose.models.LogKuis;
-export const LogKuis = mongoose.model('LogKuis', logKuisSchema);
+export const Absensi = models.Absensi || model('Absensi', AbsensiSchema);
+export const Pengumuman = models.Pengumuman || model('Pengumuman', announcementSchema);
+export const TugasExtended = models.TugasExtended || model('TugasExtended', tugasSchema);
+export const LogTugas = models.LogTugas || model('LogTugas', logTugasSchema);
+export const Kelompok = models.Kelompok || model('Kelompok', KelompokSchema);
+export const Materi = models.Materi || model('Materi', MateriSchema);
+export const SoalPG = models.SoalPG || model('SoalPG', SoalPGSchema);
+export const PengerjaanKuis = models.PengerjaanKuis || model('PengerjaanKuis', PengerjaanKuisSchema);
+export const LogKuis = models.LogKuis || model('LogKuis', logKuisSchema);
