@@ -140,8 +140,9 @@ export default function Sidebar({ user }: { user: any }) {
     window.sessionStorage.clear();
 
     // 2. Jalankan signOut dari NextAuth
-    // Gunakan origin saat ini agar tidak terlempar ke localhost jika diakses via IP/Domain
-    const callbackUrl = `${window.location.origin}/login`;
+    // Gunakan konfigurasi BASE_URL atau current origin agar redirect konsisten
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+    const callbackUrl = `${baseUrl}/login`;
     
     await signOut({ 
       redirect: true, 
