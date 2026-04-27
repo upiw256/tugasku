@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 // Tambahkan 'Pengumuman' di sini
-import { Absensi, Member, Nilai, Tugas, User, Pengumuman } from '@/models';
+import { Absensi, Member, Nilai, Tugas, User, Pengumuman, PengerjaanKuis, SoalPG } from '@/models';
 import { redirect } from 'next/navigation';
 // Import komponen Papan Pengumuman
 import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
@@ -51,9 +51,6 @@ export default async function SiswaDashboard() {
   // 5. Ambil Semua Nilai
   const allGrades = await Nilai.find({ member_id: student._id }).lean();
   
-  // Hitung Rata-rata
-  const totalNilai = allGrades.reduce((acc: number, curr: any) => acc + curr.nilai, 0);
-  const rataRataNilai = allGrades.length > 0 ? Math.round(totalNilai / allGrades.length) : 0;
 
   // 6. Hitung Tugas Pending
   const pendingTasksCount = tasks.filter((t: any) => {
@@ -62,7 +59,26 @@ export default async function SiswaDashboard() {
     return !isGraded; // Kembalikan true jika BELUM dinilai
   }).length;
 
-  // --- 7. AMBIL PENGUMUMAN (BARU) ---
+  // 7. Ambil Hasil Kuis
+  const quizResults = await PengerjaanKuis.find({ 
+    member_id: student._id,
+    status: 'SUBMITTED' 
+  })
+  .populate({
+    path: 'kuis_id',
+    model: SoalPG,
+    select: 'judul'
+  })
+  .sort({ selesai_mengerjakan: -1 })
+  .lean();
+
+  // Update Rata-rata Nilai (Gabungan Tugas + Kuis)
+  const totalNilaiTugas = allGrades.reduce((acc: number, curr: any) => acc + curr.nilai, 0);
+  const totalNilaiKuis = quizResults.reduce((acc: number, curr: any) => acc + (curr.nilai || 0), 0);
+  const totalItem = allGrades.length + quizResults.length;
+  const rataRataNilai = totalItem > 0 ? Math.round((totalNilaiTugas + totalNilaiKuis) / totalItem) : 0;
+
+  // --- 8. AMBIL PENGUMUMAN (BARU) ---
   const dataPengumuman = await Pengumuman.find({})
     .sort({ tanggal: -1 })
     .limit(5)
@@ -106,7 +122,7 @@ export default async function SiswaDashboard() {
             <div>
                 <p className="text-gray-500 text-sm">Rata-rata Nilai</p>
                 <h3 className="text-2xl font-bold text-gray-800">{rataRataNilai}</h3>
-                <p className="text-xs text-gray-400">Dari {allGrades.length} tugas</p>
+                <p className="text-xs text-gray-400">{allGrades.length} tugas & {quizResults.length} kuis</p>
             </div>
         </div>
         
@@ -189,6 +205,46 @@ export default async function SiswaDashboard() {
             </div>
         </div>
 
+        {/* SECTION HASIL KUIS */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
+            <div className="p-5 border-b bg-gray-50">
+                <h2 className="font-bold text-lg text-gray-800">📊 Hasil Kuis & Latihan</h2>
+            </div>
+            
+            <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                {quizResults.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500">
+                        Belum ada kuis yang dikerjakan.
+                    </div>
+                ) : (
+                    quizResults.map((result: any) => {
+                        const kuis = result.kuis_id as any;
+                        const date = result.selesai_mengerjakan ? new Date(result.selesai_mengerjakan) : null;
+
+                        return (
+                            <div key={result._id} className="p-5 hover:bg-gray-50 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-gray-800 text-lg mb-1">
+                                        {kuis?.judul || 'Kuis Tidak Ditemukan'}
+                                    </h3>
+                                    <div className="text-xs text-gray-400">
+                                        📅 Selesai: {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                    </div>
+                                </div>
+
+                                <div className="text-right min-w-[80px]">
+                                    <p className="text-xs text-gray-500 mb-1">Skor Kuis</p>
+                                    <span className={`text-2xl font-bold ${result.nilai < 75 ? 'text-red-500' : 'text-green-600'}`}>
+                                        {result.nilai}
+                                    </span>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        </div>
+
         {/* KOLOM KANAN (1/3): PENGUMUMAN & INFO */}
         <div className="space-y-6">
             
@@ -214,6 +270,10 @@ export default async function SiswaDashboard() {
                         <li className="flex justify-between items-center">
                             <span>Belum Dinilai</span>
                             <span className="font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">{pendingTasksCount}</span>
+                        </li>
+                        <li className="flex justify-between items-center pt-1">
+                            <span>Kuis Disubmit</span>
+                            <span className="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{quizResults.length}</span>
                         </li>
                         <li className="pt-2 border-t mt-2 flex justify-between items-center font-bold text-gray-800">
                             <span>Total Tugas</span>

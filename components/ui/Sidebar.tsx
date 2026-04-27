@@ -140,10 +140,12 @@ export default function Sidebar({ user }: { user: any }) {
     window.sessionStorage.clear();
 
     // 2. Jalankan signOut dari NextAuth
-    // redirect: true akan mengarahkan user ke halaman login secara otomatis
+    // Gunakan origin saat ini agar tidak terlempar ke localhost jika diakses via IP/Domain
+    const callbackUrl = `${window.location.origin}/login`;
+    
     await signOut({ 
       redirect: true, 
-      callbackUrl: "/login" 
+      callbackUrl 
     });
   };
 

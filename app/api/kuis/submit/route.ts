@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         benar,
         salah: totalSoal - benar,
         status: 'SUBMITTED',
-        waktu_selesai_pengerjaan: new Date()
+        selesai_mengerjakan: new Date()
       },
       { upsert: true, new: true }
     );

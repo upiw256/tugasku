@@ -146,6 +146,8 @@ const PengerjaanKuisSchema = new mongoose.Schema({
   jawaban: { type: mongoose.Schema.Types.Mixed, default: {} }, // map: soal_id -> opsi (contoh: { "soal_1": "B" })
   status: { type: String, enum: ['DRAFT', 'SUBMITTED'], default: 'DRAFT' },
   nilai: { type: Number, default: 0 },
+  benar: { type: Number, default: 0 },
+  salah: { type: Number, default: 0 },
   mulai_mengerjakan: { type: Date, default: Date.now },
   selesai_mengerjakan: { type: Date }
 }, { timestamps: true });

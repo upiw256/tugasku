@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { PengerjaanKuis, Member, User } from '@/models';
 import { redirect } from 'next/navigation';
+import QuizHistoryTable from '@/components/ui/QuizHistoryTable';
 
 export default async function SiswaNilaiPage() {
   const session = await auth();
@@ -18,10 +19,35 @@ export default async function SiswaNilaiPage() {
   }
 
   // Ambil semua pengerjaan kuis yang sudah disubmit
-  const history = await PengerjaanKuis.find({ 
+  const historyRaw = await PengerjaanKuis.find({ 
     member_id: student._id, 
     status: 'SUBMITTED' 
-  }).populate('kuis_id', 'judul').sort({ updatedAt: -1 }).lean() as any[];
+  }).populate('kuis_id').sort({ updatedAt: -1 }).lean() as any[];
+
+  // Serialisasi data agar aman dikirim ke Client Component
+  const history = historyRaw.map(h => {
+    const kuis = h.kuis_id;
+    let benar = h.benar;
+    let salah = h.salah;
+
+    // Hitung ulang benar/salah jika tidak ada di DB (untuk data lama)
+    if (benar === undefined || salah === undefined) {
+      if (kuis && kuis.daftar_soal) {
+        benar = 0;
+        kuis.daftar_soal.forEach((soal: any) => {
+          const jawabanSiswa = h.jawaban[soal.id] || h.jawaban[soal._id?.toString()];
+          if (jawabanSiswa === soal.jawaban_benar) benar++;
+        });
+        salah = kuis.daftar_soal.length - benar;
+      }
+    }
+
+    return JSON.parse(JSON.stringify({
+      ...h,
+      benar,
+      salah
+    }));
+  });
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -49,48 +75,7 @@ export default async function SiswaNilaiPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3">Kuis</th>
-                <th className="px-6 py-3 text-center">Benar</th>
-                <th className="px-6 py-3 text-center">Salah</th>
-                <th className="px-6 py-3 text-center">Skor</th>
-                <th className="px-6 py-3 text-right">Tanggal Selesai</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {history.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-400">Belum ada data nilai kuis.</td>
-                </tr>
-              ) : (
-                history.map((h: any) => (
-                  <tr key={h._id.toString()} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 font-bold text-gray-800">
-                      {h.kuis_id?.judul || 'Kuis Terhapus'}
-                    </td>
-                    <td className="px-6 py-4 text-center text-emerald-600 font-bold">{h.benar ?? '-'}</td>
-                    <td className="px-6 py-4 text-center text-red-500 font-bold">{h.salah ?? '-'}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full font-black text-lg ${
-                        (h.nilai || 0) >= 75 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'
-                      }`}>
-                        {h.nilai || 0}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right text-gray-400 text-xs">
-                      {new Date(h.updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <QuizHistoryTable history={history} />
     </div>
   );
 }
