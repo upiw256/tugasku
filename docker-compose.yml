@@ -43,7 +43,7 @@ services:
       - mongodb_data:/data/db
   redis:
     container_name: redis_container
-    image: redis:alpine
+    image: redis:8.6.2-alpine
     restart: always
     ports:
       - "6379:6379"

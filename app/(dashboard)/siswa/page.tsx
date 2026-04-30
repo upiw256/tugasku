@@ -90,28 +90,73 @@ export default async function SiswaDashboard() {
     tanggal: item.tanggal.toISOString(),
   }));
 
-  // --- 9. LOGIKA PERINGKAT (GLOBAL & KELAS) ---
-  const allMembers = await Member.find({}).lean();
-  const studentTotalScores = await Promise.all(allMembers.map(async (m: any) => {
-      // Hitung cepat total (bisa dioptimasi nanti dengan field total_poin di DB untuk skala besar)
-      const tTugas = await Nilai.aggregate([{ $match: { member_id: m._id } }, { $group: { _id: null, total: { $sum: "$nilai" } } }]);
-      const tKuis = await PengerjaanKuis.aggregate([{ $match: { member_id: m._id, status: 'SUBMITTED' } }, { $group: { _id: null, total: { $sum: "$nilai" } } }]);
-      return { 
-          _id: m._id.toString(), 
-          kelas: m.kelas, 
-          score: (tTugas[0]?.total || 0) + (tKuis[0]?.total || 0) + (m.poin_keaktifan || 0) 
-      };
-  }));
+  // --- 9. LOGIKA PERINGKAT (GLOBAL & KELAS) PAKE AGREGASI EFISIEN ---
+  const leaderboardData = await Member.aggregate([
+    {
+      $lookup: {
+        from: "nilais",
+        localField: "_id",
+        foreignField: "member_id",
+        as: "tugas_data"
+      }
+    },
+    {
+      $lookup: {
+        from: "pengerjaankuis",
+        localField: "_id",
+        foreignField: "member_id",
+        as: "kuis_data"
+      }
+    },
+    {
+      $project: {
+        kelas: 1,
+        poin_keaktifan: 1,
+        totalTugas: { $ifNull: [{ $avg: "$tugas_data.nilai" }, 0] },
+        totalKuis: {
+          $ifNull: [
+            {
+              $avg: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$kuis_data",
+                      as: "k",
+                      cond: { $eq: ["$$k.status", "SUBMITTED"] }
+                    }
+                  },
+                  as: "item",
+                  in: "$$item.nilai"
+                }
+              }
+            },
+            0
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        kelas: 1,
+        score: {
+          $add: [
+            { $ifNull: ["$totalTugas", 0] },
+            { $ifNull: ["$totalKuis", 0] },
+            { $ifNull: ["$poin_keaktifan", 0] }
+          ]
+        }
+      }
+    },
+    { $sort: { score: -1 } }
+  ]);
 
   // Hitung Rank Global
-  const sortedGlobal = [...studentTotalScores].sort((a, b) => b.score - a.score);
-  const globalRank = sortedGlobal.findIndex(s => s._id === student._id.toString()) + 1;
+  const globalRank = leaderboardData.findIndex(s => s._id.toString() === student._id.toString()) + 1;
 
   // Hitung Rank Kelas
-  const sortedKelas = studentTotalScores
-    .filter(s => s.kelas === student.kelas)
-    .sort((a, b) => b.score - a.score);
-  const kelasRank = sortedKelas.findIndex(s => s._id === student._id.toString()) + 1;
+  const sortedKelas = leaderboardData.filter(s => s.kelas === student.kelas);
+  const kelasRank = sortedKelas.findIndex(s => s._id.toString() === student._id.toString()) + 1;
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto p-4 md:p-6">

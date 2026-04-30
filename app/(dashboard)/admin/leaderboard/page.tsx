@@ -51,22 +51,27 @@ export default async function LeaderboardPage({
         nama_lengkap: 1,
         kelas: 1,
         poin_keaktifan: 1,
-        totalTugas: { $sum: "$tugas_data.nilai" },
+        totalTugas: { $ifNull: [{ $avg: "$tugas_data.nilai" }, 0] },
         // Filter kuis yang sudah SUBMITTED
         totalKuis: {
-          $sum: {
-            $map: {
-              input: {
-                $filter: {
-                  input: "$kuis_data",
-                  as: "k",
-                  cond: { $eq: ["$$k.status", "SUBMITTED"] }
+          $ifNull: [
+            {
+              $avg: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$kuis_data",
+                      as: "k",
+                      cond: { $eq: ["$$k.status", "SUBMITTED"] }
+                    }
+                  },
+                  as: "item",
+                  in: "$$item.nilai"
                 }
-              },
-              as: "item",
-              in: "$$item.nilai"
-            }
-          }
+              }
+            },
+            0
+          ]
         }
       }
     },
@@ -81,8 +86,8 @@ export default async function LeaderboardPage({
         totalKuis: 1,
         totalScore: {
           $add: [
-            "$totalTugas",
-            "$totalKuis",
+            { $ifNull: ["$totalTugas", 0] },
+            { $ifNull: ["$totalKuis", 0] },
             { $ifNull: ["$poin_keaktifan", 0] }
           ]
         }
@@ -98,8 +103,12 @@ export default async function LeaderboardPage({
       _id: item._id,
       nama: item.nama,
       kelas: item.kelas,
-      totalScore: item.totalScore,
-      detail: { tugas: item.totalTugas, kuis: item.totalKuis, aktif: item.poinAktif }
+      totalScore: Math.round(item.totalScore * 10) / 10,
+      detail: { 
+        tugas: Math.round(item.totalTugas * 10) / 10, 
+        kuis: Math.round(item.totalKuis * 10) / 10, 
+        aktif: item.poinAktif 
+      }
   }));
 
   return (

@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Member, Nilai, PengerjaanKuis } from '@/models';
+import { Member, Nilai, PengerjaanKuis, User } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
@@ -16,39 +16,87 @@ export default async function SiswaLeaderboardPage({
   const params = await searchParams;
   const viewType = params.type || 'kelas'; // Default siswa liat kelas dulu
   
-  // Ambil data diri siswa dari session
-  const currentUser = await Member.findOne({ _id: session.user.member_id }).lean();
+  // Ambil data diri siswa dari akun (berdasarkan email session)
+  const userAccount = await User.findOne({ user: session.user.email });
+  const currentUser = userAccount ? await Member.findById(userAccount.member_id).lean() : null;
   const userKelas = currentUser?.kelas || '';
   const selectedKelas = params.kelas || userKelas;
 
-  // 1. Filter
+  // 1. Filter (Hanya untuk filter query match)
   const filter = viewType === 'kelas' ? { kelas: selectedKelas } : {};
-  const students = await Member.find(filter).lean();
 
-  // 2. Agregasi (Sama dengan Admin)
-  const studentStats = await Promise.all(students.map(async (s: any) => {
-    const resTugas = await Nilai.aggregate([
-      { $match: { member_id: s._id } },
-      { $group: { _id: null, total: { $sum: "$nilai" } } }
-    ]);
-    const resKuis = await PengerjaanKuis.aggregate([
-      { $match: { member_id: s._id, status: 'SUBMITTED' } },
-      { $group: { _id: null, total: { $sum: "$nilai" } } }
-    ]);
-    const totalScore = (resTugas[0]?.total || 0) + (resKuis[0]?.total || 0) + (s.poin_keaktifan || 0);
+  // 2. Agregasi Efisien
+  const studentStats = await Member.aggregate([
+    { $match: filter },
+    {
+      $lookup: {
+        from: "nilais",
+        localField: "_id",
+        foreignField: "member_id",
+        as: "tugas_data"
+      }
+    },
+    {
+      $lookup: {
+        from: "pengerjaankuis",
+        localField: "_id",
+        foreignField: "member_id",
+        as: "kuis_data"
+      }
+    },
+    {
+      $project: {
+        nama_lengkap: 1,
+        kelas: 1,
+        poin_keaktifan: 1,
+        totalTugas: { $ifNull: [{ $avg: "$tugas_data.nilai" }, 0] },
+        totalKuis: {
+          $ifNull: [
+            {
+              $avg: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$kuis_data",
+                      as: "k",
+                      cond: { $eq: ["$$k.status", "SUBMITTED"] }
+                    }
+                  },
+                  as: "item",
+                  in: "$$item.nilai"
+                }
+              }
+            },
+            0
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        nama: "$nama_lengkap",
+        kelas: 1,
+        totalScore: {
+          $add: [
+            { $ifNull: ["$totalTugas", 0] },
+            { $ifNull: ["$totalKuis", 0] },
+            { $ifNull: ["$poin_keaktifan", 0] }
+          ]
+        }
+      }
+    },
+    { $sort: { totalScore: -1 } },
+    { $limit: 50 }
+  ]);
 
-    return {
-      _id: s._id.toString(),
-      nama: s.nama_lengkap,
-      kelas: s.kelas,
-      totalScore,
-      isMe: s._id.toString() === session.user.member_id
-    };
+  const leaderboard = studentStats.map((item) => ({
+    _id: item._id.toString(),
+    nama: item.nama,
+    kelas: item.kelas,
+    totalScore: Math.round(item.totalScore * 10) / 10,
+    isMe: item._id.toString() === session.user.member_id
   }));
-
-  const leaderboard = studentStats
-    .sort((a, b) => b.totalScore - a.totalScore)
-    .slice(0, 50); // Liat 50 besar aja
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
