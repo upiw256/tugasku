@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function QuickGrade({ submissionId, currentNilai }: { submissionId: string, currentNilai: number }) {
+export default function QuickGrade({ 
+  submissionId, 
+  currentNilai,
+  memberId,
+  tugasId
+}: { 
+  submissionId: string, 
+  currentNilai: number,
+  memberId?: string,
+  tugasId?: string
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [nilai, setNilai] = useState(currentNilai || '');
   const [loading, setLoading] = useState(false);
@@ -15,7 +25,11 @@ export default function QuickGrade({ submissionId, currentNilai }: { submissionI
       const res = await fetch(`/api/nilai/${submissionId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nilai: Number(nilai) }),
+        body: JSON.stringify({ 
+          nilai: Number(Number(nilai).toFixed(2)),
+          memberId, // Dikirim jika ada (untuk record baru)
+          tugasId   // Dikirim jika ada (untuk record baru)
+        }),
       });
 
       if (res.ok) {
@@ -60,7 +74,7 @@ export default function QuickGrade({ submissionId, currentNilai }: { submissionI
         : 'text-orange-400 text-[10px] bg-orange-50 border-orange-100 hover:bg-orange-100'
       }`}
     >
-      {currentNilai > 0 ? currentNilai : 'PENDING'}
+      {currentNilai > 0 ? Number(currentNilai.toFixed(2)) : 'PENDING'}
     </button>
   );
 }

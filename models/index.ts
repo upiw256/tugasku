@@ -48,6 +48,7 @@ const NilaiSchema = new Schema({
   // 👇 TAMBAHKAN DUA BARIS INI 👇
   file_url: { type: String },
   catatan_siswa: { type: String },
+  tanggal_dinilai: { type: Date },
 }, { timestamps: false });
 
 const AbsensiSchema = new mongoose.Schema({

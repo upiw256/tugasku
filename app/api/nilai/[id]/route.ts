@@ -16,33 +16,51 @@ export async function PATCH(
 
     await connectDB();
     const { id } = await params;
-    const { nilai } = await request.json();
+    const body = await request.json();
+    const { nilai, memberId, tugasId } = body;
 
-    // 2. Ambil dokumen asli sebelum diedit untuk referensi referensi member_id dan tugas_id
-    const documentNilaiAsli = await Nilai.findById(id);
-    if (!documentNilaiAsli) {
-      return NextResponse.json({ error: 'Data tidak ditemukan' }, { status: 404 });
+    let targetTugasId = tugasId;
+    let targetMemberId = memberId;
+
+    if (id.startsWith('temp-')) {
+      // Jika record baru, kita butuh memberId dan tugasId dari body
+      if (!memberId || !tugasId) {
+        return NextResponse.json({ error: 'Missing data for new record' }, { status: 400 });
+      }
+    } else {
+      // Ambil dokumen asli untuk referensi
+      const documentNilaiAsli = await Nilai.findById(id);
+      if (!documentNilaiAsli) {
+        return NextResponse.json({ error: 'Data tidak ditemukan' }, { status: 404 });
+      }
+      targetTugasId = documentNilaiAsli.tugas_id;
+      targetMemberId = documentNilaiAsli.member_id;
     }
 
     // 3. Cek apakah ini tugas kelompok
-    const tugas = await Tugas.findById(documentNilaiAsli.tugas_id);
-    let targetAnggotaIds: any[] = [documentNilaiAsli.member_id];
+    const tugas = await Tugas.findById(targetTugasId);
+    let targetAnggotaIds: any[] = [targetMemberId];
 
     if (tugas && tugas.tipe_tugas === 'kelompok') {
-      const kelompok = await Kelompok.findOne({ anggota: documentNilaiAsli.member_id });
+      const kelompok = await Kelompok.findOne({ anggota: targetMemberId });
       if (kelompok) {
-        targetAnggotaIds = kelompok.anggota; // Target selurus anggota kelompok
+        targetAnggotaIds = kelompok.anggota; // Target seluruh anggota kelompok
       }
     }
 
     // 4. Update Nilai ke seluruh target anggota (bisa individu bisa rombongan)
+    // Gunakan updateMany dengan upsert: true agar record baru tercipta jika belum ada
     await Nilai.updateMany(
-      { tugas_id: documentNilaiAsli.tugas_id, member_id: { $in: targetAnggotaIds } },
-      { $set: { nilai: Number(nilai) } }
+      { tugas_id: targetTugasId, member_id: { $in: targetAnggotaIds } },
+      { $set: { nilai: Number(Number(nilai).toFixed(2)) } },
+      { upsert: true }
     );
 
     // Kirim feedback sukses (bisa kembalikan salah satu data saja sebagai representasi frontend)
-    const updatedNilai = await Nilai.findById(id);
+    const updatedNilai = await Nilai.findOne({ 
+      tugas_id: targetTugasId, 
+      member_id: targetMemberId 
+    });
 
     return NextResponse.json({ success: true, data: updatedNilai });
   } catch (error) {
