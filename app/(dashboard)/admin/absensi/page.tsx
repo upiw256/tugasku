@@ -112,10 +112,10 @@ export default async function RekapAbsensiPage({
             <table className="w-full text-sm text-left">
               <thead className="bg-foreground/5 text-foreground/60 uppercase font-bold border-b border-border-custom text-[10px]">
                 <tr>
-                  <th className="px-6 py-3 w-1/6">NIS</th>
-                  <th className="px-6 py-3 w-1/3">Nama Siswa</th>
-                  <th className="px-6 py-3 text-center">Set Kehadiran</th>
-                  <th className="px-6 py-3">Status Saat Ini</th>
+                  <th className="px-6 py-3 w-1/6 hidden md:table-cell">NIS</th>
+                  <th className="px-6 py-3 md:w-1/3">Nama Siswa</th>
+                  <th className="px-6 py-3 text-center hidden md:table-cell">Set Kehadiran</th>
+                  <th className="px-6 py-3 hidden md:table-cell text-center">Status Saat Ini</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-custom">
