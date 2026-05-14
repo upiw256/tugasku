@@ -86,7 +86,7 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
       </div>
 
       {/* Area Grafik Line Chart */}
-      <div className="w-full h-[350px]">
+      <div className="w-full h-[300px]">
         {allClasses.length === 0 ? (
             <div className="h-full flex items-center justify-center text-gray-400">
                 Belum ada data kelas atau siswa.
@@ -100,10 +100,11 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-foreground/10" />
                 <XAxis 
                     dataKey="date" 
-                    tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 
+                    tick={{ fill: 'currentColor', fontSize: 10, className: "text-foreground/40 font-bold" }} 
                     axisLine={false}
                     tickLine={false}
-                    padding={{ left: 20, right: 20 }}
+                    padding={{ left: 10, right: 10 }}
+                    interval={0}
                 />
                 <YAxis 
                     tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 

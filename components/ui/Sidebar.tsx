@@ -258,12 +258,12 @@ export default function Sidebar({ user }: { user: any }) {
         </div>
 
         {/* --- THEME TOGGLE (Di bawah Logo) --- */}
-        <div className={`px-4 py-3 border-b border-slate-800 shrink-0 transition-all duration-300 ${isCollapsed ? 'opacity-0 h-0 overflow-hidden py-0 border-0' : 'opacity-100'}`}>
+        <div className={`px-4 py-2 border-b border-slate-800 shrink-0 transition-all duration-300 ${isCollapsed ? 'opacity-0 h-0 overflow-hidden py-0 border-0' : 'opacity-100'}`}>
            <ThemeToggle />
         </div>
 
         {/* 2. USER PROFILE MINI (Gelap) */}
-        <div className={`px-4 py-6 border-b border-slate-800 flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : ''}`}>
+        <div className={`px-4 py-4 border-b border-slate-800 flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : ''}`}>
             <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-blue-500 font-bold text-lg shrink-0">
                 {user.name?.charAt(0).toUpperCase() || 'U'}
             </div>

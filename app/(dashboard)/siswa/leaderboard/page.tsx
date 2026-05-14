@@ -90,12 +90,17 @@ export default async function SiswaLeaderboardPage({
     { $limit: 50 }
   ]);
 
-  const leaderboard = studentStats.map((item) => ({
-    _id: item._id.toString(),
-    nama: item.nama,
-    kelas: item.kelas,
-    totalScore: Math.round(item.totalScore * 10) / 10,
-    isMe: item._id.toString() === session.user.member_id
+  const leaderboard = studentStats.map(item => ({
+      _id: item._id.toString(),
+      nama: item.nama,
+      kelas: item.kelas,
+      totalScore: Number(item.totalScore).toFixed(2).replace(/\.00$/, ''),
+      isMe: item._id.toString() === session.user.member_id,
+      detail: { 
+        tugas: Number(item.totalTugas).toFixed(2).replace(/\.00$/, ''), 
+        kuis: Number(item.totalKuis).toFixed(2).replace(/\.00$/, ''), 
+        aktif: item.poinAktif 
+      }
   }));
 
   return (
@@ -122,7 +127,7 @@ export default async function SiswaLeaderboardPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="bg-surface rounded-3xl shadow-lg border border-border-custom overflow-hidden">
         {leaderboard.map((item, index) => {
           const rank = index + 1;
           const isRank1 = rank === 1;
@@ -131,33 +136,33 @@ export default async function SiswaLeaderboardPage({
             <div 
               key={item._id}
               className={`
-                flex items-center justify-between p-5 border-b last:border-0 transition-colors
-                ${item.isMe ? 'bg-blue-50/50' : 'hover:bg-gray-50'}
+                flex items-center justify-between p-5 border-b border-border-custom last:border-0 transition-colors
+                ${item.isMe ? 'bg-blue-500/10' : 'hover:bg-foreground/5'}
               `}
             >
                 <div className="flex items-center gap-5">
                     <div className={`
                         w-10 h-10 rounded-full flex items-center justify-center font-black text-lg
                         ${rank === 1 ? 'bg-amber-400 text-white scale-110 shadow-md' : 
-                          rank === 2 ? 'bg-gray-300 text-white' : 
-                          rank === 3 ? 'bg-orange-400 text-white' : 'text-gray-400'}
+                          rank === 2 ? 'bg-slate-300 text-white' : 
+                          rank === 3 ? 'bg-orange-400 text-white' : 'text-foreground/20'}
                     `}>
                         {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
                     </div>
 
                     <div>
-                        <div className="font-bold text-gray-900 flex items-center gap-2">
+                        <div className="font-bold text-foreground flex items-center gap-2">
                             {item.nama}
                             {item.isMe && <span className="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full uppercase">Saya</span>}
                         </div>
-                        <div className="text-xs text-gray-400 font-medium">{item.kelas}</div>
+                        <div className="text-xs text-foreground/40 font-medium tracking-tight uppercase">{item.kelas}</div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <div className="text-center pr-4">
-                        <div className={`text-xl font-black ${isRank1 ? 'text-amber-600' : 'text-gray-800'}`}>{item.totalScore}</div>
-                        <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Points</div>
+                        <div className={`text-xl font-black ${isRank1 ? 'text-amber-500' : 'text-foreground'}`}>{item.totalScore}</div>
+                        <div className="text-[9px] text-foreground/40 font-bold uppercase tracking-widest">Points</div>
                     </div>
                 </div>
             </div>

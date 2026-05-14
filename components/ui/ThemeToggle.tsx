@@ -19,40 +19,41 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-foreground/5 rounded-xl border border-border-custom w-full">
+    <div className="flex items-center gap-0.5 p-0.5 bg-slate-950/50 rounded-lg border border-slate-800/50 w-full backdrop-blur-sm">
       <button
         onClick={() => setTheme('light')}
-        className={`flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-bold transition-all
+        className={`flex-1 flex items-center justify-center py-1.5 rounded text-xs transition-all duration-300
           ${theme === 'light' 
-            ? 'bg-white text-blue-600 shadow-sm' 
-            : 'text-foreground/40 hover:text-foreground hover:bg-foreground/5'
+            ? 'bg-slate-800 text-amber-500 shadow-inner' 
+            : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
           }`}
+        title="Ligh Mode"
       >
         <span>☀️</span>
-        <span className="hidden lg:inline">Light</span>
       </button>
       
       <button
         onClick={() => setTheme('system')}
-        className={`flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-bold transition-all
+        className={`flex-1 flex items-center justify-center py-1.5 rounded text-xs transition-all duration-300
           ${theme === 'system' 
-            ? 'bg-foreground/10 text-foreground shadow-sm border border-border-custom' 
-            : 'text-foreground/40 hover:text-foreground hover:bg-foreground/5'
+            ? 'bg-slate-800 text-blue-500 shadow-inner' 
+            : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
           }`}
+        title="Auto System"
       >
         <span>💻</span>
       </button>
 
       <button
         onClick={() => setTheme('dark')}
-        className={`flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-bold transition-all
+        className={`flex-1 flex items-center justify-center py-1.5 rounded text-xs transition-all duration-300
           ${theme === 'dark' 
-            ? 'bg-slate-800 text-blue-400 shadow-sm ring-1 ring-white/10' 
-            : 'text-foreground/40 hover:text-foreground hover:bg-foreground/5'
+            ? 'bg-slate-800 text-blue-400 shadow-inner' 
+            : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
           }`}
+        title="Dark Mode"
       >
         <span>🌙</span>
-        <span className="hidden lg:inline">Dark</span>
       </button>
     </div>
   )

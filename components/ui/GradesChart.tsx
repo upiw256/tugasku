@@ -43,7 +43,7 @@ export default function GradesChart({ data }: Props) {
         <p className="text-sm text-foreground/40 font-medium">Akumulasi nilai seluruh tugas</p>
       </div>
 
-      <div className="w-full h-[350px]">
+      <div className="w-full h-[300px]">
         {data.length === 0 ? (
            <div className="h-full flex flex-col items-center justify-center text-foreground/20 italic gap-2 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
              <span className="text-2xl grayscale">📉</span>
@@ -58,9 +58,13 @@ export default function GradesChart({ data }: Props) {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-foreground/10" />
               <XAxis 
                   dataKey="kelas" 
-                  tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 
+                  tick={{ fill: 'currentColor', fontSize: 10, className: "text-foreground/40 font-bold" }} 
                   axisLine={false}
                   tickLine={false}
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
               />
               <YAxis 
                   domain={[0, 100]} 

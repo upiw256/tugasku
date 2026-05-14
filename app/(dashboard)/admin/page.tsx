@@ -149,18 +149,17 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* --- GRID UTAMA: GRAFIK & PENGUMUMAN --- */}
+      {/* --- GRID BARIS 1: ABSENSI & PENGUMUMAN --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2">
            <AttendanceChart 
               dataByClass={chartDataByClass} 
               allClasses={sortedClasses} 
            />
-           <GradesChart data={gradesChartData} />
         </div>
 
         <div className="lg:col-span-1">
-          <div className="h-[600px]">
+          <div className="h-full">
             <AnnouncementBoard 
               role="admin" 
               initialData={announcements} 
@@ -169,62 +168,71 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Tabel Aktivitas Terbaru */}
-      <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden">
-        <div className="p-6 border-b border-border-custom flex justify-between items-center">
-          <h3 className="font-bold text-foreground text-lg">Aktivitas Pengumpulan Terbaru</h3>
-          <span className="text-xs font-bold bg-foreground/5 text-foreground/60 px-2 py-1 rounded border border-border-custom">5 Terakhir</span>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-foreground/40 uppercase bg-foreground/5 border-b border-border-custom font-bold">
-              <tr>
-                <th className="px-6 py-3 font-bold">Nama Siswa</th>
-                <th className="px-6 py-3 font-bold">Kelas</th>
-                <th className="px-6 py-3 font-bold">Judul Tugas</th>
-                <th className="px-6 py-3 font-bold">Nilai</th>
-                <th className="px-6 py-3 font-bold">Tanggal</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-custom">
-              {recentSubmissions.length === 0 ? (
+      {/* --- GRID BARIS 2: AKTIVITAS TERBARU & RATA-RATA NILAI (DIPISAH) --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Tabel Aktivitas Terbaru (2/3) */}
+        <div className="lg:col-span-2 bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+          <div className="p-6 border-b border-border-custom flex justify-between items-center bg-foreground/5">
+            <h3 className="font-bold text-foreground text-lg">Aktivitas Pengumpulan Terbaru</h3>
+            <span className="text-xs font-bold bg-foreground/10 text-foreground/60 px-2 py-1 rounded border border-border-custom">5 Terakhir</span>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-foreground/40 uppercase bg-foreground/5 border-b border-border-custom font-bold">
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-foreground/20">
-                    Belum ada data pengumpulan tugas.
-                  </td>
+                  <th className="px-6 py-3 font-bold">Nama Siswa</th>
+                  <th className="px-6 py-3 font-bold">Kelas</th>
+                  <th className="px-6 py-3 font-bold">Nilai</th>
+                  <th className="px-6 py-3 text-right">Tanggal</th>
                 </tr>
-              ) : (
-                recentSubmissions.map((item: any) => (
-                  <tr key={item._id} className="hover:bg-foreground/5 transition-colors">
-                    <td className="px-6 py-4 font-bold text-foreground">
-                      {item.member_id?.nama_lengkap || 'Siswa Dihapus'}
-                    </td>
-                    <td className="px-6 py-4 text-foreground/60">
-                      <span className="bg-blue-500/10 text-blue-500 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-500/20">
-                        {item.member_id?.kelas || '-'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-foreground/60 underline decoration-border-custom">
-                      {item.tugas_id?.judul || 'Tugas Dihapus'}
-                    </td>
-                    <td className="px-6 py-4">
-                      {item.nilai >= 75 ? (
-                        <span className="text-green-500 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">{item.nilai}</span>
-                      ) : (
-                        <span className="text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">{item.nilai}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-foreground/40 text-xs">
-                      {new Date(item.tanggal_mengumpulkan).toLocaleDateString('id-ID', {
-                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                      })}
+              </thead>
+              <tbody className="divide-y divide-border-custom">
+                {recentSubmissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-foreground/20">
+                      Belum ada data pengumpulan tugas.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  recentSubmissions.map((item: any) => (
+                    <tr key={item._id} className="hover:bg-foreground/5 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-foreground text-sm">{item.member_id?.nama_lengkap || 'Siswa Dihapus'}</p>
+                        <p className="text-[10px] text-foreground/40 font-medium truncate max-w-[150px]">{item.tugas_id?.judul || 'Tugas Dihapus'}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="bg-blue-500/10 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-500/20">
+                          {item.member_id?.kelas || '-'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {item.nilai >= 75 ? (
+                          <span className="text-green-500 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+                            {Number(item.nilai).toFixed(2).replace(/\.00$/, '')}
+                          </span>
+                        ) : (
+                          <span className="text-red-500 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/20">
+                            {Number(item.nilai).toFixed(2).replace(/\.00$/, '')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-foreground/40 text-[10px] text-right whitespace-nowrap">
+                        {new Date(item.tanggal_mengumpulkan).toLocaleDateString('id-ID', {
+                          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                        })}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Grafik Nilai (1/3) */}
+        <div className="lg:col-span-1">
+          <GradesChart data={gradesChartData} />
         </div>
       </div>
 

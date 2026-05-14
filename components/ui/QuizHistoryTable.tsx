@@ -49,10 +49,12 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                     <td className="px-6 py-4 text-center text-emerald-600 font-bold">{h.benar ?? '-'}</td>
                     <td className="px-6 py-4 text-center text-red-500 font-bold">{h.salah ?? '-'}</td>
                     <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full font-black text-lg ${
-                        (h.nilai || 0) >= 75 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'
+                      <span className={`px-4 py-1.5 rounded-full font-black text-lg border ${
+                        (h.nilai || 0) >= 75 
+                          ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' 
+                          : 'text-red-500 bg-red-500/10 border-red-500/20'
                       }`}>
-                        {h.nilai || 0}
+                        {Number(h.nilai || 0).toFixed(2).replace(/\.00$/, '')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -83,8 +85,8 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
               <div>
                 <h2 className="text-xl font-bold text-foreground">{selectedQuiz.kuis_id?.judul}</h2>
                 <p className="text-sm text-foreground/40 mt-1 font-medium">
-                  Skor: <span className="font-bold text-blue-600">{selectedQuiz.nilai}</span> | 
-                  Benar: <span className="text-emerald-600 font-bold">{selectedQuiz.benar}</span> | 
+                  Skor: <span className="font-black text-blue-500 underline decoration-blue-500/20">{Number(selectedQuiz.nilai || 0).toFixed(2).replace(/\.00$/, '')}</span> | 
+                  Benar: <span className="text-emerald-500 font-bold">{selectedQuiz.benar}</span> | 
                   Salah: <span className="text-red-500 font-bold">{selectedQuiz.salah}</span>
                 </p>
               </div>

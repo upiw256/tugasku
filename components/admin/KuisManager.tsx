@@ -188,7 +188,9 @@ export default function KuisManager({
                             {p.status === 'SUBMITTED' ? '✅ Selesai' : '✍️ Mengerjakan'}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-center font-bold text-lg text-foreground">{p.nilai || 0}</td>
+                         <td className="px-4 py-4 text-center font-black text-lg text-foreground">
+                           {Number(p.nilai || 0).toFixed(2).replace(/\.00$/, '')}
+                         </td>
                         <td className="px-4 py-4 text-right">
                           <button 
                             onClick={() => handleResetTimer(p._id, p.member_id?.nama_lengkap)}
