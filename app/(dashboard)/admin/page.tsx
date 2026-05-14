@@ -39,13 +39,21 @@ export default async function AdminDashboardPage() {
     .populate('tugas_id', 'judul') 
     .lean();
 
-  // --- LOGIKA DATA GRAFIK KEHADIRAN ---
-  const endDate = new Date();
-  endDate.setHours(23, 59, 59, 999);
+  // --- LOGIKA DATA GRAFIK KEHADIRAN (SEMUA DATA) ---
+  const allLogs = await Absensi.find({}).sort({ tanggal: 1 }).lean();
   
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 6); 
+  let startDate = new Date();
+  let endDate = new Date();
+  
+  if (allLogs.length > 0) {
+    startDate = new Date(allLogs[0].tanggal);
+    endDate = new Date(allLogs[allLogs.length - 1].tanggal);
+  } else {
+    startDate.setDate(startDate.getDate() - 6);
+  }
+  
   startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
 
   const allStudents = await Member.find({}).lean();
   const studentClassMap: Record<string, string> = {}; 
@@ -58,16 +66,26 @@ export default async function AdminDashboardPage() {
   
   const sortedClasses = Object.keys(distinctClasses).sort();
 
-  const attendanceLogs = await Absensi.find({
-    tanggal: { $gte: startDate, $lte: endDate }
-  }).lean();
+  const attendanceLogs = allLogs;
 
   const chartDataByClass: Record<string, any[]> = {};
-  const classesWithAttendanceData = new Set<string>(); // Untuk melacak kelas yang punya data
+  const classesWithAttendanceData = new Set<string>();
+  
+  // Ambil hanya tanggal yang memang ada datanya di LOGS (untuk menghilangkan tanggal kosong)
+  const uniqueDatesSet = new Set<string>();
+  attendanceLogs.forEach((log: any) => {
+    uniqueDatesSet.add(new Date(log.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' }));
+  });
+
+  // Urutkan tanggal yang unik (asumsi allLogs sudah urut tanggal dari DB)
+  // Kalau belum yakin urut, kita bisa biarkan log urutan default dari allLogs yang sudah di-sort di awal
   const dateRange: string[] = [];
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    dateRange.push(d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' }));
-  }
+  allLogs.forEach((log: any) => {
+    const dStr = new Date(log.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' });
+    if (!dateRange.includes(dStr)) {
+      dateRange.push(dStr);
+    }
+  });
 
   sortedClasses.forEach(cls => {
     chartDataByClass[cls] = dateRange.map(dateStr => ({

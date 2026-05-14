@@ -58,15 +58,18 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
     }
   }, [allClasses, selectedClass]);
 
-  // Ambil data berdasarkan kelas yang dipilih (atau array kosong jika belum ada)
-  const currentData = selectedClass ? dataByClass[selectedClass] : [];
+  // Ambil data berdasarkan kelas yang dipilih
+  // Filter tanggal yang benar-benar punya data (Hadir/Sakit/Izin/Alpha > 0)
+  const currentData = selectedClass 
+    ? (dataByClass[selectedClass] || []).filter(d => (d.Hadir + d.Sakit + d.Izin + d.Alpha) > 0)
+    : [];
 
   return (
     <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
       {/* Header & Filter Dropdown */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
-            <h3 className="text-lg font-bold text-foreground">Tren Absensi 7 Hari Terakhir</h3>
+            <h3 className="text-lg font-bold text-foreground">Tren Absensi Seluruh Waktu</h3>
             <p className="text-sm text-foreground/40 font-medium">
                 Menampilkan data kelas: <span className="text-blue-500 font-black underline decoration-blue-500/30">{selectedClass || '-'}</span>
             </p>
