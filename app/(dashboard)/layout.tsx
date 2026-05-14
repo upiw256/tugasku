@@ -32,11 +32,11 @@ export default async function DashboardLayout({
       <Sidebar user={userForSidebar} />
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen">
         
         {/* Konten Utama */}
         {/* pt-16 ditambahkan agar konten tidak tertutup header di tampilan mobile */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6 bg-background">
+        <main className="p-4 md:p-6 pt-20 md:pt-6 bg-background">
           {children}
         </main>
       </div>

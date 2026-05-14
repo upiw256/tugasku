@@ -3,7 +3,15 @@
 import { deleteTaskAction } from '@/actions/task-actions';
 import { useState } from 'react';
 
-export default function DeleteTaskButton({ id, judul }: { id: string, judul: string }) {
+export default function DeleteTaskButton({ 
+  id, 
+  judul,
+  className = "text-red-600 hover:text-red-800 text-sm font-medium"
+}: { 
+  id: string, 
+  judul: string,
+  className?: string
+}) {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -20,9 +28,9 @@ export default function DeleteTaskButton({ id, judul }: { id: string, judul: str
     <button 
       onClick={handleDelete} 
       disabled={loading}
-      className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
+      className={`${className} disabled:opacity-50`}
     >
-      {loading ? '...' : 'Hapus'}
+      {loading ? '...' : (className.includes('p-4') ? '🗑️ HAPUS PERMANEN' : 'Hapus')}
     </button>
   );
 }

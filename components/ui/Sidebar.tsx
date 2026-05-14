@@ -227,12 +227,12 @@ export default function Sidebar({ user }: { user: any }) {
 
       {/* --- SIDEBAR CONTAINER (Tema Gelap) --- */}
       <aside className={`
-        fixed md:static inset-y-0 left-0 z-20 
+        fixed md:sticky md:top-0 inset-y-0 left-0 z-20 
         bg-slate-900 border-r border-slate-800
         transform transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
         flex flex-col h-screen shadow-xl
-        ${isCollapsed ? 'w-20' : 'w-72'} // Lebar dinamis berdasarkan state collapsed
+        ${isCollapsed ? 'w-20' : 'w-72'}
       `}>
         
         {/* 1. LOGO & COLLAPSE HEADER */}

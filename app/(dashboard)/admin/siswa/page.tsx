@@ -10,6 +10,7 @@ import GivePointButton from '@/components/admin/GivePointButton';
 import KelasFilter from '@/components/admin/KelasFilter';
 // Import komponen baru
 import DownloadAkunSiswa from '@/components/admin/DownloadButton';
+import SiswaTable from '@/components/admin/SiswaTable';
 
 export default async function DataSiswaPage({
   searchParams,
@@ -96,72 +97,16 @@ export default async function DataSiswaPage({
         </div>
       </div>
 
-      {/* Tabel Data Siswa */}
-      <div className="bg-surface rounded-xl shadow border border-border-custom overflow-hidden">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-foreground/5 text-foreground/70 uppercase font-bold border-b border-border-custom">
-            <tr>
-              <th className="px-6 py-3">NIS</th>
-              <th className="px-6 py-3">Nama</th>
-              <th className="px-6 py-3">Kelas</th>
-              <th className="px-6 py-3 text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border-custom">
-            {students.map((s: any) => (
-              <tr key={s._id} className="hover:bg-foreground/5 transition-colors">
-                <td className="px-6 py-3 font-mono text-foreground/60">{s.nis}</td>
-                <td className="px-6 py-3 font-medium text-foreground">
-                  <div className="flex flex-col">
-                    <span>{s.nama_lengkap}</span>
-                    <span className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5">
-                      ⭐ {s.poin_keaktifan || 0} Poin Aktif
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-3">
-                  <span className="bg-blue-500/10 text-blue-500 text-xs px-2 py-1 rounded font-bold">
-                    {s.kelas}
-                  </span>
-                </td>
-                <td className="px-6 py-3 flex justify-center gap-3 items-center">
-                  <GivePointButton memberId={s._id.toString()} />
-                  <div className="w-[1px] h-4 bg-border-custom mx-1"></div>
-                  <Link 
-                    href={`/admin/siswa/${s._id}/nilai`} 
-                    className="bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 text-[10px] px-2 py-1 rounded font-bold transition"
-                  >
-                    ★ Nilai
-                  </Link>
-                  <Link
-                    href={`/admin/siswa/${s._id}`}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    Edit
-                  </Link>
-
-                  <DeleteStudentButton
-                    id={s._id.toString()}
-                    nama={s.nama_lengkap}
-                  />
-
-                  <ResetPasswordButton
-                    memberId={s._id.toString()}
-                    nama={s.nama_lengkap}
-                  />
-                </td>
-              </tr>
-            ))}
-            {students.length === 0 && (
-              <tr>
-                <td colSpan={4} className="p-8 text-center text-foreground/40">
-                  Tidak ada data siswa ditemukan.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* Tabel Data Siswa (Client Component untuk Interaktivitas Mobile) */}
+      <SiswaTable 
+        students={students.map((s: any) => ({
+          _id: s._id.toString(),
+          nis: s.nis,
+          nama_lengkap: s.nama_lengkap,
+          kelas: s.kelas,
+          poin_keaktifan: s.poin_keaktifan || 0
+        }))} 
+      />
 
       {totalPages > 1 && <Pagination totalPages={totalPages} />}
     </div>

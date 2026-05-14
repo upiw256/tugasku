@@ -3,7 +3,15 @@
 import { deleteStudentAction } from '@/actions/admin-actions';
 import { useState } from 'react';
 
-export default function DeleteStudentButton({ id, nama }: { id: string, nama: string }) {
+export default function DeleteStudentButton({ 
+  id, 
+  nama, 
+  className = "text-red-600 hover:text-red-800 text-sm font-medium" 
+}: { 
+  id: string, 
+  nama: string,
+  className?: string 
+}) {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -18,9 +26,9 @@ export default function DeleteStudentButton({ id, nama }: { id: string, nama: st
     <button 
       onClick={handleDelete} 
       disabled={loading}
-      className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
+      className={`${className} disabled:opacity-50`}
     >
-      {loading ? '...' : 'Hapus'}
+      {loading ? '...' : (className.includes('p-3') ? '🗑️ Hapus' : 'Hapus')}
     </button>
   );
 }

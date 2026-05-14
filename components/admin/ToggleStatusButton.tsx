@@ -5,15 +5,20 @@ import { toggleTugasStatus } from '@/actions/submission-actions' // Sesuaikan pa
 
 export default function ToggleStatusButton({ 
   id, 
-  initialStatus 
+  initialStatus,
+  className
 }: { 
   id: string, 
-  initialStatus: boolean 
+  initialStatus: boolean,
+  className?: string
 }) {
   const [isActive, setIsActive] = useState(initialStatus)
   const [isPending, startTransition] = useTransition()
 
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Biar ga ganggu event parent
+    
     startTransition(async () => {
       const result = await toggleTugasStatus(id, isActive)
       if (result.success) {
@@ -24,26 +29,29 @@ export default function ToggleStatusButton({
     })
   }
 
+  const defaultClass = `p-2 rounded-lg transition-all border ${
+    isActive 
+      ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-emerald-600/20' 
+      : 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-rose-600/20'
+  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`;
+
   return (
     <button
+      type="button"
       onClick={handleToggle}
       disabled={isPending}
       title={isActive ? "Tutup Pengumpulan" : "Buka Pengumpulan"}
-      className={`p-2 rounded-lg transition-all border ${
-        isActive 
-          ? 'bg-green-50 text-green-600 border-green-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200' 
-          : 'bg-red-50 text-red-600 border-red-200 hover:bg-green-50 hover:text-green-600 hover:border-green-200'
-      } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={className || defaultClass}
     >
       {isPending ? (
-        <span className="text-[10px] font-bold">...</span>
+        <span className="text-[10px] font-bold animate-pulse">...</span>
       ) : isActive ? (
-        <span className="flex items-center gap-1 text-[10px] font-bold uppercase">
-          🔓 <span className="hidden lg:inline">Buka</span>
+        <span className="flex items-center gap-1 text-[10px] font-black uppercase whitespace-nowrap">
+          🟢 <span className={className?.includes('p-3') ? '' : 'hidden lg:inline'}>TUTUP</span>
         </span>
       ) : (
-        <span className="flex items-center gap-1 text-[10px] font-bold uppercase">
-          🔒 <span className="hidden lg:inline">Tutup</span>
+        <span className="flex items-center gap-1 text-[10px] font-black uppercase whitespace-nowrap">
+          🔴 <span className={className?.includes('p-3') ? '' : 'hidden lg:inline'}>BUKA</span>
         </span>
       )}
     </button>
