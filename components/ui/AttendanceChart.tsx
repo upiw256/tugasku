@@ -29,12 +29,15 @@ interface Props {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border border-gray-200 rounded shadow-lg text-sm">
-        <p className="font-bold text-gray-800 mb-2 border-b pb-1">Tanggal {label}</p>
-        <div className="space-y-1">
+      <div className="bg-surface p-3 border border-border-custom rounded-xl shadow-2xl text-sm backdrop-blur-md">
+        <p className="font-black text-foreground mb-2 border-b border-border-custom pb-1 flex justify-between items-center">
+            <span>Tgl: {label}</span>
+        </p>
+        <div className="space-y-1.5">
             {payload.map((entry: any) => (
-                <p key={entry.name} style={{ color: entry.color }} className="font-semibold">
-                    {entry.name}: {entry.value}
+                <p key={entry.name} style={{ color: entry.color }} className="font-bold flex justify-between gap-4">
+                    <span>{entry.name}:</span>
+                    <span>{entry.value}</span>
                 </p>
             ))}
         </div>
@@ -59,13 +62,13 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
   const currentData = selectedClass ? dataByClass[selectedClass] : [];
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
       {/* Header & Filter Dropdown */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
-            <h3 className="text-lg font-bold text-gray-800">Tren Absensi 7 Hari Terakhir</h3>
-            <p className="text-sm text-gray-500">
-                Menampilkan data kelas: <span className="text-blue-600 font-bold">{selectedClass || '-'}</span>
+            <h3 className="text-lg font-bold text-foreground">Tren Absensi 7 Hari Terakhir</h3>
+            <p className="text-sm text-foreground/40 font-medium">
+                Menampilkan data kelas: <span className="text-blue-500 font-black underline decoration-blue-500/30">{selectedClass || '-'}</span>
             </p>
         </div>
         
@@ -73,11 +76,11 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
         <select
           value={selectedClass}
           onChange={(e) => setSelectedClass(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"
+          className="border border-border-custom rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-foreground/5 text-foreground font-bold transition-all hover:bg-foreground/10 cursor-pointer"
         >
           {allClasses.length === 0 && <option value="">Data Kosong</option>}
           {allClasses.map(cls => (
-            <option key={cls} value={cls}>Kelas {cls}</option>
+            <option key={cls} value={cls} className="bg-surface text-foreground">Kelas {cls}</option>
           ))}
         </select>
       </div>
@@ -94,22 +97,25 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
                 data={currentData}
                 margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
             >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-foreground/10" />
                 <XAxis 
                     dataKey="date" 
-                    tick={{ fill: '#6b7280', fontSize: 12 }} 
+                    tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 
                     axisLine={false}
                     tickLine={false}
                     padding={{ left: 20, right: 20 }}
                 />
                 <YAxis 
-                    tick={{ fill: '#6b7280', fontSize: 12 }} 
+                    tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 
                     axisLine={false}
                     tickLine={false}
                     allowDecimals={false}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d1d5db', strokeWidth: 1 }} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'currentColor', strokeWidth: 1, strokeDasharray: '5 5', className: "text-foreground/20" }} />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '20px' }} 
+                  formatter={(value) => <span className="text-foreground/60 text-xs font-bold uppercase tracking-widest">{value}</span>}
+                />
                 
                 {/* 4 Garis untuk masing-masing status */}
                 <Line 

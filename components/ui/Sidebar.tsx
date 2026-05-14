@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { JSX, useState } from "react";
 import { clearAppCache } from "@/actions/cache-actions"
+import { ThemeToggle } from "./ThemeToggle";
 
 // Definisikan tipe untuk menu agar lebih rapi saat dikelompokkan
 type MenuItem = {
@@ -254,6 +255,11 @@ export default function Sidebar({ user }: { user: any }) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg> // Panah Kiri
             )}
           </button>
+        </div>
+
+        {/* --- THEME TOGGLE (Di bawah Logo) --- */}
+        <div className={`px-4 py-3 border-b border-slate-800 shrink-0 transition-all duration-300 ${isCollapsed ? 'opacity-0 h-0 overflow-hidden py-0 border-0' : 'opacity-100'}`}>
+           <ThemeToggle />
         </div>
 
         {/* 2. USER PROFILE MINI (Gelap) */}

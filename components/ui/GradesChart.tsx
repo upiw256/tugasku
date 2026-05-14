@@ -25,10 +25,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white p-3 border border-gray-200 rounded shadow-lg text-sm">
-        <p className="font-bold text-gray-800 mb-2 border-b pb-1">Kelas {label}</p>
-        <p className="text-purple-600 font-bold text-lg">Rata-rata: {data.rataRata}</p>
-        <p className="text-xs text-gray-500">Dari total {data.jumlahTugas} penilaian</p>
+      <div className="bg-surface p-4 border border-border-custom rounded-xl shadow-2xl text-sm backdrop-blur-md">
+        <p className="font-black text-foreground mb-2 border-b border-border-custom pb-1 flex justify-between items-center text-xs uppercase tracking-tighter">Kelas {label}</p>
+        <p className="text-purple-400 font-black text-xl">AVG: {data.rataRata}</p>
+        <p className="text-[10px] text-foreground/40 font-bold uppercase mt-1">Total {data.jumlahTugas} Penilaian</p>
       </div>
     );
   }
@@ -37,16 +37,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function GradesChart({ data }: Props) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-full">
+    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom h-full">
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-800">Rata-rata Nilai Kelas</h3>
-        <p className="text-sm text-gray-500">Akumulasi nilai seluruh tugas</p>
+        <h3 className="text-lg font-bold text-foreground">Rata-rata Nilai Kelas</h3>
+        <p className="text-sm text-foreground/40 font-medium">Akumulasi nilai seluruh tugas</p>
       </div>
 
       <div className="w-full h-[350px]">
         {data.length === 0 ? (
-           <div className="h-full flex items-center justify-center text-gray-400">
-             Belum ada data nilai masuk.
+           <div className="h-full flex flex-col items-center justify-center text-foreground/20 italic gap-2 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
+             <span className="text-2xl grayscale">📉</span>
+             <p className="font-bold">Belum ada data nilai masuk.</p>
            </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -54,20 +55,20 @@ export default function GradesChart({ data }: Props) {
               data={data}
               margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-foreground/10" />
               <XAxis 
                   dataKey="kelas" 
-                  tick={{ fill: '#6b7280', fontSize: 12 }} 
+                  tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 
                   axisLine={false}
                   tickLine={false}
               />
               <YAxis 
                   domain={[0, 100]} 
-                  tick={{ fill: '#6b7280', fontSize: 12 }} 
+                  tick={{ fill: 'currentColor', fontSize: 11, className: "text-foreground/40 font-bold" }} 
                   axisLine={false}
                   tickLine={false}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f9fafb' }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'currentColor', className: "text-foreground/5" }} />
               
               <Bar dataKey="rataRata" radius={[6, 6, 0, 0]} maxBarSize={50}>
                 {data.map((entry, index) => (

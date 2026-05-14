@@ -200,39 +200,39 @@ export default async function SiswaDashboard() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="p-3 bg-green-100 text-green-600 rounded-full text-2xl">📅</div>
+        <div className="bg-surface p-5 rounded-xl shadow-sm border border-border-custom flex items-center gap-4 transition-all hover:bg-foreground/5">
+            <div className="p-3 bg-green-500/10 text-green-500 rounded-full text-2xl">📅</div>
             <div>
-                <p className="text-gray-500 text-sm">Kehadiran</p>
-                <h3 className="text-2xl font-bold text-gray-800">{persentaseKehadiran}%</h3>
-                <p className="text-xs text-gray-400">{totalHadir} kali Hadir</p>
+                <p className="text-foreground/40 text-sm font-bold uppercase tracking-tighter">Kehadiran</p>
+                <h3 className="text-2xl font-bold text-foreground">{persentaseKehadiran}%</h3>
+                <p className="text-[10px] text-foreground/30 font-medium">{totalHadir} kali Hadir</p>
             </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="p-3 bg-amber-100 text-amber-600 rounded-full text-2xl">⭐</div>
+        <div className="bg-surface p-5 rounded-xl shadow-sm border border-border-custom flex items-center gap-4 transition-all hover:bg-foreground/5">
+            <div className="p-3 bg-amber-500/10 text-amber-500 rounded-full text-2xl">⭐</div>
             <div>
-                <p className="text-gray-500 text-sm">Poin Aktif</p>
-                <h3 className="text-2xl font-bold text-amber-600">{student.poin_keaktifan || 0}</h3>
-                <p className="text-[10px] text-gray-400">Bonus dari Guru</p>
+                <p className="text-foreground/40 text-sm font-bold uppercase tracking-tighter">Poin Aktif</p>
+                <h3 className="text-2xl font-bold text-amber-500">{student.poin_keaktifan || 0}</h3>
+                <p className="text-[10px] text-foreground/30 font-medium">Bonus dari Guru</p>
             </div>
         </div>
         
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="p-3 bg-purple-100 text-purple-600 rounded-full text-2xl">🎓</div>
+        <div className="bg-surface p-5 rounded-xl shadow-sm border border-border-custom flex items-center gap-4 transition-all hover:bg-foreground/5">
+            <div className="p-3 bg-purple-500/10 text-purple-400 rounded-full text-2xl">🎓</div>
             <div>
-                <p className="text-gray-500 text-sm">Rata-rata Nilai</p>
-                <h3 className="text-2xl font-bold text-gray-800">{rataRataNilai}</h3>
-                <p className="text-xs text-gray-400">{allGrades.length} tugas & {quizResults.length} kuis</p>
+                <p className="text-foreground/40 text-sm font-bold uppercase tracking-tighter">Rata-rata Nilai</p>
+                <h3 className="text-2xl font-bold text-foreground">{rataRataNilai}</h3>
+                <p className="text-[10px] text-foreground/30 font-medium">{allGrades.length} tugas & {quizResults.length} kuis</p>
             </div>
         </div>
         
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="p-3 bg-orange-100 text-orange-600 rounded-full text-2xl">📝</div>
+        <div className="bg-surface p-5 rounded-xl shadow-sm border border-border-custom flex items-center gap-4 transition-all hover:bg-foreground/5">
+            <div className="p-3 bg-orange-500/10 text-orange-500 rounded-full text-2xl">📝</div>
             <div>
-                <p className="text-gray-500 text-sm">Tugas Pending</p>
-                <h3 className="text-2xl font-bold text-gray-800">{pendingTasksCount}</h3>
-                <p className="text-xs text-gray-400">Belum dinilai</p>
+                <p className="text-foreground/40 text-sm font-bold uppercase tracking-tighter">Tugas Pending</p>
+                <h3 className="text-2xl font-bold text-foreground">{pendingTasksCount}</h3>
+                <p className="text-[10px] text-foreground/30 font-medium">Belum dinilai</p>
             </div>
         </div>
       </div>
@@ -241,14 +241,14 @@ export default async function SiswaDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* KOLOM KIRI (2/3): LIST TUGAS */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-            <div className="p-5 border-b bg-gray-50">
-                <h2 className="font-bold text-lg text-gray-800">📋 Daftar Semua Tugas</h2>
+        <div className="lg:col-span-2 bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+            <div className="p-5 border-b border-border-custom bg-foreground/5">
+                <h2 className="font-bold text-lg text-foreground">📋 Daftar Semua Tugas</h2>
             </div>
             
-            <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+            <div className="divide-y divide-border-custom max-h-[600px] overflow-y-auto">
                 {tasks.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className="p-8 text-center text-foreground/30 italic">
                         Belum ada tugas.
                     </div>
                 ) : (
@@ -259,44 +259,44 @@ export default async function SiswaDashboard() {
                         const isLate = !isDone && deadline < new Date();
 
                         return (
-                            <div key={task._id} className="p-5 hover:bg-gray-50 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                            <div key={task._id} className="p-5 hover:bg-foreground/5 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-bold text-gray-800 text-lg">
+                                        <h3 className="font-bold text-foreground text-lg">
                                             {task.judul}
                                         </h3>
                                         {isDone ? (
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold border border-green-200">
+                                            <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full font-bold border border-green-500/20">
                                                 ✅ Selesai
                                             </span>
                                         ) : isLate ? (
-                                            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold border border-red-200">
+                                            <span className="text-xs bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full font-bold border border-red-500/20">
                                                 ⚠️ Terlewat
                                             </span>
                                         ) : (
-                                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-bold border border-yellow-200">
+                                            <span className="text-xs bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-bold border border-amber-500/20">
                                                 ⏳ Pending
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-sm text-gray-600 line-clamp-1 mb-2">
+                                    <p className="text-sm text-foreground/60 line-clamp-1 mb-2">
                                         {task.deskripsi || 'Tidak ada deskripsi.'}
                                     </p>
-                                    <div className="text-xs text-gray-400">
+                                    <div className="text-xs text-foreground/30 font-medium">
                                         📅 Batas: {deadline.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                                     </div>
                                 </div>
 
                                 {isDone ? (
                                     <div className="text-right min-w-[80px]">
-                                        <p className="text-xs text-gray-500 mb-1">Nilai</p>
-                                        <span className={`text-2xl font-bold ${gradeData.nilai < 75 ? 'text-red-500' : 'text-blue-600'}`}>
+                                        <p className="text-xs text-foreground/40 mb-1 font-bold">NILAI</p>
+                                        <span className={`text-2xl font-black ${gradeData.nilai < 75 ? 'text-red-500' : 'text-blue-500'}`}>
                                             {gradeData.nilai}
                                         </span>
                                     </div>
                                 ) : (
                                     <div className="text-right min-w-[80px]">
-                                        <p className="text-xs text-gray-400 italic">Belum dinilai</p>
+                                        <p className="text-xs text-foreground/20 italic font-medium">Belum dinilai</p>
                                     </div>
                                 )}
                             </div>
@@ -307,14 +307,14 @@ export default async function SiswaDashboard() {
         </div>
 
         {/* SECTION HASIL KUIS */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-            <div className="p-5 border-b bg-gray-50">
-                <h2 className="font-bold text-lg text-gray-800">📊 Hasil Kuis & Latihan</h2>
+        <div className="lg:col-span-2 bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+            <div className="p-5 border-b border-border-custom bg-foreground/5">
+                <h2 className="font-bold text-lg text-foreground">📊 Hasil Kuis & Latihan</h2>
             </div>
             
-            <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+            <div className="divide-y divide-border-custom max-h-[400px] overflow-y-auto">
                 {quizResults.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className="p-8 text-center text-foreground/30 italic">
                         Belum ada kuis yang dikerjakan.
                     </div>
                 ) : (
@@ -323,19 +323,19 @@ export default async function SiswaDashboard() {
                         const date = result.selesai_mengerjakan ? new Date(result.selesai_mengerjakan) : null;
 
                         return (
-                            <div key={result._id} className="p-5 hover:bg-gray-50 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                            <div key={result._id} className="p-5 hover:bg-foreground/5 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-gray-800 text-lg mb-1">
+                                    <h3 className="font-bold text-foreground text-lg mb-1">
                                         {kuis?.judul || 'Kuis Tidak Ditemukan'}
                                     </h3>
-                                    <div className="text-xs text-gray-400">
+                                    <div className="text-xs text-foreground/30 font-medium">
                                         📅 Selesai: {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                                     </div>
                                 </div>
 
                                 <div className="text-right min-w-[80px]">
-                                    <p className="text-xs text-gray-500 mb-1">Skor Kuis</p>
-                                    <span className={`text-2xl font-bold ${result.nilai < 75 ? 'text-red-500' : 'text-green-600'}`}>
+                                    <p className="text-xs text-foreground/40 mb-1 font-bold">SKOR KUIS</p>
+                                    <span className={`text-2xl font-black ${result.nilai < 75 ? 'text-red-500' : 'text-emerald-500'}`}>
                                         {result.nilai}
                                     </span>
                                 </div>
@@ -358,25 +358,25 @@ export default async function SiswaDashboard() {
             </div>
 
             {/* 2. INFO CARD */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-                <div className="p-5 border-b bg-gray-50">
-                    <h2 className="font-bold text-gray-800">🔔 Status Pengerjaan</h2>
+            <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+                <div className="p-5 border-b border-border-custom bg-foreground/5">
+                    <h2 className="font-bold text-foreground">🔔 Status Pengerjaan</h2>
                 </div>
                 <div className="p-5">
-                    <ul className="space-y-3 text-sm text-gray-600">
+                    <ul className="space-y-3 text-sm text-foreground/70">
                         <li className="flex justify-between items-center">
                             <span>Sudah Dinilai</span>
-                            <span className="font-bold text-green-600 bg-green-50 px-2 py-1 rounded">{allGrades.length}</span>
+                            <span className="font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded border border-green-500/20">{allGrades.length}</span>
                         </li>
                         <li className="flex justify-between items-center">
                             <span>Belum Dinilai</span>
-                            <span className="font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">{pendingTasksCount}</span>
+                            <span className="font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20">{pendingTasksCount}</span>
                         </li>
                         <li className="flex justify-between items-center pt-1">
                             <span>Kuis Disubmit</span>
-                            <span className="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{quizResults.length}</span>
+                            <span className="font-bold text-blue-500 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">{quizResults.length}</span>
                         </li>
-                        <li className="pt-2 border-t mt-2 flex justify-between items-center font-bold text-gray-800">
+                        <li className="pt-2 border-t border-border-custom mt-2 flex justify-between items-center font-bold text-foreground">
                             <span>Total Tugas</span>
                             <span>{tasks.length}</span>
                         </li>
