@@ -153,7 +153,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
+    <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden flex flex-col h-full">
       {/* HEADER */}
       <div className="bg-blue-600 p-4 flex justify-between items-center text-white shadow-md z-10">
         <h2 className="font-bold flex items-center gap-2 text-sm md:text-base">
@@ -164,7 +164,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         {role === 'siswa' && permission === 'default' && (
             <button 
                 onClick={requestPermission}
-                className="text-xs bg-white text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-50 transition animate-pulse shadow-sm flex items-center gap-1"
+                className="text-xs bg-surface text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-50 transition animate-pulse shadow-sm flex items-center gap-1"
             >
                 🔔 Aktifkan Notif
             </button>
@@ -178,29 +178,29 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         )}
       </div>
 
-      <div className="p-4 flex-1 overflow-y-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+      <div className="p-4 flex-1 overflow-y-auto max-h-[600px] scrollbar-thin scrollbar-thumb-foreground/10 scrollbar-track-transparent">
         
         {/* FORM ADMIN (Hanya muncul jika Role = Admin) */}
         {role === 'admin' && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-inner">
-            <h3 className="text-xs uppercase tracking-wider font-bold text-gray-500 mb-3">Buat Pengumuman Baru</h3>
+          <div className="mb-6 p-4 bg-foreground/5 rounded-lg border border-border-custom shadow-inner">
+            <h3 className="text-xs uppercase tracking-wider font-bold text-foreground/40 mb-3">Buat Pengumuman Baru</h3>
             <form ref={formRef} action={handlePost} className="space-y-3">
               <input 
                 name="judul" 
                 required 
                 placeholder="Judul Pengumuman Singkat..." 
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" 
+                className="w-full px-3 py-2 text-sm border border-border-custom bg-surface text-foreground rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition placeholder:text-foreground/20" 
               />
               <textarea 
                 name="konten" 
                 required 
                 placeholder="Isi pesan lengkap..." 
                 rows={2} 
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+                className="w-full px-3 py-2 text-sm border border-border-custom bg-surface text-foreground rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none placeholder:text-foreground/20"
               ></textarea>
               
               <div className="flex justify-between items-center pt-1">
-                 <select name="prioritas" className="text-sm border border-gray-300 rounded px-2 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                 <select name="prioritas" className="text-sm border border-border-custom rounded px-2 py-1.5 bg-surface text-foreground font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
                     <option value="Info">ℹ️ Info Biasa</option>
                     <option value="Penting">⚠️ Penting</option>
                     <option value="Libur">🏖️ Libur</option>
@@ -222,34 +222,34 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         {/* LIST PENGUMUMAN */}
         <div className="space-y-4 pb-4">
           {announcements.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-gray-400 border-2 border-dashed border-gray-100 rounded-lg">
-                <span className="text-2xl mb-2">📭</span>
-                <p className="text-sm">Belum ada pengumuman.</p>
+            <div className="flex flex-col items-center justify-center h-40 text-foreground/20 border-2 border-dashed border-border-custom rounded-lg bg-foreground/5">
+                <span className="text-2xl mb-2 grayscale opacity-50">📭</span>
+                <p className="text-sm font-medium">Belum ada pengumuman.</p>
             </div>
           ) : (
             announcements.map((item) => (
-              <div key={item._id} className={`group relative p-4 rounded-lg border-l-[6px] shadow-sm bg-white border-y border-r border-gray-100 transition hover:shadow-md
-                ${item.prioritas === 'Penting' ? 'border-l-red-500 bg-red-50/10' : 
-                  item.prioritas === 'Libur' ? 'border-l-green-500 bg-green-50/10' : 'border-l-blue-400 bg-blue-50/10'}`
+              <div key={item._id} className={`group relative p-4 rounded-lg border-l-[6px] shadow-sm bg-surface border-y border-r border-border-custom transition hover:shadow-md
+                ${item.prioritas === 'Penting' ? 'border-l-red-500 bg-red-500/5' : 
+                  item.prioritas === 'Libur' ? 'border-l-green-500 bg-green-500/5' : 'border-l-blue-400 bg-blue-500/5'}`
               }>
                 {/* Header Item */}
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold text-gray-800 text-sm leading-tight pr-4">{item.judul}</h4>
-                  <span className="text-[10px] font-mono text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100 whitespace-nowrap">
+                  <h4 className="font-bold text-foreground text-sm leading-tight pr-4">{item.judul}</h4>
+                  <span className="text-[10px] font-bold text-foreground/30 bg-foreground/5 px-1.5 py-0.5 rounded border border-border-custom whitespace-nowrap">
                     {new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                   </span>
                 </div>
 
                 {/* Konten Item */}
-                <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed mb-3">
+                <p className="text-sm text-foreground/60 whitespace-pre-line leading-relaxed mb-3">
                     {item.konten}
                 </p>
                 
                 {/* Footer Item (Badge & Delete) */}
-                <div className="flex justify-between items-center mt-2 border-t border-gray-50 pt-2">
-                   <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider
-                     ${item.prioritas === 'Penting' ? 'bg-red-100 text-red-600' : 
-                       item.prioritas === 'Libur' ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-500'}`
+                <div className="flex justify-between items-center mt-2 border-t border-border-custom pt-2">
+                   <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase tracking-wider
+                     ${item.prioritas === 'Penting' ? 'bg-red-500/10 text-red-500' : 
+                       item.prioritas === 'Libur' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`
                    }>
                      {item.prioritas}
                    </span>
@@ -259,7 +259,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
                      <button 
                         onClick={() => handleDelete(item._id)} 
                         title="Hapus Pengumuman"
-                        className="text-gray-300 hover:text-red-500 hover:bg-red-50 p-1 rounded transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        className="text-foreground/20 hover:text-red-500 hover:bg-red-500/10 p-1 rounded transition opacity-0 group-hover:opacity-100 focus:opacity-100"
                      >
                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                      </button>

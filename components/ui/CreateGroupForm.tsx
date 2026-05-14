@@ -134,7 +134,7 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Status Data Siswa</label>
-          <div className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-600">
+          <div className="w-full px-4 py-2 bg-foreground/5 border border-border-custom rounded-lg text-sm text-foreground/60">
             {isLoadingStudents ? 'Memuat...' : (selectedClass ? `${students.length} Siswa ditemukan di kelas ${selectedClass}` : 'Pilih kelas terlebih dahulu')}
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
 
       {/* Bagian Pembuatan Kelompok */}
       {selectedClass && students.length > 0 && (
-        <div className="p-4 border rounded-xl border-blue-200 bg-white">
+        <div className="p-4 border rounded-xl border-blue-500/30 bg-surface">
           <div className="flex justify-between items-center mb-4 pb-3 border-b">
             <h3 className="font-bold text-lg text-blue-800">Bentuk Kelompok</h3>
           </div>
@@ -179,7 +179,7 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
                   <div className="mb-2 bg-yellow-50 px-2 py-1.5 rounded border border-yellow-200">
                     <label className="text-[11px] font-bold text-yellow-800 uppercase tracking-wide mr-2">👑 Ketua:</label>
                     <select 
-                       className="px-2 py-1 text-xs border rounded bg-white outline-none w-3/4 max-w-[200px]"
+                       className="px-2 py-1 text-xs border border-border-custom rounded bg-surface text-foreground outline-none w-3/4 max-w-[200px]"
                        value={group.ketua_id}
                        onChange={(e) => {
                           const newGroups = [...groups];

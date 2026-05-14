@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import Pagination from '@/components/ui/Pagination';
 import DeleteTaskButton from '@/components/ui/DeleteTaskButton';
 import ToggleStatusButton from '@/components/admin/ToggleStatusButton';
+
 export default async function KelolaTugasPage({
   searchParams,
 }: {
@@ -42,7 +43,7 @@ export default async function KelolaTugasPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-foreground">
           Daftar Tugas ({totalTasks})
         </h1>
 
@@ -54,12 +55,12 @@ export default async function KelolaTugasPage({
               name="q"
               defaultValue={query}
               placeholder="Cari judul..."
-              className="border border-gray-300 px-3 py-2 rounded-lg text-sm"
+              className="border border-border-custom bg-surface text-foreground px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             />
             <input type="hidden" name="page" value="1" />
             <button
               type="submit"
-              className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm"
+              className="bg-foreground text-background px-4 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity"
             >
               Cari
             </button>
@@ -83,127 +84,126 @@ export default async function KelolaTugasPage({
             className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-orange-700 whitespace-nowrap"
           >
             📊 Rekap Nilai
-        </Link>
+          </Link>
         </div>
       </div>
 
       {/* Tabel Tugas */}
-      <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="w-full text-sm text-left">
-      <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
-        <tr>
-          <th className="px-6 py-3">Judul Tugas</th>
-          <th className="px-6 py-3">Kelas</th>
-          <th className="px-6 py-3">Metode</th>
-          <th className="px-6 py-3">Deadline</th>
-          <th className="px-6 py-3 text-center">Aksi</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-100">
-        {tasks.map((t: any) => {
-          // LOGIKA PENENTU TIPE (Fallback ke 'online' jika null)
-          const isOnline = (t.tipe_pengumpulan || 'online') === 'online';
+      <div className="bg-surface rounded-xl shadow border border-border-custom overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-foreground/5 text-foreground/70 uppercase font-bold border-b border-border-custom">
+              <tr>
+                <th className="px-6 py-3">Judul Tugas</th>
+                <th className="px-6 py-3">Kelas</th>
+                <th className="px-6 py-3">Metode</th>
+                <th className="px-6 py-3">Deadline</th>
+                <th className="px-6 py-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-custom">
+              {tasks.map((t: any) => {
+                const isOnline = (t.tipe_pengumpulan || 'online') === 'online';
 
-          return (
-            <tr key={t._id} className="hover:bg-gray-50">
-              {/* 1. JUDUL */}
-              <td className="px-6 py-4">
-                <div className="font-bold text-gray-900 flex items-center gap-2">
-                  {t.judul}
-                  {t.tipe_tugas === 'kelompok' && (
-                    <span className="bg-indigo-100 text-indigo-800 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold">Kelompok</span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-500 line-clamp-1">
-                  {t.deskripsi || '-'}
-                </div>
-              </td>
+                return (
+                  <tr key={t._id} className="hover:bg-foreground/5 transition-colors">
+                    {/* 1. JUDUL */}
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-foreground flex items-center gap-2">
+                        {t.judul}
+                        {t.tipe_tugas === 'kelompok' && (
+                          <span className="bg-indigo-500/10 text-indigo-500 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold">Kelompok</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-foreground/40 line-clamp-1">
+                        {t.deskripsi || '-'}
+                      </div>
+                    </td>
 
-              {/* 2. KELAS */}
-              <td className="px-6 py-4">
-                <div className="flex flex-wrap gap-1">
-                  {Array.isArray(t.kelas)
-                    ? t.kelas.map((k: string) => (
-                        <span key={k} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                          {k}
+                    {/* 2. KELAS */}
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(t.kelas)
+                          ? t.kelas.map((k: string) => (
+                              <span key={k} className="bg-blue-500/10 text-blue-500 text-xs px-2 py-1 rounded border border-blue-500/20">
+                                {k}
+                              </span>
+                            ))
+                          : (
+                              <span className="bg-blue-500/10 text-blue-500 text-xs px-2 py-1 rounded border border-blue-500/20">
+                                {t.kelas}
+                              </span>
+                            )
+                        }
+                      </div>
+                    </td>
+
+                    {/* 3. METODE */}
+                    <td className="px-6 py-4">
+                      {isOnline ? (
+                        <span className="inline-flex items-center gap-1 bg-blue-500/10 text-blue-500 text-xs font-bold px-2 py-1 rounded border border-blue-500/20">
+                          ☁️ Upload
                         </span>
-                      ))
-                    : (
-                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                          {t.kelas}
+                      ) : (
+                        <span className="inline-flex items-center gap-1 bg-foreground/5 text-foreground/40 text-xs font-bold px-2 py-1 rounded border border-border-custom">
+                          🏫 Offline
                         </span>
-                      )
-                  }
-                </div>
-              </td>
+                      )}
+                    </td>
 
-              {/* 3. METODE (BARU) */}
-              <td className="px-6 py-4">
-                {isOnline ? (
-                  <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded border border-blue-200">
-                    ☁️ Upload
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded border border-gray-200">
-                    🏫 Offline
-                  </span>
-                )}
-              </td>
+                    {/* 4. DEADLINE */}
+                    <td className="px-6 py-4">
+                      {t.deadline ? (
+                        <span className={`text-xs font-bold px-2 py-1 rounded border
+                          ${new Date(t.deadline) < new Date() ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-green-500/10 text-green-500 border-green-500/20'}
+                        `}>
+                          {new Date(t.deadline).toLocaleDateString('id-ID', {
+                            day: 'numeric', month: 'short', year: 'numeric'
+                          })}
+                        </span>
+                      ) : (
+                        <span className="text-foreground/20">-</span>
+                      )}
+                    </td>
 
-              {/* 4. DEADLINE */}
-              <td className="px-6 py-4">
-                {t.deadline ? (
-                  <span className={`text-xs font-bold px-2 py-1 rounded 
-                    ${new Date(t.deadline) < new Date() ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}
-                  `}>
-                    {new Date(t.deadline).toLocaleDateString('id-ID', {
-                      day: 'numeric', month: 'short', year: 'numeric'
-                    })}
-                  </span>
-                ) : (
-                  <span className="text-gray-400">-</span>
-                )}
-              </td>
-
-              {/* 5. AKSI */}
-              <td className="px-6 py-4 flex justify-center gap-4 items-center">
-                  <Link
-                    href={`/admin/tugas/${t._id}/pengumpulan`}
-                    className="bg-teal-100 text-teal-700 border border-teal-200 px-3 py-1 rounded text-xs font-bold hover:bg-teal-200 transition flex items-center gap-1"
-                  >
-                    👁️ Cek Pengumpulan
-                  </Link>                
-                <Link
-                  href={`/admin/tugas/${t._id}`}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Edit
-                </Link>
-                <ToggleStatusButton 
-                      id={t._id.toString()} 
-                      initialStatus={t.is_active ?? true} 
-                    />
-                <DeleteTaskButton 
-                  id={t._id.toString()} 
-                  judul={t.judul} 
-                />
-              </td>
-            </tr>
-          );
-        })}
-        
-        {tasks.length === 0 && (
-          <tr>
-            <td colSpan={5} className="p-8 text-center text-gray-500">
-              Belum ada tugas dibuat.
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
+                    {/* 5. AKSI */}
+                    <td className="px-6 py-4 flex justify-center gap-4 items-center">
+                      <Link
+                        href={`/admin/tugas/${t._id}/pengumpulan`}
+                        className="bg-teal-500/10 text-teal-500 border border-teal-500/20 px-3 py-1 rounded text-xs font-bold hover:bg-teal-500/20 transition flex items-center gap-1"
+                      >
+                        👁️ Cek Pengumpulan
+                      </Link>                
+                      <Link
+                        href={`/admin/tugas/${t._id}`}
+                        className="text-blue-500 hover:text-blue-700 font-bold text-xs"
+                      >
+                        Edit
+                      </Link>
+                      <ToggleStatusButton 
+                        id={t._id.toString()} 
+                        initialStatus={t.is_active ?? true} 
+                      />
+                      <DeleteTaskButton 
+                        id={t._id.toString()} 
+                        judul={t.judul} 
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+              
+              {tasks.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-foreground/40">
+                    Belum ada tugas dibuat.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {totalPages > 1 && <Pagination totalPages={totalPages} />}
     </div>

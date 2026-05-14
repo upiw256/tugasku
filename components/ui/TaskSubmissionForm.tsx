@@ -37,12 +37,12 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
         }
         setIsUploading(false);
       }} 
-      className="space-y-4 p-4 bg-white rounded-xl shadow-md border"
+      className="space-y-4 p-4 bg-surface rounded-xl shadow-md border border-border-custom"
     >
       <input type="hidden" name="tugasId" value={tugasId} />
 
       <div className="space-y-2">
-        <label className="block text-sm font-bold text-gray-700">Upload Foto Tugas</label>
+        <label className="block text-sm font-bold text-foreground">Upload Foto Tugas</label>
         <input
           ref={fileInputRef}
           type="file"
@@ -50,14 +50,14 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
           accept="image/*"
           onChange={handleFileChange}
           required
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          className="block w-full text-sm text-foreground/40 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-foreground/5 file:text-foreground hover:file:bg-foreground/10"
         />
       </div>
 
       {/* --- BOX PREVIEW --- */}
       {previewUrl && (
-        <div className="mt-4 p-2 border-2 border-dashed rounded-lg bg-gray-50 relative">
-          <p className="text-[10px] font-bold text-gray-400 mb-2 uppercase">Pratinjau Foto:</p>
+        <div className="mt-4 p-2 border-2 border-dashed border-border-custom rounded-lg bg-foreground/5 relative">
+          <p className="text-[10px] font-bold text-foreground/40 mb-2 uppercase">Pratinjau Foto:</p>
           <img src={previewUrl} alt="Preview" className="max-h-60 mx-auto rounded shadow-sm" />
           <button 
             type="button" 
@@ -70,10 +70,10 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
       )}
 
       <div className="space-y-2">
-        <label className="block text-sm font-bold text-gray-700">Catatan Siswa</label>
+        <label className="block text-sm font-bold text-foreground">Catatan Siswa</label>
         <textarea
           name="catatan"
-          className="w-full p-2 border rounded-lg text-sm"
+          className="w-full p-2 bg-foreground/5 border border-border-custom rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Tambahkan catatan jika ada..."
           rows={3}
         ></textarea>

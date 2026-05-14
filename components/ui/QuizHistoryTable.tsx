@@ -22,10 +22,10 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+            <thead className="text-xs text-foreground/40 uppercase bg-foreground/5 border-b border-border-custom font-bold">
               <tr>
                 <th className="px-6 py-3">Kuis</th>
                 <th className="px-6 py-3 text-center">Benar</th>
@@ -35,15 +35,15 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                 <th className="px-6 py-3 text-right">Tanggal Selesai</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border-custom">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">Belum ada data nilai kuis.</td>
+                  <td colSpan={6} className="px-6 py-12 text-center text-foreground/20 italic">Belum ada data nilai kuis.</td>
                 </tr>
               ) : (
                 history.map((h: any) => (
-                  <tr key={h._id.toString()} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 font-bold text-gray-800">
+                  <tr key={h._id.toString()} className="hover:bg-foreground/5 transition">
+                    <td className="px-6 py-4 font-bold text-foreground">
                       {h.kuis_id?.judul || 'Kuis Terhapus'}
                     </td>
                     <td className="px-6 py-4 text-center text-emerald-600 font-bold">{h.benar ?? '-'}</td>
@@ -63,7 +63,7 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                         Detail
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-right text-gray-400 text-xs">
+                    <td className="px-6 py-4 text-right text-foreground/30 text-xs">
                       {new Date(h.updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
                     </td>
                   </tr>
@@ -76,13 +76,13 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
 
       {/* MODAL DETAIL */}
       {isModalOpen && selectedQuiz && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-surface rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-border-custom animate-in fade-in zoom-in duration-200">
             {/* Header Modal */}
-            <div className="p-6 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+            <div className="p-6 border-b border-border-custom flex justify-between items-center bg-foreground/5 rounded-t-2xl">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">{selectedQuiz.kuis_id?.judul}</h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <h2 className="text-xl font-bold text-foreground">{selectedQuiz.kuis_id?.judul}</h2>
+                <p className="text-sm text-foreground/40 mt-1 font-medium">
                   Skor: <span className="font-bold text-blue-600">{selectedQuiz.nilai}</span> | 
                   Benar: <span className="text-emerald-600 font-bold">{selectedQuiz.benar}</span> | 
                   Salah: <span className="text-red-500 font-bold">{selectedQuiz.salah}</span>
@@ -90,7 +90,7 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
               </div>
               <button 
                 onClick={closeModal}
-                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                className="p-2 hover:bg-foreground/10 rounded-full transition-colors text-foreground/40 hover:text-foreground"
                 aria-label="Close"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,10 +108,10 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                 return (
                   <div key={soal.id || soal._id} className="space-y-3">
                     <div className="flex gap-4">
-                      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600">
+                      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center text-sm font-bold text-foreground">
                         {idx + 1}
                       </span>
-                      <h3 className="text-gray-800 font-medium pt-1 leading-relaxed">
+                      <h3 className="text-foreground font-bold pt-1 leading-relaxed">
                         {soal.pertanyaan}
                       </h3>
                     </div>
@@ -122,8 +122,8 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                         const isStudentAnswer = studentAnswer === optKey;
                         const isCorrectAnswer = soal.jawaban_benar === optKey;
 
-                        let bgColor = 'bg-slate-50 border-slate-100';
-                        let textColor = 'text-gray-600';
+                        let bgColor = 'bg-foreground/5 border-border-custom';
+                        let textColor = 'text-foreground/70 font-medium';
                         let icon = null;
 
                         if (isCorrectAnswer) {
@@ -163,10 +163,10 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
             </div>
 
             {/* Footer Modal */}
-            <div className="p-4 border-t bg-gray-50 flex justify-end rounded-b-2xl">
+            <div className="p-4 border-t border-border-custom bg-foreground/5 flex justify-end rounded-b-2xl">
               <button 
                 onClick={closeModal}
-                className="px-6 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition"
+                className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition shadow-lg shadow-blue-500/20 active:scale-95"
               >
                 Tutup
               </button>

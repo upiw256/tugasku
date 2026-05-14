@@ -213,13 +213,13 @@ export default function Sidebar({ user }: { user: any }) {
 
   return (
     <>
-      {/* --- MOBILE HEADER (Tetap Putih agar kontras dengan konten) --- */}
-      <div className="md:hidden fixed top-0 left-0 w-full bg-white border-b border-slate-200 z-30 px-4 py-3 flex justify-between items-center shadow-sm">
+      {/* --- MOBILE HEADER (Tema Adaptif) --- */}
+      <div className="md:hidden fixed top-0 left-0 w-full bg-surface border-b border-border-custom z-30 px-4 py-3 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
             <div className="bg-blue-600 text-white p-1 rounded-md font-bold text-sm leading-none">TK</div>
-            <span className="font-bold text-slate-800 text-lg">TugasKu</span>
+            <span className="font-bold text-foreground text-lg">TugasKu</span>
         </div>
-        <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-md">
+        <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-foreground/70 hover:bg-foreground/5 rounded-md">
             {isOpen ? <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg> : <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>}
         </button>
       </div>

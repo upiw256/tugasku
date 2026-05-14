@@ -115,21 +115,21 @@ export default async function LeaderboardPage({
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">🏆 Hall of Fame</h1>
-          <p className="text-gray-500">Peringkat siswa terbaik berdasarkan akumulasi seluruh aktivitas.</p>
+          <h1 className="text-3xl font-black text-foreground tracking-tight">🏆 Hall of Fame</h1>
+          <p className="text-foreground/60">Peringkat siswa terbaik berdasarkan akumulasi seluruh aktivitas.</p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-gray-200 p-1 rounded-xl">
+        <div className="flex bg-foreground/10 p-1 rounded-xl">
           <Link 
             href={`/admin/leaderboard?type=global`}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewType === 'global' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewType === 'global' ? 'bg-surface text-blue-500 shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
           >
             🌍 Global
           </Link>
           <Link 
             href={`/admin/leaderboard?type=kelas&kelas=${selectedKelas || distinctClasses[0]}`}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewType === 'kelas' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition ${viewType === 'kelas' ? 'bg-surface text-blue-500 shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}
           >
             🏫 Per Kelas
           </Link>
@@ -138,14 +138,14 @@ export default async function LeaderboardPage({
 
       {/* Filter Kelas (Hanya muncul jika mode Sekelas) */}
       {viewType === 'kelas' && (
-        <div className="bg-white p-4 rounded-xl shadow-sm border flex gap-2 items-center">
-             <span className="text-sm font-bold text-gray-600">Pilih Kelas:</span>
+        <div className="bg-surface p-4 rounded-xl shadow-sm border border-border-custom flex gap-2 items-center">
+             <span className="text-sm font-bold text-foreground/70">Pilih Kelas:</span>
              <div className="flex flex-wrap gap-2">
                 {distinctClasses.sort().map(cls => (
                     <Link 
                         key={cls}
                         href={`/admin/leaderboard?type=kelas&kelas=${cls}`}
-                        className={`px-3 py-1 rounded-full text-xs font-bold border transition ${selectedKelas === cls ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                        className={`px-3 py-1 rounded-full text-xs font-bold border transition ${selectedKelas === cls ? 'bg-blue-600 text-white border-blue-600' : 'bg-surface text-foreground/70 border-border-custom hover:bg-foreground/5'}`}
                     >
                         {cls}
                     </Link>
@@ -158,51 +158,50 @@ export default async function LeaderboardPage({
       <div className="grid gap-4">
         {leaderboard.map((item, index) => {
           const rank = index + 1;
-          const isTop3 = rank <= 3;
           
           return (
             <div 
               key={item._id.toString()}
               className={`
                 relative flex items-center justify-between p-4 rounded-2xl border transition-all duration-300
-                ${rank === 1 ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md scale-[1.02] z-10' : 'bg-white border-gray-100 hover:border-blue-200'}
+                ${rank === 1 ? 'bg-amber-500/10 border-amber-500/20 shadow-md scale-[1.02] z-10' : 'bg-surface border-border-custom hover:border-blue-400/50'}
               `}
             >
               {/* Rank Label */}
               <div className="flex items-center gap-4">
                 <div className={`
-                    w-12 h-12 rounded-full flex items-center justify-center text-xl font-black
-                    ${rank === 1 ? 'bg-amber-400 text-white shadow-lg' : 
-                      rank === 2 ? 'bg-gray-300 text-white' : 
-                      rank === 3 ? 'bg-orange-400 text-white' : 'bg-gray-100 text-gray-400'}
+                    w-12 h-12 rounded-full flex items-center justify-center text-xl font-black border
+                    ${rank === 1 ? 'bg-amber-400 text-white shadow-lg border-amber-300' : 
+                      rank === 2 ? 'bg-slate-300 text-white border-slate-200' : 
+                      rank === 3 ? 'bg-orange-400 text-white border-orange-300' : 'bg-foreground/5 text-foreground/40 border-border-custom'}
                 `}>
                   {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
                 </div>
                 
                 <div>
-                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                    <h3 className="font-bold text-foreground flex items-center gap-2">
                         {item.nama}
                         {viewType === 'global' && (
-                            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded uppercase">{item.kelas}</span>
+                            <span className="text-[10px] bg-blue-500/20 text-blue-500 px-1.5 py-0.5 rounded uppercase font-bold">{item.kelas}</span>
                         )}
                     </h3>
                     <div className="flex gap-3 mt-1">
-                        <span className="text-[10px] text-gray-400 font-medium">📚 Tugas: {item.detail.tugas}</span>
-                        <span className="text-[10px] text-gray-400 font-medium">📝 Kuis: {item.detail.kuis}</span>
-                        <span className="text-[10px] text-amber-500 font-bold">⭐ Aktif: {item.detail.aktif}</span>
+                        <span className="text-[10px] text-foreground/40 font-medium tracking-tight">📚 Tugas: {item.detail.tugas}</span>
+                        <span className="text-[10px] text-foreground/40 font-medium tracking-tight">📝 Kuis: {item.detail.kuis}</span>
+                        <span className="text-[10px] text-amber-500 font-bold tracking-tight">⭐ Aktif: {item.detail.aktif}</span>
                     </div>
                 </div>
               </div>
 
               {/* Score Display */}
               <div className="text-right">
-                <div className="text-2xl font-black text-gray-800">{item.totalScore}</div>
-                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Poin</div>
+                <div className="text-2xl font-black text-foreground">{item.totalScore}</div>
+                <div className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider">Total Poin</div>
               </div>
               
               {/* Special Badge for Rank 1 */}
               {rank === 1 && (
-                <div className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-bounce">
+                <div className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-bounce border-2 border-white dark:border-gray-800">
                     THE KING 👑
                 </div>
               )}
@@ -211,7 +210,7 @@ export default async function LeaderboardPage({
         })}
 
         {leaderboard.length === 0 && (
-            <div className="bg-white p-20 text-center rounded-2xl border border-dashed border-gray-300 text-gray-400 italic">
+            <div className="bg-surface p-20 text-center rounded-2xl border border-dashed border-border-custom text-foreground/40 italic">
                 Belum ada data skor untuk ditampilkan.
             </div>
         )}

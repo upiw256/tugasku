@@ -19,16 +19,16 @@ export default function KelasFilter({ sortedClasses, defaultValue }: { sortedCla
 
   return (
     <div className="flex flex-col">
-      <label className="text-xs font-bold text-gray-600 mb-1">Filter Tabel</label>
+      <label className="text-xs font-bold text-foreground/60 mb-1">Filter Tabel</label>
       <select 
         name="kelas" 
         value={defaultValue}
         onChange={(e) => handleKelasChange(e.target.value)}
-        className="border p-2 rounded text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
+        className="border border-border-custom p-2 rounded text-sm bg-surface text-foreground outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
       >
-        <option value="">-- Semua --</option>
+        <option value="" className="bg-surface text-foreground">-- Semua --</option>
         {sortedClasses.map((cls: string) => (
-          <option key={cls} value={cls}>{cls}</option>
+          <option key={cls} value={cls} className="bg-surface text-foreground">{cls}</option>
         ))}
       </select>
     </div>

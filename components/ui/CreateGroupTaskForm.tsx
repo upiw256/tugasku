@@ -140,7 +140,7 @@ export default function CreateGroupTaskForm({ availableClasses }: { availableCla
 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Status Data Siswa</label>
-          <div className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-600">
+          <div className="w-full px-4 py-2 bg-foreground/5 border border-border-custom rounded-lg text-sm text-foreground/60">
             {isLoadingStudents ? 'Memuat...' : (selectedClass ? `${students.length} Siswa ditemukan di kelas ${selectedClass}` : 'Pilih kelas terlebih dahulu')}
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function CreateGroupTaskForm({ availableClasses }: { availableCla
 
       {/* Bagian Pembuatan Kelompok */}
       {selectedClass && students.length > 0 && (
-        <div className="p-4 border rounded-xl border-blue-200 bg-white">
+        <div className="p-4 border rounded-xl border-blue-500/30 bg-surface">
           <div className="flex flex-col md:flex-row justify-between items-center mb-4 pb-3 border-b">
             <h3 className="font-bold text-lg text-blue-800">Pembentukan Kelompok</h3>
             <div className="flex gap-2">

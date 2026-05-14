@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc; /* gray-50 equivalent */
+  --foreground: #0f172a; /* slate-900 equivalent */
+  --surface: #ffffff;
+  --border: #e2e8f0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-surface: var(--surface);
+  --color-border-custom: var(--border);
+
+  --font-sans: var(--font-geist);
   --font-mono: var(--font-geist-mono);
+
   --color-primary-50: var(--color-blue-50);
   --color-primary-100: var(--color-blue-100);
   --color-primary-200: var(--color-blue-200);
@@ -32,21 +38,20 @@
   --color-danger-700: var(--color-red-700);
   --color-danger-800: var(--color-red-800);
   --color-danger-900: var(--color-red-900);
-
-  /* --- 3. CUSTOM BACKGROUNDS --- */
-  --color-surface: #ffffff;      /* Putih bersih */
-  --color-background: var(--color-slate-50); /* Abu-abu sangat muda */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #020617; /* slate-950 equivalent */
+    --foreground: #f8fafc; /* slate-50 equivalent */
+    --surface: #0f172a; /* slate-900 equivalent */
+    --border: #1e293b; /* slate-800 equivalent */
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist), Arial, Helvetica, sans-serif;
 }
+

@@ -53,7 +53,7 @@ export default async function DataSiswaPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-foreground">
           Data Siswa ({totalStudents})
         </h1>
         <div className="flex flex-wrap gap-2 items-end justify-end w-full md:w-auto">
@@ -61,7 +61,7 @@ export default async function DataSiswaPage({
           {/* TOMBOL DOWNLOAD (FITUR BARU) */}
           <DownloadAkunSiswa listKelas={sortedClasses} />
           
-          <div className="hidden md:block w-[1px] h-[30px] bg-gray-300 mx-1"></div>
+          <div className="hidden md:block w-[1px] h-[30px] bg-border-custom mx-1"></div>
 
           {/* Filter Tampilan Tabel */}
           <KelasFilter sortedClasses={sortedClasses} defaultValue={selectedKelas} />      
@@ -69,13 +69,13 @@ export default async function DataSiswaPage({
           {/* Form Search */}
           <form className="flex gap-2 items-end">
             <div className="flex flex-col">
-              <label className="text-xs font-bold text-gray-600 mb-1">Cari Nama</label>
+              <label className="text-xs font-bold text-foreground/60 mb-1">Cari Nama</label>
               <input
                 type="text"
                 name="q"
                 defaultValue={query}
                 placeholder="Nama..."
-                className="border border-gray-300 px-3 py-2 rounded text-sm h-[38px]"
+                className="border border-border-custom px-3 py-2 rounded text-sm h-[38px] bg-surface text-foreground outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <input type="hidden" name="page" value="1" />
@@ -97,9 +97,9 @@ export default async function DataSiswaPage({
       </div>
 
       {/* Tabel Data Siswa */}
-      <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+      <div className="bg-surface rounded-xl shadow border border-border-custom overflow-hidden">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
+          <thead className="bg-foreground/5 text-foreground/70 uppercase font-bold border-b border-border-custom">
             <tr>
               <th className="px-6 py-3">NIS</th>
               <th className="px-6 py-3">Nama</th>
@@ -107,11 +107,11 @@ export default async function DataSiswaPage({
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border-custom">
             {students.map((s: any) => (
-              <tr key={s._id} className="hover:bg-gray-50">
-                <td className="px-6 py-3 font-mono text-gray-600">{s.nis}</td>
-                <td className="px-6 py-3 font-medium text-gray-900">
+              <tr key={s._id} className="hover:bg-foreground/5 transition-colors">
+                <td className="px-6 py-3 font-mono text-foreground/60">{s.nis}</td>
+                <td className="px-6 py-3 font-medium text-foreground">
                   <div className="flex flex-col">
                     <span>{s.nama_lengkap}</span>
                     <span className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5">
@@ -120,16 +120,16 @@ export default async function DataSiswaPage({
                   </div>
                 </td>
                 <td className="px-6 py-3">
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">
+                  <span className="bg-blue-500/10 text-blue-500 text-xs px-2 py-1 rounded font-bold">
                     {s.kelas}
                   </span>
                 </td>
                 <td className="px-6 py-3 flex justify-center gap-3 items-center">
                   <GivePointButton memberId={s._id.toString()} />
-                  <div className="w-[1px] h-4 bg-gray-200 mx-1"></div>
+                  <div className="w-[1px] h-4 bg-border-custom mx-1"></div>
                   <Link 
                     href={`/admin/siswa/${s._id}/nilai`} 
-                    className="bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 text-[10px] px-2 py-1 rounded font-bold transition"
+                    className="bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 text-[10px] px-2 py-1 rounded font-bold transition"
                   >
                     ★ Nilai
                   </Link>
@@ -154,7 +154,7 @@ export default async function DataSiswaPage({
             ))}
             {students.length === 0 && (
               <tr>
-                <td colSpan={4} className="p-8 text-center text-gray-500">
+                <td colSpan={4} className="p-8 text-center text-foreground/40">
                   Tidak ada data siswa ditemukan.
                 </td>
               </tr>

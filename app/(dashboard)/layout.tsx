@@ -24,7 +24,7 @@ export default async function DashboardLayout({
   const isStaff = session.user.role === 'admin' || session.user.role === 'guru';
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans">
+    <div className="flex min-h-screen bg-background font-sans">
       {/* Notifikasi Real-time untuk Admin/Guru */}
       {isStaff && <AdminRealtimeNotifier />}
       
@@ -36,7 +36,7 @@ export default async function DashboardLayout({
         
         {/* Konten Utama */}
         {/* pt-16 ditambahkan agar konten tidak tertutup header di tampilan mobile */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6 bg-gray-50">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6 bg-background">
           {children}
         </main>
       </div>

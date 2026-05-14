@@ -56,24 +56,24 @@ export default async function RekapNilaiPage({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
            <div className="flex items-center gap-2 mb-1">
-            <Link href="/admin/tugas" className="text-gray-500 hover:text-gray-800 transition">← Daftar Tugas</Link>
-            <span className="text-gray-300">/</span>
+            <Link href="/admin/tugas" className="text-foreground/40 hover:text-foreground transition text-sm">← Daftar Tugas</Link>
+            <span className="text-foreground/20">/</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Rekapitulasi Nilai</h1>
-          <p className="text-gray-500">Laporan nilai siswa per mata pelajaran/tugas</p>
+          <h1 className="text-2xl font-bold text-foreground">Rekapitulasi Nilai</h1>
+          <p className="text-foreground/60">Laporan nilai siswa per mata pelajaran/tugas</p>
         </div>
       </div>
 
       {/* Filter Area */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-surface p-4 rounded-xl shadow-sm border border-border-custom">
         <form className="flex flex-col md:flex-row gap-4 items-end">
           
           <div className="w-full md:w-auto">
-            <label className="block text-xs font-bold text-gray-600 mb-1">Pilih Kelas</label>
+            <label className="block text-xs font-bold text-foreground/60 mb-1">Pilih Kelas</label>
             <select 
               name="kelas" 
               defaultValue={selectedKelas} 
-              className="w-full md:w-60 border p-2 rounded text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full md:w-60 border border-border-custom p-2 rounded text-sm bg-surface text-foreground outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">-- Pilih Kelas --</option>
               {sortedClasses.map((cls: string) => (
@@ -82,7 +82,7 @@ export default async function RekapNilaiPage({
             </select>
           </div>
 
-          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-blue-700 h-[38px]">
+          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-blue-700 h-[38px] transition-colors">
             Tampilkan Data
           </button>
 
@@ -91,7 +91,7 @@ export default async function RekapNilaiPage({
             <a 
               href={downloadUrl}
               target="_blank"
-              className="bg-green-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-green-700 h-[38px] flex items-center gap-2"
+              className="bg-green-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-green-700 h-[38px] flex items-center gap-2 transition-colors"
             >
               <span>📥</span> Download Excel
             </a>
@@ -100,34 +100,34 @@ export default async function RekapNilaiPage({
       </div>
 
       {/* Tabel Preview */}
-      <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden overflow-x-auto">
+      <div className="bg-surface rounded-xl shadow border border-border-custom overflow-hidden overflow-x-auto">
         {!selectedKelas ? (
-            <div className="p-10 text-center text-gray-500">Silakan pilih kelas terlebih dahulu.</div>
+            <div className="p-10 text-center text-foreground/40">Silakan pilih kelas terlebih dahulu.</div>
         ) : students.length === 0 ? (
-            <div className="p-10 text-center text-gray-500">Tidak ada siswa di kelas ini.</div>
+            <div className="p-10 text-center text-foreground/40">Tidak ada siswa di kelas ini.</div>
         ) : (
             <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
+                <thead className="bg-foreground/5 text-foreground/70 uppercase font-bold border-b border-border-custom">
                     <tr>
-                        <th className="px-6 py-3 border-r">NIS</th>
-                        <th className="px-6 py-3 border-r min-w-[200px]">Nama Siswa</th>
+                        <th className="px-6 py-3 border-r border-border-custom">NIS</th>
+                        <th className="px-6 py-3 border-r border-border-custom min-w-[200px]">Nama Siswa</th>
                         {/* Header Judul Tugas */}
                         {tasks.map((t: any) => (
-                            <th key={t._id} className="px-4 py-3 text-center border-r min-w-[100px]">
+                            <th key={t._id} className="px-4 py-3 text-center border-r border-border-custom min-w-[100px]">
                                 <div className="truncate max-w-[150px]" title={t.judul}>{t.judul}</div>
                             </th>
                         ))}
-                        <th className="px-6 py-3 text-center bg-gray-100">Rata-rata</th>
+                        <th className="px-6 py-3 text-center bg-foreground/10">Rata-rata</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border-custom">
                     {students.map((student: any) => {
                         let total = 0;
                         
                         return (
-                            <tr key={student._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 border-r font-mono text-gray-600">{student.nis}</td>
-                                <td className="px-6 py-4 border-r font-medium text-gray-900">{student.nama_lengkap}</td>
+                            <tr key={student._id} className="hover:bg-foreground/5 transition-colors">
+                                <td className="px-6 py-4 border-r border-border-custom font-mono text-foreground/40">{student.nis}</td>
+                                <td className="px-6 py-4 border-r border-border-custom font-medium text-foreground">{student.nama_lengkap}</td>
                                 
                                 {/* Loop Kolom Nilai */}
                                 {tasks.map((t: any) => {
@@ -136,20 +136,20 @@ export default async function RekapNilaiPage({
                                     if(nilai !== undefined) total += nilai;
 
                                     return (
-                                        <td key={t._id} className="px-4 py-4 text-center border-r">
+                                        <td key={t._id} className="px-4 py-4 text-center border-r border-border-custom">
                                             {nilai !== undefined ? (
-                                                <span className={`font-bold ${nilai < 75 ? 'text-red-500' : 'text-green-600'}`}>
+                                                <span className={`font-bold ${nilai < 75 ? 'text-red-500' : 'text-green-500'}`}>
                                                     {nilai}
                                                 </span>
                                             ) : (
-                                                <span className="text-gray-300">-</span>
+                                                <span className="text-foreground/20">-</span>
                                             )}
                                         </td>
                                     )
                                 })}
 
                                 {/* Kolom Rata-rata */}
-                                <td className="px-6 py-4 text-center font-bold bg-gray-50">
+                                <td className="px-6 py-4 text-center font-bold bg-foreground/5">
                                     {(tasks.length > 0 ? (total / tasks.length).toFixed(1) : 0)}
                                 </td>
                             </tr>

@@ -22,9 +22,9 @@ export default function ImportSiswaForm() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mt-6">
+    <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom mt-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-gray-800 text-lg">Import Data Siswa (Excel)</h3>
+        <h3 className="font-bold text-foreground text-lg">Import Data Siswa (Excel)</h3>
         <button 
           onClick={downloadTemplate}
           type="button"
@@ -40,13 +40,13 @@ export default function ImportSiswaForm() {
           name="file" 
           accept=".xlsx" 
           required 
-          className="block w-full text-sm text-gray-500
+          className="block w-full text-sm text-foreground/40
             file:mr-4 file:py-2 file:px-4
             file:rounded-full file:border-0
             file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100
-            cursor-pointer border border-gray-300 rounded-lg p-1"
+            file:bg-foreground/5 file:text-foreground
+            hover:file:bg-foreground/10
+            cursor-pointer border border-border-custom rounded-lg p-1 bg-foreground/5 outline-none"
         />
         
         <button 

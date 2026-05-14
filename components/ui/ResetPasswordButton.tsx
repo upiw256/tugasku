@@ -25,7 +25,7 @@ export default function ResetPasswordButton({ memberId, nama }: { memberId: stri
       className={`text-xs px-3 py-1 rounded border transition font-medium
         ${isLoading 
           ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-wait' 
-          : 'bg-white text-orange-600 border-orange-200 hover:bg-orange-50'
+          : 'bg-surface text-orange-600 border border-orange-500/30 hover:bg-orange-500/10'
         }
       `}
     >

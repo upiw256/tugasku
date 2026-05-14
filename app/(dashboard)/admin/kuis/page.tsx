@@ -45,10 +45,10 @@ export default async function AdminKuisPage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Kelola Kuis PG</h1>
-          <p className="text-gray-500">Buat, edit, dan analisis kuis pilihan ganda</p>
+          <h1 className="text-2xl font-bold text-foreground">Kelola Kuis PG</h1>
+          <p className="text-foreground/60">Buat, edit, dan analisis kuis pilihan ganda</p>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export default async function AdminKuisPage() {
     return (
       <div className="p-10 text-center">
         <h1 className="text-red-500 font-bold text-xl">Terjadi Kesalahan Server</h1>
-        <p className="text-gray-500 mt-2">{error.message}</p>
+        <p className="text-foreground/60 mt-2">{error.message}</p>
       </div>
     );
   }

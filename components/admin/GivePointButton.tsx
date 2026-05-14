@@ -24,11 +24,11 @@ export default function GivePointButton({ memberId }: { memberId: string }) {
   };
 
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1.5">
       <button
         onClick={() => handleGivePoint(5)}
         disabled={loading}
-        className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-2 py-1 rounded text-[10px] font-bold border border-amber-200 transition-colors"
+        className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 px-2 py-1 rounded text-[10px] font-black border border-amber-500/20 transition-all active:scale-95"
         title="Beri +5 Poin Aktif"
       >
         +5 ⭐
@@ -36,7 +36,7 @@ export default function GivePointButton({ memberId }: { memberId: string }) {
       <button
         onClick={() => handleGivePoint(10)}
         disabled={loading}
-        className="bg-orange-100 text-orange-700 hover:bg-orange-200 px-2 py-1 rounded text-[10px] font-bold border border-orange-200 transition-colors"
+        className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 px-2 py-1 rounded text-[10px] font-black border border-orange-500/20 transition-all active:scale-95"
         title="Beri +10 Poin Aktif"
       >
         +10 ⭐
@@ -46,7 +46,7 @@ export default function GivePointButton({ memberId }: { memberId: string }) {
       <button
         onClick={() => handleGivePoint(-5)}
         disabled={loading}
-        className="bg-red-100 text-red-700 hover:bg-red-200 px-2 py-1 rounded text-[10px] font-bold border border-red-200 transition-colors"
+        className="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-2 py-1 rounded text-[10px] font-black border border-red-500/20 transition-all active:scale-95"
         title="Sanksi -5 Poin"
       >
         -5 😡
@@ -54,7 +54,7 @@ export default function GivePointButton({ memberId }: { memberId: string }) {
       <button
         onClick={() => handleGivePoint(-10)}
         disabled={loading}
-        className="bg-red-200 text-red-800 hover:bg-red-300 px-2 py-1 rounded text-[10px] font-bold border border-red-300 transition-colors"
+        className="bg-red-600/20 text-red-400 hover:bg-red-600/30 px-2 py-1 rounded text-[10px] font-black border border-red-600/30 transition-all active:scale-95"
         title="Sanksi -10 Poin"
       >
         -10 😡

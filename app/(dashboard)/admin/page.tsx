@@ -1,17 +1,14 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-// Tambahkan Pengumuman di sini
 import { Member, Tugas, Nilai, Absensi, Pengumuman } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AttendanceChart from '@/components/ui/AttendanceChart';
 import GradesChart from '@/components/ui/GradesChart';
-// Import component AnnouncementBoard
 import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
 
 export default async function AdminDashboardPage() {
   const session = await auth();
-  console.log("LOGIN DEBUG:", JSON.stringify(session, null, 2));
   if (!session || session.user.role !== 'admin') {
     redirect('/login');
   }
@@ -23,13 +20,12 @@ export default async function AdminDashboardPage() {
   const totalTugas = await Tugas.countDocuments();
   const totalPengumpulan = await Nilai.countDocuments();
 
-  // --- DATA PENGUMUMAN (BARU) ---
+  // --- DATA PENGUMUMAN ---
   const dataPengumuman = await Pengumuman.find({})
     .sort({ tanggal: -1 })
     .limit(5)
     .lean();
 
-  // Serialisasi data pengumuman agar bisa dikirim ke Client Component
   const announcements = dataPengumuman.map((item: any) => ({
     ...item,
     _id: item._id.toString(),
@@ -43,7 +39,7 @@ export default async function AdminDashboardPage() {
     .populate('tugas_id', 'judul') 
     .lean();
 
-  // --- LOGIKA DATA GRAFIK KEHADIRAN HARI INI ---
+  // --- LOGIKA DATA GRAFIK KEHADIRAN ---
   const endDate = new Date();
   endDate.setHours(23, 59, 59, 999);
   
@@ -127,49 +123,43 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard Admin</h1>
-          <p className="text-gray-500">Ringkasan aktivitas sistem</p>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard Admin</h1>
+          <p className="text-foreground/60">Ringkasan aktivitas sistem</p>
         </div>
-        <p className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+        <p className="text-sm font-medium text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
           📅 {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
-          <p className="text-sm text-gray-500">Total Siswa</p>
-          <h2 className="text-3xl font-bold">{totalSiswa}</h2>
+        <div className="bg-surface p-6 rounded-xl shadow-sm border-l-4 border-blue-500 border border-border-custom">
+          <p className="text-sm text-foreground/40 mb-1 font-bold uppercase tracking-wider">Total Siswa</p>
+          <h2 className="text-4xl font-bold text-foreground">{totalSiswa}</h2>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-orange-500">
-          <p className="text-sm text-gray-500">Total Tugas</p>
-          <h2 className="text-3xl font-bold">{totalTugas}</h2>
+        <div className="bg-surface p-6 rounded-xl shadow-sm border-l-4 border-orange-500 border border-border-custom">
+          <p className="text-sm text-foreground/40 mb-1 font-bold uppercase tracking-wider">Total Tugas</p>
+          <h2 className="text-4xl font-bold text-foreground">{totalTugas}</h2>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
-          <p className="text-sm text-gray-500">Tugas Dikumpulkan</p>
-          <h2 className="text-3xl font-bold">{totalPengumpulan}</h2>
+        <div className="bg-surface p-6 rounded-xl shadow-sm border-l-4 border-green-500 border border-border-custom">
+          <p className="text-sm text-foreground/40 mb-1 font-bold uppercase tracking-wider">Tugas Dikumpulkan</p>
+          <h2 className="text-4xl font-bold text-foreground">{totalPengumpulan}</h2>
         </div>
       </div>
 
       {/* --- GRID UTAMA: GRAFIK & PENGUMUMAN --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* KOLOM KIRI (2/3): Grafik-grafik */}
         <div className="lg:col-span-2 space-y-6">
-           {/* Grafik Absensi */}
            <AttendanceChart 
               dataByClass={chartDataByClass} 
               allClasses={sortedClasses} 
            />
-           {/* Grafik Nilai */}
            <GradesChart data={gradesChartData} />
         </div>
 
-        {/* KOLOM KANAN (1/3): Papan Pengumuman */}
         <div className="lg:col-span-1">
-          {/* Container dengan tinggi fix agar scroll berfungsi */}
           <div className="h-[600px]">
             <AnnouncementBoard 
               role="admin" 
@@ -180,52 +170,52 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Tabel Aktivitas Terbaru */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h3 className="font-bold text-gray-800 text-lg">Aktivitas Pengumpulan Terbaru</h3>
-          <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-1 rounded">5 Terakhir</span>
+      <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden">
+        <div className="p-6 border-b border-border-custom flex justify-between items-center">
+          <h3 className="font-bold text-foreground text-lg">Aktivitas Pengumpulan Terbaru</h3>
+          <span className="text-xs font-bold bg-foreground/5 text-foreground/60 px-2 py-1 rounded border border-border-custom">5 Terakhir</span>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+            <thead className="text-xs text-foreground/40 uppercase bg-foreground/5 border-b border-border-custom font-bold">
               <tr>
-                <th className="px-6 py-3">Nama Siswa</th>
-                <th className="px-6 py-3">Kelas</th>
-                <th className="px-6 py-3">Judul Tugas</th>
-                <th className="px-6 py-3">Nilai</th>
-                <th className="px-6 py-3">Tanggal</th>
+                <th className="px-6 py-3 font-bold">Nama Siswa</th>
+                <th className="px-6 py-3 font-bold">Kelas</th>
+                <th className="px-6 py-3 font-bold">Judul Tugas</th>
+                <th className="px-6 py-3 font-bold">Nilai</th>
+                <th className="px-6 py-3 font-bold">Tanggal</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border-custom">
               {recentSubmissions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-foreground/20">
                     Belum ada data pengumpulan tugas.
                   </td>
                 </tr>
               ) : (
                 recentSubmissions.map((item: any) => (
-                  <tr key={item._id} className="bg-white border-b hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 font-medium text-gray-900">
+                  <tr key={item._id} className="hover:bg-foreground/5 transition-colors">
+                    <td className="px-6 py-4 font-bold text-foreground">
                       {item.member_id?.nama_lengkap || 'Siswa Dihapus'}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                    <td className="px-6 py-4 text-foreground/60">
+                      <span className="bg-blue-500/10 text-blue-500 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-500/20">
                         {item.member_id?.kelas || '-'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-4 text-foreground/60 underline decoration-border-custom">
                       {item.tugas_id?.judul || 'Tugas Dihapus'}
                     </td>
                     <td className="px-6 py-4">
                       {item.nilai >= 75 ? (
-                        <span className="text-green-600 font-bold">{item.nilai}</span>
+                        <span className="text-green-500 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">{item.nilai}</span>
                       ) : (
-                        <span className="text-red-500 font-bold">{item.nilai}</span>
+                        <span className="text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">{item.nilai}</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-gray-500">
+                    <td className="px-6 py-4 text-foreground/40 text-xs">
                       {new Date(item.tanggal_mengumpulkan).toLocaleDateString('id-ID', {
                         day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                       })}
@@ -240,10 +230,10 @@ export default async function AdminDashboardPage() {
 
       {/* Action Buttons */}
       <div className="flex gap-4">
-        <Link href="/admin/siswa/import" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow">
-          + Import Siswa
+        <Link href="/admin/siswa" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg flex-1 text-center">
+          Kelola Siswa
         </Link>
-        <Link href="/admin/tugas" className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-900 transition shadow">
+        <Link href="/admin/tugas" className="bg-foreground text-background px-6 py-3 rounded-lg font-bold hover:opacity-90 transition shadow-lg flex-1 text-center">
           Kelola Tugas
         </Link>
       </div>

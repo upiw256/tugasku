@@ -55,52 +55,54 @@ export default async function RekapAbsensiRangePage({
     });
   }
 
-  // URL untuk Download Excel
   const downloadUrl = `/api/rekap/download?kelas=${selectedKelas}&start=${startDate}&end=${endDate}`;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Link href="/admin/absensi" className="text-gray-500 hover:text-gray-800 transition">← Input Harian</Link>
-            <span className="text-gray-300">/</span>
+          <div className="flex items-center gap-2 mb-1 text-sm font-medium">
+            <Link href="/admin/absensi" className="text-foreground/40 hover:text-foreground transition">← Input Harian</Link>
+            <span className="text-foreground/20">/</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Laporan Rekap Absensi</h1>
+          <h1 className="text-2xl font-bold text-foreground">Laporan Rekap Absensi</h1>
         </div>
       </div>
 
       {/* Filter Area */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-surface p-4 rounded-xl shadow-sm border border-border-custom">
         <form className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
           
           <div className="w-full md:w-auto">
-            <label className="block text-xs font-bold text-gray-600 mb-1">Kelas</label>
-            <select name="kelas" defaultValue={selectedKelas} className="w-full md:w-40 border p-2 rounded text-sm bg-white">
+            <label className="block text-[10px] font-bold text-foreground/40 mb-1 uppercase tracking-wider">Kelas</label>
+            <select 
+              name="kelas" 
+              defaultValue={selectedKelas} 
+              className="w-full md:w-40 border border-border-custom p-2 rounded-lg text-sm bg-surface text-foreground outline-none focus:ring-2 focus:ring-blue-500"
+            >
               <option value="">-- Pilih --</option>
               {sortedClasses.map((cls: string) => <option key={cls} value={cls}>{cls}</option>)}
             </select>
           </div>
 
           <div className="w-full md:w-auto">
-            <label className="block text-xs font-bold text-gray-600 mb-1">Dari</label>
-            <input type="date" name="start" defaultValue={startDate} className="w-full border p-2 rounded text-sm"/>
+            <label className="block text-[10px] font-bold text-foreground/40 mb-1 uppercase tracking-wider">Dari</label>
+            <input type="date" name="start" defaultValue={startDate} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
           <div className="w-full md:w-auto">
-            <label className="block text-xs font-bold text-gray-600 mb-1">Sampai</label>
-            <input type="date" name="end" defaultValue={endDate} className="w-full border p-2 rounded text-sm"/>
+            <label className="block text-[10px] font-bold text-foreground/40 mb-1 uppercase tracking-wider">Sampai</label>
+            <input type="date" name="end" defaultValue={endDate} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
 
-          <button type="submit" className="w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-blue-700 h-[38px]">
+          <button type="submit" className="w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 h-[38px] transition-colors shadow">
             Tampilkan
           </button>
 
-          {/* TOMBOL DOWNLOAD EXCEL (Hanya Muncul Jika Kelas Dipilih) */}
           {selectedKelas && (
             <a 
               href={downloadUrl} 
               target="_blank"
-              className="w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded text-sm font-bold hover:bg-green-700 h-[38px] flex items-center justify-center gap-2"
+              className="w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-green-700 h-[38px] flex items-center justify-center gap-2 transition-colors shadow"
             >
               <span>📥</span> Download Excel
             </a>
@@ -109,45 +111,43 @@ export default async function RekapAbsensiRangePage({
         </form>
       </div>
 
-      {/* Tabel Laporan (Tetap sama seperti sebelumnya) */}
-      <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+      {/* Tabel Laporan */}
+      <div className="bg-surface rounded-xl shadow border border-border-custom overflow-hidden overflow-x-auto">
         {!selectedKelas ? (
-           <div className="p-10 text-center text-gray-500">Pilih Kelas untuk melihat laporan.</div>
+           <div className="p-16 text-center text-foreground/20 italic">Pilih Kelas untuk melihat laporan.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
-                <tr>
-                  <th className="px-6 py-3">NIS</th>
-                  <th className="px-6 py-3">Nama Siswa</th>
-                  <th className="px-6 py-3 text-center bg-green-50 text-green-700">H</th>
-                  <th className="px-6 py-3 text-center bg-yellow-50 text-yellow-700">S</th>
-                  <th className="px-6 py-3 text-center bg-blue-50 text-blue-700">I</th>
-                  <th className="px-6 py-3 text-center bg-red-50 text-red-700">A</th>
-                  <th className="px-6 py-3 text-center">% Hadir</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {rekapData.map((data: any) => (
-                    <tr key={data._id} className="hover:bg-gray-50 border-b">
-                      <td className="px-6 py-4 font-mono text-gray-600">{data.nis}</td>
-                      <td className="px-6 py-4 font-medium text-gray-900">{data.nama_lengkap}</td>
-                      <td className="px-6 py-4 text-center font-bold text-green-600 bg-green-50/30">{data.hadir}</td>
-                      <td className="px-6 py-4 text-center font-bold text-yellow-600 bg-yellow-50/30">{data.sakit}</td>
-                      <td className="px-6 py-4 text-center font-bold text-blue-600 bg-blue-50/30">{data.izin}</td>
-                      <td className="px-6 py-4 text-center font-bold text-red-600 bg-red-50/30">{data.alpha}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-bold border 
-                          ${data.persentase >= 75 ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}
-                        `}>
-                          {data.persentase}%
-                        </span>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <table className="w-full text-sm text-left">
+            <thead className="bg-foreground/5 text-foreground/40 uppercase font-bold border-b border-border-custom text-[10px]">
+              <tr>
+                <th className="px-6 py-3 border-r border-border-custom">NIS</th>
+                <th className="px-6 py-3 border-r border-border-custom">Nama Siswa</th>
+                <th className="px-6 py-3 text-center border-r border-border-custom bg-green-500/10 text-green-500">H</th>
+                <th className="px-6 py-3 text-center border-r border-border-custom bg-yellow-500/10 text-yellow-500">S</th>
+                <th className="px-6 py-3 text-center border-r border-border-custom bg-blue-500/10 text-blue-500">I</th>
+                <th className="px-6 py-3 text-center border-r border-border-custom bg-red-500/10 text-red-500">A</th>
+                <th className="px-6 py-3 text-center">Total % Hadir</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-custom">
+              {rekapData.map((data: any) => (
+                  <tr key={data._id} className="hover:bg-foreground/5 transition-colors">
+                    <td className="px-6 py-4 font-mono text-foreground/40 border-r border-border-custom">{data.nis}</td>
+                    <td className="px-6 py-4 font-bold text-foreground border-r border-border-custom">{data.nama_lengkap}</td>
+                    <td className="px-6 py-4 text-center font-bold text-green-500 bg-green-500/5 border-r border-border-custom">{data.hadir}</td>
+                    <td className="px-6 py-4 text-center font-bold text-yellow-500 bg-yellow-500/5 border-r border-border-custom">{data.sakit}</td>
+                    <td className="px-6 py-4 text-center font-bold text-blue-500 bg-blue-500/5 border-r border-border-custom">{data.izin}</td>
+                    <td className="px-6 py-4 text-center font-bold text-red-500 bg-red-500/5 border-r border-border-custom">{data.alpha}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-2 py-1 rounded-full text-xs font-black border 
+                        ${data.persentase >= 75 ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}
+                      `}>
+                        {data.persentase}%
+                      </span>
+                    </td>
+                  </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

@@ -57,54 +57,54 @@ export default function FormUploadMateri({ availableClasses }: { availableClasse
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <form onSubmit={handleSubmit} className="space-y-5 bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
       <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Judul Materi <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-bold text-foreground mb-1">Judul Materi <span className="text-red-500">*</span></label>
         <input 
           type="text" 
           value={judul}
           onChange={(e) => setJudul(e.target.value)}
           required 
           placeholder="Contoh: Modul Matematika Aljabar"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-4 py-2 bg-foreground/5 border border-border-custom rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-foreground placeholder:text-foreground/30"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Deskripsi</label>
+        <label className="block text-sm font-bold text-foreground mb-1">Deskripsi</label>
         <textarea 
           value={deskripsi}
           onChange={(e) => setDeskripsi(e.target.value)}
           rows={3}
           placeholder="Detail materi..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+          className="w-full px-4 py-2 bg-foreground/5 border border-border-custom rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none text-foreground placeholder:text-foreground/30"
         ></textarea>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="relative">
-          <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Kelas <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Pilih Kelas <span className="text-red-500">*</span></label>
           <div 
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full min-h-[42px] px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white flex flex-wrap gap-2 items-center transition hover:border-gray-400"
+            className="w-full min-h-[42px] px-3 py-2 border border-border-custom bg-foreground/5 rounded-lg cursor-pointer flex flex-wrap gap-2 items-center transition hover:border-foreground/20"
           >
-            {selectedClasses.length === 0 && <span className="text-gray-400 text-sm">-- Klik untuk pilih kelas --</span>}
+            {selectedClasses.length === 0 && <span className="text-foreground/30 text-sm">-- Klik untuk pilih kelas --</span>}
             {selectedClasses.map((cls) => (
-              <span key={cls} className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+              <span key={cls} className="bg-blue-500/10 text-blue-500 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 border border-blue-500/20">
                 {cls}
-                <button type="button" onClick={(e) => { e.stopPropagation(); toggleClass(cls); }} className="hover:text-blue-900">&times;</button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); toggleClass(cls); }} className="hover:text-blue-400">&times;</button>
               </span>
             ))}
           </div>
           {isOpen && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+            <div className="absolute z-10 w-full mt-1 bg-surface border border-border-custom rounded-lg shadow-2xl max-h-48 overflow-y-auto">
               {availableClasses.map((cls) => (
                 <div 
                   key={cls}
                   onClick={() => toggleClass(cls)}
-                  className={`px-4 py-2 text-sm cursor-pointer flex justify-between items-center ${selectedClasses.includes(cls) ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`}
+                  className={`px-4 py-2 text-sm cursor-pointer flex justify-between items-center transition-colors ${selectedClasses.includes(cls) ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-foreground/70 hover:bg-foreground/5'}`}
                 >
-                  {cls} {selectedClasses.includes(cls) && '✓'}
+                  {cls} {selectedClasses.includes(cls) && <span className="text-blue-500">✓</span>}
                 </div>
               ))}
             </div>
@@ -112,11 +112,11 @@ export default function FormUploadMateri({ availableClasses }: { availableClasse
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">File Materi (PDF/Doc) <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">File Materi (PDF/Doc) <span className="text-red-500">*</span></label>
           {fileUrl ? (
-            <div className="flex items-center gap-2 border p-2 rounded-lg bg-green-50 border-green-200">
-               <span className="text-xs font-medium text-green-700 truncate flex-1">{fileUrl}</span>
-               <button type="button" onClick={() => setFileUrl('')} className="text-red-500 font-bold px-2">&times;</button>
+            <div className="flex items-center gap-2 border p-2 rounded-lg bg-green-500/10 border-green-500/20">
+               <span className="text-xs font-bold text-green-500 truncate flex-1">{fileUrl}</span>
+               <button type="button" onClick={() => setFileUrl('')} className="text-red-500 font-bold px-2 hover:bg-red-500/10 rounded">&times;</button>
             </div>
           ) : (
             <div className="relative">
@@ -153,7 +153,7 @@ export default function FormUploadMateri({ availableClasses }: { availableClasse
               />
               <label 
                 htmlFor="local-upload"
-                className="w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-400 hover:text-blue-500 transition font-medium cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-2 px-4 border-2 border-dashed border-border-custom bg-foreground/5 rounded-lg text-foreground/40 hover:border-blue-500/50 hover:text-blue-500 transition font-bold cursor-pointer flex items-center justify-center gap-2"
               >
                 📁 Pilih & Upload File ke Server
               </label>
@@ -166,9 +166,14 @@ export default function FormUploadMateri({ availableClasses }: { availableClasse
         <button 
           type="submit" 
           disabled={isLoading}
-          className={`w-full py-3 rounded-lg text-white font-bold transition shadow-md ${isLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+          className={`w-full py-3 rounded-lg text-white font-bold transition shadow-lg ${isLoading ? 'bg-slate-700 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 active:scale-[0.98]'}`}
         >
-          {isLoading ? 'Menyimpan...' : 'Unggah Materi'}
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+              <span>Menyimpan...</span>
+            </div>
+          ) : 'Unggah Materi'}
         </button>
       </div>
     </form>

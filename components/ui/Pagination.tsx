@@ -22,14 +22,14 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
         className={`px-4 py-2 border rounded-lg text-sm font-medium transition ${
           currentPage <= 1 
             ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' 
-            : 'hover:bg-white hover:shadow-sm bg-gray-50 text-gray-700'
+            : 'hover:bg-surface hover:shadow-sm bg-foreground/5 text-foreground/70 border border-border-custom'
         }`}
         aria-disabled={currentPage <= 1}
       >
         ← Sebelumnya
       </Link>
 
-      <span className="text-sm font-medium text-gray-600 bg-white px-3 py-2 rounded border">
+      <span className="text-sm font-bold text-foreground bg-surface px-3 py-2 rounded border border-border-custom">
         Halaman {currentPage} dari {totalPages}
       </span>
 
@@ -38,7 +38,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
         className={`px-4 py-2 border rounded-lg text-sm font-medium transition ${
           currentPage >= totalPages 
             ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400' 
-            : 'hover:bg-white hover:shadow-sm bg-gray-50 text-gray-700'
+            : 'hover:bg-surface hover:shadow-sm bg-foreground/5 text-foreground/70 border border-border-custom'
         }`}
         aria-disabled={currentPage >= totalPages}
       >

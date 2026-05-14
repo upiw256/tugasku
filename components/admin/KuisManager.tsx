@@ -150,7 +150,7 @@ export default function KuisManager({
       {/* Modal Monitoring */}
       {monitoringKuis && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-surface w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-border-custom">
             <div className="p-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex justify-between items-center">
               <div>
                 <h3 className="text-xl font-bold">📊 Monitoring Kuis: {monitoringKuis.judul}</h3>
@@ -165,10 +165,10 @@ export default function KuisManager({
                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                 </div>
               ) : pesertaList.length === 0 ? (
-                <div className="text-center py-20 text-gray-400">Belum ada siswa yang mulai mengerjakan kuis ini.</div>
+                <div className="text-center py-20 text-foreground/40">Belum ada siswa yang mulai mengerjakan kuis ini.</div>
               ) : (
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
+                  <thead className="bg-foreground/5 text-foreground/60 uppercase text-[10px] font-bold">
                     <tr>
                       <th className="px-4 py-3 text-left">Siswa</th>
                       <th className="px-4 py-3 text-left">Status</th>
@@ -178,17 +178,17 @@ export default function KuisManager({
                   </thead>
                   <tbody className="divide-y">
                     {pesertaList.map((p) => (
-                      <tr key={p._id} className="hover:bg-gray-50">
+                      <tr key={p._id} className="hover:bg-foreground/5 transition-colors border-b border-border-custom last:border-0">
                         <td className="px-4 py-4">
-                          <p className="font-bold text-gray-800">{p.member_id?.nama_lengkap || 'Unknown'}</p>
-                          <p className="text-[10px] text-gray-500">Kelas: {p.member_id?.kelas} • NIS: {p.member_id?.nis}</p>
+                          <p className="font-bold text-foreground">{p.member_id?.nama_lengkap || 'Unknown'}</p>
+                          <p className="text-[10px] text-foreground/40">Kelas: {p.member_id?.kelas} • NIS: {p.member_id?.nis}</p>
                         </td>
                         <td className="px-4 py-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${p.status === 'SUBMITTED' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${p.status === 'SUBMITTED' ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'}`}>
                             {p.status === 'SUBMITTED' ? '✅ Selesai' : '✍️ Mengerjakan'}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-center font-bold text-lg text-gray-700">{p.nilai || 0}</td>
+                        <td className="px-4 py-4 text-center font-bold text-lg text-foreground">{p.nilai || 0}</td>
                         <td className="px-4 py-4 text-right">
                           <button 
                             onClick={() => handleResetTimer(p._id, p.member_id?.nama_lengkap)}
@@ -204,10 +204,10 @@ export default function KuisManager({
               )}
             </div>
             
-            <div className="p-4 bg-gray-50 flex justify-end">
+            <div className="p-4 bg-foreground/5 flex justify-end gap-2 border-t border-border-custom">
               <button 
                 onClick={() => setMonitoringKuis(null)} 
-                className="px-6 py-2 bg-white border border-gray-300 rounded-xl font-bold text-gray-600 hover:bg-gray-100"
+                className="px-6 py-2 bg-surface border border-border-custom rounded-xl font-bold text-foreground/70 hover:bg-foreground/10 transition"
               >
                 Tutup Monitoring
               </button>
@@ -216,9 +216,8 @@ export default function KuisManager({
         </div>
       )}
 
-      {/* Form Section */}
       <section>
-        <h2 className="text-xl font-bold text-gray-800 mb-4 px-2">
+        <h2 className="text-xl font-bold text-foreground mb-4 px-2">
           {editingKuis ? '🛠️ Edit Kuis' : '📝 Buat Kuis Baru'}
         </h2>
         <FormBuatSoal 
@@ -229,7 +228,7 @@ export default function KuisManager({
         {editingKuis && (
           <button 
             onClick={cancelEdit}
-            className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 text-gray-500 rounded-xl hover:bg-gray-50 font-medium transition"
+            className="mt-4 w-full py-2 border-2 border-dashed border-border-custom text-foreground/40 rounded-xl hover:bg-foreground/5 font-medium transition"
           >
             Batal Edit (Kembali ke Buat Kuis Baru)
           </button>
@@ -237,13 +236,13 @@ export default function KuisManager({
       </section>
 
       {/* List Section */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-8">
-        <div className="p-6 border-b border-gray-100">
-          <h3 className="font-bold text-gray-800 text-lg">Daftar Kuis Terpublikasi</h3>
+      <section className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden mt-8">
+        <div className="p-6 border-b border-border-custom">
+          <h3 className="font-bold text-foreground text-lg">Daftar Kuis Terpublikasi</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+            <thead className="text-xs text-foreground/40 uppercase bg-foreground/5 border-b border-border-custom">
               <tr>
                 <th className="px-6 py-3">Judul Kuis</th>
                 <th className="px-6 py-3">Kelas</th>
@@ -259,26 +258,26 @@ export default function KuisManager({
                 </tr>
               ) : (
                 initialKuis.map((kuis: any) => (
-                  <tr key={kuis._id.toString()} className="border-b hover:bg-gray-50 transition group">
+                  <tr key={kuis._id.toString()} className="border-b border-border-custom hover:bg-foreground/5 transition-all group">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-gray-900">{kuis.judul}</p>
-                      <p className="text-[10px] text-gray-400 italic">Jadwal: {new Date(kuis.waktu_mulai).toLocaleDateString()} s/d {new Date(kuis.waktu_selesai).toLocaleDateString()}</p>
+                      <p className="font-bold text-foreground">{kuis.judul}</p>
+                      <p className="text-[10px] text-foreground/40 italic">Jadwal: {new Date(kuis.waktu_mulai).toLocaleDateString()} s/d {new Date(kuis.waktu_selesai).toLocaleDateString()}</p>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {(Array.isArray(kuis.kelas) ? kuis.kelas : [kuis.kelas]).map((c: string) => (
-                          <span key={c} className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-100">{c}</span>
+                          <span key={c} className="bg-blue-500/10 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-500/20">{c}</span>
                         ))}
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium">{kuis.daftar_soal?.length || 0}</td>
                     <td className="px-6 py-4">
-                      <div className="flex bg-gray-200 p-1 rounded-full border border-gray-300 w-fit shadow-inner">
+                      <div className="flex bg-foreground/10 p-1 rounded-full border border-border-custom w-fit shadow-inner">
                         {[
                           { 
                             id: 'AUTO', 
                             label: '🕒 Auto', 
-                            color: 'bg-white text-gray-800 shadow-md ring-1 ring-black/5' 
+                            color: 'bg-surface text-foreground shadow-md ring-1 ring-border-custom' 
                           },
                           { 
                             id: 'OPEN', 
@@ -297,7 +296,7 @@ export default function KuisManager({
                             className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all duration-300 ${
                               (kuis.status_manual || 'AUTO') === btn.id 
                                 ? btn.color 
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
+                                : 'text-foreground/40 hover:text-foreground hover:bg-foreground/5'
                             }`}
                           >
                             {btn.label}
@@ -309,21 +308,21 @@ export default function KuisManager({
                       <div className="flex justify-end gap-1">
                         <button 
                           onClick={() => openMonitoring(kuis)}
-                          className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                          className="p-2 text-purple-500 hover:bg-purple-500/10 rounded-lg transition"
                           title="Monitor Peserta (Reset Waktu)"
                         >
                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                         </button>
                         <a 
                           href={`/api/kuis/export-soal/${kuis._id}`} 
-                          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                          className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition"
                           title="Download Soal"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </a>
                         <a 
                           href={`/api/kuis/export/${kuis._id}`} 
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                          className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition"
                           title="Download Hasil"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -331,14 +330,14 @@ export default function KuisManager({
                         <button 
                           onClick={() => startEdit(kuis)}
                           disabled={kuis.sudahAdaJawaban}
-                          className={`p-2 rounded-lg transition ${kuis.sudahAdaJawaban ? 'text-gray-300 cursor-not-allowed opacity-50' : 'text-orange-500 hover:bg-orange-50'}`}
+                          className={`p-2 rounded-lg transition ${kuis.sudahAdaJawaban ? 'text-foreground/20 cursor-not-allowed opacity-50' : 'text-orange-500 hover:bg-orange-500/10'}`}
                           title="Edit Kuis"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
                         <button 
                           onClick={() => handleDeleteKuis(kuis._id, kuis.judul, kuis.sudahAdaJawaban)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                          className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition"
                           title="Hapus Kuis"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
