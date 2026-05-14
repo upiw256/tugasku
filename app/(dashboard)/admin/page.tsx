@@ -63,6 +63,7 @@ export default async function AdminDashboardPage() {
   }).lean();
 
   const chartDataByClass: Record<string, any[]> = {};
+  const classesWithAttendanceData = new Set<string>(); // Untuk melacak kelas yang punya data
   const dateRange: string[] = [];
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     dateRange.push(d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' }));
@@ -80,6 +81,7 @@ export default async function AdminDashboardPage() {
     const cls = studentClassMap[studentId];
     
     if (cls && chartDataByClass[cls]) {
+      classesWithAttendanceData.add(cls); // Tandai kelas ini punya data
       const logDateStr = new Date(log.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' });
       const dataIndex = chartDataByClass[cls].findIndex(d => d.date === logDateStr);
       
@@ -90,6 +92,9 @@ export default async function AdminDashboardPage() {
       }
     }
   });
+
+  // Filter kelas yang ditampilkan di absen hanya yang punya data
+  const attendanceClassesFiltered = sortedClasses.filter(cls => classesWithAttendanceData.has(cls));
 
   // --- LOGIKA GRAFIK NILAI ---
   const allGrades = await Nilai.find({}).lean();
@@ -154,7 +159,7 @@ export default async function AdminDashboardPage() {
         <div className="lg:col-span-2">
            <AttendanceChart 
               dataByClass={chartDataByClass} 
-              allClasses={sortedClasses} 
+              allClasses={attendanceClassesFiltered} 
            />
         </div>
 
