@@ -46,32 +46,32 @@ export default function AdminAttendanceRow({ student, date, initialStatus }: Pro
   const btnBase = "px-3 py-1 rounded text-xs font-bold border transition-all disabled:opacity-50 active:scale-95";
   
   return (
-    <tr className="hover:bg-gray-50 border-b group">
-      <td className="px-6 py-4 font-mono text-gray-600">{student.nis}</td>
-      <td className="px-6 py-4 font-medium text-gray-900">{student.nama_lengkap}</td>
+    <tr className="hover:bg-foreground/5 border-b border-border-custom group transition-colors">
+      <td className="px-6 py-4 font-mono text-foreground/40">{student.nis}</td>
+      <td className="px-6 py-4 font-medium text-foreground">{student.nama_lengkap}</td>
       
       <td className="px-6 py-4">
         <div className="flex gap-2 opacity-80 group-hover:opacity-100 transition">
           <button disabled={loading} onClick={() => handleStatusChange('Hadir')} 
-            className={`${btnBase} ${status === 'Hadir' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-green-50'}`}>H</button>
+            className={`${btnBase} ${status === 'Hadir' ? 'bg-green-600 text-white border-green-600 shadow-md shadow-green-500/20' : 'bg-foreground/5 text-foreground/40 border-border-custom hover:bg-green-500/10 hover:text-green-500'}`}>H</button>
 
           <button disabled={loading} onClick={() => handleStatusChange('Sakit')}
-            className={`${btnBase} ${status === 'Sakit' ? 'bg-yellow-500 text-white border-yellow-500 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-yellow-50'}`}>S</button>
+            className={`${btnBase} ${status === 'Sakit' ? 'bg-yellow-500 text-white border-yellow-500 shadow-md shadow-yellow-500/20' : 'bg-foreground/5 text-foreground/40 border-border-custom hover:bg-yellow-500/10 hover:text-yellow-500'}`}>S</button>
 
           <button disabled={loading} onClick={() => handleStatusChange('Izin')}
-            className={`${btnBase} ${status === 'Izin' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-blue-50'}`}>I</button>
+            className={`${btnBase} ${status === 'Izin' ? 'bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20' : 'bg-foreground/5 text-foreground/40 border-border-custom hover:bg-blue-500/10 hover:text-blue-500'}`}>I</button>
 
           <button disabled={loading} onClick={() => handleStatusChange('Alpha')}
-            className={`${btnBase} ${status === 'Alpha' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-red-50'}`}>A</button>
+            className={`${btnBase} ${status === 'Alpha' ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-500/20' : 'bg-foreground/5 text-foreground/40 border-border-custom hover:bg-red-500/10 hover:text-red-500'}`}>A</button>
         </div>
       </td>
 
-      <td className="px-6 py-4 font-bold text-sm">
-         {status === 'Hadir' && <span className="text-green-600 bg-green-50 px-2 py-1 rounded">Hadir</span>}
-         {status === 'Sakit' && <span className="text-yellow-600 bg-yellow-50 px-2 py-1 rounded">Sakit</span>}
-         {status === 'Izin' && <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded">Izin</span>}
-         {status === 'Alpha' && <span className="text-red-600 bg-red-50 px-2 py-1 rounded">Alpha</span>}
-         {!status && <span className="text-gray-300 italic">-</span>}
+      <td className="px-6 py-4 font-bold text-xs">
+         {status === 'Hadir' && <span className="text-green-500 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded uppercase tracking-wider">Hadir</span>}
+         {status === 'Sakit' && <span className="text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-1 rounded uppercase tracking-wider">Sakit</span>}
+         {status === 'Izin' && <span className="text-blue-500 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded uppercase tracking-wider">Izin</span>}
+         {status === 'Alpha' && <span className="text-red-500 bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded uppercase tracking-wider">Alpha</span>}
+         {!status && <span className="text-foreground/10 italic text-[10px] uppercase tracking-widest font-black">Belum Absen</span>}
       </td>
     </tr>
   );
