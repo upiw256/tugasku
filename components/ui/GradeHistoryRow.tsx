@@ -78,18 +78,19 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
             {grade.tugas_id?.judul || 'Tugas Terhapus'}
           </span>
           
-          {/* Deskripsi Tugas */}
-          {grade.tugas_id?.deskripsi && (
-            <div className="mt-1">
-              <p className={`text-[10px] text-foreground/50 leading-relaxed ${!isExpanded ? 'line-clamp-1' : ''}`}>
-                {grade.tugas_id.deskripsi}
+          {/* Catatan dari Siswa */}
+          {grade.catatan_siswa && (
+            <div className="mt-1 p-2 bg-foreground/5 rounded-lg border border-border-custom shadow-inner">
+              <span className="text-[9px] font-black text-foreground/30 uppercase tracking-widest block mb-1">📝 Catatan Siswa:</span>
+              <p className={`text-[10px] text-foreground/60 leading-relaxed italic ${!isExpanded ? 'line-clamp-2' : ''}`}>
+                "{grade.catatan_siswa}"
               </p>
-              {grade.tugas_id.deskripsi.length > 50 && (
+              {grade.catatan_siswa.length > 60 && (
                 <button 
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-[9px] text-primary-500 font-bold hover:underline"
+                  className="text-[9px] text-primary-500 font-bold hover:underline mt-1"
                 >
-                  {isExpanded ? 'Tutup' : 'Baca Selengkapnya'}
+                  {isExpanded ? 'Tutup Catatan' : 'Baca Selengkapnya'}
                 </button>
               )}
             </div>
