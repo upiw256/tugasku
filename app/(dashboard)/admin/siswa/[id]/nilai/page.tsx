@@ -55,7 +55,7 @@ export default async function InputNilaiPage({
 
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-full px-4 lg:px-8 mx-auto space-y-8">
       {/* Header Info */}
       <div className="flex items-center justify-between">
         <div>
@@ -140,7 +140,7 @@ export default async function InputNilaiPage({
           <table className="w-full text-sm text-left">
             <thead className="bg-foreground/5 text-foreground/40 border-b border-border-custom uppercase text-[10px] font-bold">
               <tr>
-                <th className="px-4 py-2 w-2/3">Judul Tugas</th>
+                <th className="px-4 py-2 w-4/5">Judul Tugas</th>
                 <th className="px-4 py-2">Nilai</th>
               </tr>
             </thead>

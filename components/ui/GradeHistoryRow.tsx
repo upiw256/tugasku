@@ -8,6 +8,19 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false); // State untuk Read More
 
+  const renderTextWithLinks = (text: string) => {
+    if (!text) return null;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, index) => 
+      urlRegex.test(part) ? (
+        <a key={index} href={part} target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline break-all">
+          {part}
+        </a>
+      ) : part
+    );
+  };
+
   // Fungsi Simpan Edit
   const handleSave = async (formData: FormData) => {
     setIsLoading(true);
@@ -83,7 +96,7 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
             <div className="mt-1 p-2 bg-foreground/5 rounded-lg border border-border-custom shadow-inner">
               <span className="text-[9px] font-black text-foreground/30 uppercase tracking-widest block mb-1">📝 Catatan Siswa:</span>
               <p className={`text-[10px] text-foreground/60 leading-relaxed italic ${!isExpanded ? 'line-clamp-2' : ''}`}>
-                "{grade.catatan_siswa}"
+                "{renderTextWithLinks(grade.catatan_siswa)}"
               </p>
               {grade.catatan_siswa.length > 60 && (
                 <button 
