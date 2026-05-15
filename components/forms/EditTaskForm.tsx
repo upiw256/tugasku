@@ -97,43 +97,43 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
 
       {/* Judul */}
       <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Judul Tugas <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-bold text-foreground mb-1">Judul Tugas <span className="text-danger-500">*</span></label>
         <input 
           name="judul" 
           type="text" 
           defaultValue={initialData.judul} // Pakai defaultValue
           required 
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
         />
       </div>
 
       {/* Deskripsi */}
       <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Deskripsi</label>
+        <label className="block text-sm font-bold text-foreground mb-1">Deskripsi</label>
         <textarea 
           name="deskripsi" 
           rows={4}
           defaultValue={initialData.deskripsi} // Pakai defaultValue
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+          className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none"
         ></textarea>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Deadline */}
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Deadline <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Deadline <span className="text-danger-500">*</span></label>
           <input 
             name="deadline" 
             type="datetime-local" // Saya sarankan pakai ini biar jam-nya ikut tersimpan
             defaultValue={formattedDeadline} // Pakai format tanggal yang sudah disiapkan
             required 
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-600"
+            className="w-full px-4 py-2 border border-border-custom bg-surface rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-foreground"
           />
         </div>
 
         {/* CUSTOM MULTI-SELECT DROPDOWN */}
         <div ref={dropdownRef} className="relative">
-          <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Kelas <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Pilih Kelas <span className="text-danger-500">*</span></label>
           
           {/* TRICK: Loop input hidden agar Action 'formData.getAll' bisa menangkap Array.
              Ini lebih aman daripada .join(',') untuk Server Action kita sebelumnya.
@@ -145,22 +145,22 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
           {/* Trigger Area */}
           <div 
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-full min-h-[42px] px-3 py-2 border rounded-lg cursor-pointer bg-white flex flex-wrap gap-2 items-center transition
-              ${isOpen ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-300 hover:border-gray-400'}
+            className={`w-full min-h-[42px] px-3 py-2 border rounded-lg cursor-pointer bg-surface flex flex-wrap gap-2 items-center transition
+              ${isOpen ? 'border-primary-500 ring-2 ring-primary-500/10' : 'border-border-custom hover:border-primary-400'}
             `}
           >
             {selectedClasses.length === 0 && (
-              <span className="text-gray-400 text-sm">-- Klik untuk pilih kelas --</span>
+              <span className="text-foreground/40 text-sm">-- Klik untuk pilih kelas --</span>
             )}
 
             {/* Tags */}
             {selectedClasses.map((cls) => (
-              <span key={cls} className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+              <span key={cls} className="bg-primary-500/10 text-primary-600 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
                 {cls}
                 <button 
                   type="button"
                   onClick={(e) => removeTag(cls, e)}
-                  className="hover:text-blue-900 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center"
+                  className="hover:text-primary-700 hover:bg-primary-500/20 rounded-full w-4 h-4 flex items-center justify-center"
                 >
                   &times;
                 </button>
@@ -168,16 +168,16 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
             ))}
             
             {/* Panah */}
-            <div className="ml-auto text-gray-400">
+            <div className="ml-auto text-foreground/40">
               <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
 
           {/* Dropdown Menu */}
           {isOpen && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+            <div className="absolute z-10 w-full mt-1 bg-surface border border-border-custom rounded-lg shadow-xl max-h-60 overflow-y-auto">
               {classOptions.length === 0 ? (
-                <div className="p-3 text-sm text-gray-500 text-center">Data kelas kosong.</div>
+                <div className="p-3 text-sm text-foreground/50 text-center">Data kelas kosong.</div>
               ) : (
                 classOptions.map((cls) => {
                   const isSelected = selectedClasses.includes(cls);
@@ -186,11 +186,11 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
                       key={cls}
                       onClick={() => toggleClass(cls)}
                       className={`px-4 py-2 text-sm cursor-pointer flex justify-between items-center transition
-                        ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}
+                        ${isSelected ? 'bg-primary-500/10 text-primary-600 font-medium' : 'text-foreground hover:bg-background'}
                       `}
                     >
                       <span>{cls}</span>
-                      {isSelected && <span className="text-blue-600">✓</span>}
+                      {isSelected && <span className="text-primary-600">✓</span>}
                     </div>
                   );
                 })
@@ -202,33 +202,33 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
 
       {/* Metode Pengumpulan */}
       <div className="mb-4">
-        <label className="block text-sm font-bold text-gray-700 mb-2">Metode Pengumpulan</label>
+        <label className="block text-sm font-bold text-foreground mb-2">Metode Pengumpulan</label>
         <div className="flex flex-col sm:flex-row gap-4">
-          <label className="flex-1 flex items-center gap-2 cursor-pointer border p-3 rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 transition">
+          <label className="flex-1 flex items-center gap-2 cursor-pointer border border-border-custom p-3 rounded-lg has-[:checked]:bg-primary-500/10 has-[:checked]:border-primary-500 transition">
             <input 
                 type="radio" 
                 name="tipe_pengumpulan" 
                 value="online" 
                 defaultChecked={initialData.tipe_pengumpulan === 'online'} // Cek Default
-                className="w-4 h-4 text-blue-600" 
+                className="w-4 h-4 text-primary-600" 
             />
             <div>
-              <span className="block text-sm font-bold">☁️ Upload File</span>
-              <span className="block text-xs text-gray-500">Siswa wajib upload bukti (Foto/PDF)</span>
+              <span className="block text-sm font-bold text-foreground">☁️ Upload File</span>
+              <span className="block text-xs text-foreground/50">Siswa wajib upload bukti (Foto/PDF)</span>
             </div>
           </label>
           
-          <label className="flex-1 flex items-center gap-2 cursor-pointer border p-3 rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 transition">
+          <label className="flex-1 flex items-center gap-2 cursor-pointer border border-border-custom p-3 rounded-lg has-[:checked]:bg-primary-500/10 has-[:checked]:border-primary-500 transition">
             <input 
                 type="radio" 
                 name="tipe_pengumpulan" 
                 value="offline" 
                 defaultChecked={initialData.tipe_pengumpulan === 'offline'} // Cek Default
-                className="w-4 h-4 text-blue-600" 
+                className="w-4 h-4 text-primary-600" 
             />
             <div>
-              <span className="block text-sm font-bold">🏫 Offline / Langsung</span>
-              <span className="block text-xs text-gray-500">Dikumpulkan fisik di kelas</span>
+              <span className="block text-sm font-bold text-foreground">🏫 Offline / Langsung</span>
+              <span className="block text-xs text-foreground/50">Dikumpulkan fisik di kelas</span>
             </div>
           </label>
         </div>
@@ -236,7 +236,7 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg font-bold border border-red-100 text-center animate-pulse">
+        <div className="p-3 bg-danger-500/10 text-danger-600 text-sm rounded-lg font-bold border border-danger-500/20 text-center animate-pulse">
           {error}
         </div>
       )}
@@ -246,7 +246,7 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
         <button 
             type="button" 
             onClick={() => router.back()} 
-            className="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 font-bold hover:bg-gray-50"
+            className="flex-1 py-3 border border-border-custom rounded-lg text-foreground font-bold hover:bg-background"
         >
             Batal
         </button>
@@ -255,7 +255,7 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
           type="submit" 
           disabled={isLoading}
           className={`flex-1 py-3 rounded-lg text-white font-bold transition shadow-md
-            ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'}
+            ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 hover:shadow-lg'}
           `}
         >
           {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}

@@ -61,9 +61,9 @@ export default async function QuizDetailPage({
     return (
       <div className="p-10 text-center space-y-4">
         <div className="text-4xl">🔒</div>
-        <h2 className="text-2xl font-bold text-gray-800">Kuis Sedang Ditutup</h2>
-        <p className="text-gray-500">Kuis ini belum dimulai atau sudah berakhir.</p>
-        <a href="/siswa/kuis" className="inline-block text-purple-600 font-bold hover:underline">Kembali ke Daftar Kuis</a>
+        <h2 className="text-2xl font-bold text-foreground">Kuis Sedang Ditutup</h2>
+        <p className="text-foreground/40 font-medium">Kuis ini belum dimulai atau sudah berakhir.</p>
+        <a href="/siswa/kuis" className="inline-block text-primary-500 font-bold hover:underline">Kembali ke Daftar Kuis</a>
       </div>
     );
   }
@@ -76,15 +76,15 @@ export default async function QuizDetailPage({
 
   if (pengerjaan?.status === 'SUBMITTED') {
     return (
-      <div className="p-10 text-center space-y-6 bg-white rounded-2xl shadow-sm border mt-10">
+      <div className="p-10 text-center space-y-6 bg-surface rounded-2xl shadow-sm border border-border-custom mt-10">
         <div className="text-5xl">✅</div>
-        <h2 className="text-2xl font-bold text-gray-800">Kuis Sudah Dikerjakan</h2>
-        <div className="bg-green-50 p-6 rounded-xl inline-block border border-green-200">
-           <p className="text-sm text-green-600 font-medium">Skor Anda:</p>
-           <p className="text-4xl font-black text-green-700">{pengerjaan.nilai}</p>
+        <h2 className="text-2xl font-bold text-foreground">Kuis Sudah Dikerjakan</h2>
+        <div className="bg-emerald-500/10 p-6 rounded-xl inline-block border border-emerald-500/20">
+           <p className="text-sm text-emerald-500 font-medium">Skor Anda:</p>
+           <p className="text-4xl font-black text-emerald-500">{pengerjaan.nilai}</p>
         </div>
         <br />
-        <a href="/siswa/kuis" className="inline-block px-6 py-2 bg-gray-100 text-gray-600 rounded-lg font-bold hover:bg-gray-200 transition">Kembali</a>
+        <a href="/siswa/kuis" className="inline-block px-6 py-2 bg-foreground/5 text-foreground/40 rounded-lg font-bold hover:bg-foreground/10 transition">Kembali</a>
       </div>
     );
   }

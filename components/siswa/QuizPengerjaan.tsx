@@ -185,12 +185,12 @@ export default function QuizPengerjaan({
   return (
     <div className="space-y-8 pb-24 relative">
       {/* Sticky Header Waktu */}
-      <div className="sticky top-4 z-10 flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-purple-100">
+      <div className="sticky top-4 z-10 flex justify-between items-center bg-surface/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-border-custom">
         <div>
-          <h1 className="font-bold text-gray-800 text-lg leading-tight">{kuis.judul}</h1>
-          <p className="text-xs text-purple-600 font-medium">Progress: {Object.keys(jawaban).length} / {kuis.daftar_soal.length} Terjawab</p>
+          <h1 className="font-bold text-foreground text-lg leading-tight">{kuis.judul}</h1>
+          <p className="text-xs text-primary-500 font-medium">Progress: {Object.keys(jawaban).length} / {kuis.daftar_soal.length} Terjawab</p>
         </div>
-        <div className={`px-4 py-2 rounded-xl font-mono font-bold text-center border-2 ${timeLeft < 300000 ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-purple-50 text-purple-600 border-purple-200'}`}>
+        <div className={`px-4 py-2 rounded-xl font-mono font-bold text-center border-2 ${timeLeft < 300000 ? 'bg-danger-500/10 text-danger-500 border-danger-500/20 animate-pulse' : 'bg-primary-500/10 text-primary-500 border-primary-500/20'}`}>
           <div className="text-[10px] uppercase opacity-60">Sisa Waktu</div>
           <div className="text-xl">{formatTime(timeLeft)}</div>
         </div>
@@ -198,10 +198,10 @@ export default function QuizPengerjaan({
 
       <div className="space-y-6">
         {kuis.daftar_soal.map((soal: any, index: number) => (
-          <div key={soal.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4 hover:shadow-md transition">
+          <div key={soal.id} className="bg-surface p-6 rounded-2xl shadow-sm border border-border-custom space-y-4 hover:shadow-md transition">
             <div className="flex gap-4">
-               <span className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-600 flex items-center justify-center rounded-lg font-bold text-sm">{index + 1}</span>
-               <p className="text-gray-800 font-medium leading-relaxed pt-1 whitespace-pre-wrap">{soal.pertanyaan}</p>
+               <span className="flex-shrink-0 w-8 h-8 bg-primary-500/10 text-primary-500 flex items-center justify-center rounded-lg font-bold text-sm">{index + 1}</span>
+               <p className="text-foreground font-medium leading-relaxed pt-1 whitespace-pre-wrap">{soal.pertanyaan}</p>
             </div>
             
             <div className="grid grid-cols-1 gap-3 pl-12 mt-2">
@@ -211,16 +211,16 @@ export default function QuizPengerjaan({
                   onClick={() => handlePilihJawaban(soal.id, opt)}
                   className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                     jawaban[soal.id] === opt 
-                      ? 'bg-purple-50 border-purple-500 text-purple-700 shadow-sm ring-1 ring-purple-200' 
-                      : 'bg-white border-gray-100 text-gray-600 hover:border-purple-200 hover:bg-gray-50'
+                      ? 'bg-primary-500/10 border-primary-500 text-primary-500 shadow-sm ring-1 ring-primary-500/20' 
+                      : 'bg-surface border-border-custom text-foreground/40 hover:border-primary-500/30 hover:bg-foreground/5'
                   }`}
                 >
                   <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition ${
-                     jawaban[soal.id] === opt ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-400'
+                     jawaban[soal.id] === opt ? 'bg-primary-500 text-white' : 'bg-foreground/5 text-foreground/20'
                   }`}>{opt}</span>
                   <span className="flex-1 text-sm font-medium">{soal.opsi?.[opt] || '-'}</span>
                   {jawaban[soal.id] === opt && (
-                    <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                    <svg className="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                   )}
                 </button>
               ))}
@@ -235,7 +235,7 @@ export default function QuizPengerjaan({
             onClick={handleSubmit}
             disabled={isSubmitting}
             className={`w-full py-4 rounded-2xl text-white font-bold text-lg shadow-2xl transition-all ${
-              isSubmitting ? 'bg-gray-400' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:scale-[1.02] active:scale-[0.98]'
+              isSubmitting ? 'bg-foreground/10' : 'bg-primary-600 hover:bg-primary-700 hover:scale-[1.02] active:scale-[0.98]'
             }`}
           >
             {isSubmitting ? 'Mengirim Jawaban...' : '✅ Kumpulkan Jawaban Sekarang'}

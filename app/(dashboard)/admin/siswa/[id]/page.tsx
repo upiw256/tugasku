@@ -23,33 +23,33 @@ export default async function Page({
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/siswa" className="text-gray-500 hover:underline">← Kembali</Link>
-        <h1 className="text-2xl font-bold">Edit Siswa</h1>
+        <Link href="/admin/siswa" className="text-foreground/40 hover:text-foreground transition">← Kembali</Link>
+        <h1 className="text-2xl font-bold text-foreground">Edit Siswa</h1>
       </div>
 
       <form action={async (formData) => {
         'use server'
         await updateStudentAction(id, formData);
         redirect('/admin/siswa');
-      }} className="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
+      }} className="bg-surface p-6 rounded-xl shadow border border-border-custom space-y-4">
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">NIS</label>
-          <input name="nis" defaultValue={student.nis} className="w-full border p-2 rounded" required />
+          <label className="block text-sm font-medium text-foreground/70 mb-1">NIS</label>
+          <input name="nis" defaultValue={student.nis} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded focus:ring-2 focus:ring-primary-500 outline-none" required />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-          <input name="nama" defaultValue={student.nama_lengkap} className="w-full border p-2 rounded" required />
+          <label className="block text-sm font-medium text-foreground/70 mb-1">Nama Lengkap</label>
+          <input name="nama" defaultValue={student.nama_lengkap} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded focus:ring-2 focus:ring-primary-500 outline-none" required />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-          <input name="kelas" defaultValue={student.kelas} className="w-full border p-2 rounded" required />
+          <label className="block text-sm font-medium text-foreground/70 mb-1">Kelas</label>
+          <input name="kelas" defaultValue={student.kelas} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded focus:ring-2 focus:ring-primary-500 outline-none" required />
         </div>
 
         <div className="pt-4">
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-bold">
+            <button type="submit" className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-bold shadow-lg shadow-primary-500/20 transition-all">
                 Simpan Perubahan
             </button>
         </div>

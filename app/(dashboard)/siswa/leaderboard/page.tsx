@@ -114,13 +114,13 @@ export default async function SiswaLeaderboardPage({
         <div className="flex justify-center mt-6 gap-2">
             <Link 
                 href="/siswa/leaderboard?type=kelas"
-                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${viewType === 'kelas' ? 'bg-white text-blue-700' : 'bg-blue-500/30 text-white hover:bg-blue-500/50'}`}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${viewType === 'kelas' ? 'bg-surface text-primary-500' : 'bg-primary-500/30 text-white hover:bg-primary-500/50'}`}
             >
                 🏆 Peringkat Kelas
             </Link>
             <Link 
                 href="/siswa/leaderboard?type=global"
-                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${viewType === 'global' ? 'bg-white text-blue-700' : 'bg-blue-500/30 text-white hover:bg-blue-500/50'}`}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${viewType === 'global' ? 'bg-surface text-primary-500' : 'bg-primary-500/30 text-white hover:bg-primary-500/50'}`}
             >
                 🌍 Peringkat Global
             </Link>
@@ -137,7 +137,7 @@ export default async function SiswaLeaderboardPage({
               key={item._id}
               className={`
                 flex items-center justify-between p-5 border-b border-border-custom last:border-0 transition-colors
-                ${item.isMe ? 'bg-blue-500/10' : 'hover:bg-foreground/5'}
+                ${item.isMe ? 'bg-primary-500/10' : 'hover:bg-foreground/5'}
               `}
             >
                 <div className="flex items-center gap-5">

@@ -57,21 +57,21 @@ export default async function SiswaNilaiPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-           <p className="text-sm text-gray-500 font-medium">Total Kuis</p>
-           <p className="text-3xl font-bold text-gray-800">{history.length}</p>
+        <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-sm">
+           <p className="text-sm text-foreground/40 font-medium">Total Kuis</p>
+           <p className="text-3xl font-bold text-foreground">{history.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-           <p className="text-sm text-gray-500 font-medium">Rata-rata Nilai</p>
-           <p className="text-3xl font-bold text-emerald-600">
+        <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-sm">
+           <p className="text-sm text-foreground/40 font-medium">Rata-rata Nilai</p>
+           <p className="text-3xl font-bold text-emerald-500">
              {history.length > 0 
                ? Math.round(history.reduce((a, b) => a + (b.nilai || 0), 0) / history.length) 
                : 0}
            </p>
         </div>
-        <div className="bg-white p-6 rounded-xl border shadow-sm">
-           <p className="text-sm text-gray-500 font-medium">Kuis Terakhir</p>
-           <p className="text-sm font-bold text-gray-800 line-clamp-1">{history[0]?.kuis_id?.judul || '-'}</p>
+        <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-sm">
+           <p className="text-sm text-foreground/40 font-medium">Kuis Terakhir</p>
+           <p className="text-sm font-bold text-foreground line-clamp-1">{history[0]?.kuis_id?.judul || '-'}</p>
         </div>
       </div>
 

@@ -68,13 +68,13 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
       
       {/* Judul */}
       <div>
-        <label className="block text-sm font-bold text-foreground mb-1">Judul Tugas <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-bold text-foreground mb-1">Judul Tugas <span className="text-danger-500">*</span></label>
         <input 
           name="judul" 
           type="text" 
           required 
           placeholder="Contoh: Latihan Matematika"
-          className="w-full px-4 py-2 border border-border-custom bg-foreground/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-foreground placeholder:text-foreground/30"
+          className="w-full px-4 py-2 border border-border-custom bg-surface rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-foreground placeholder:text-foreground/30"
         />
       </div>
 
@@ -85,25 +85,25 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
           name="deskripsi" 
           rows={4}
           placeholder="Detail tugas..."
-          className="w-full px-4 py-2 border border-border-custom bg-foreground/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none text-foreground placeholder:text-foreground/30"
+          className="w-full px-4 py-2 border border-border-custom bg-surface rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none text-foreground placeholder:text-foreground/30"
         ></textarea>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Deadline */}
         <div>
-          <label className="block text-sm font-bold text-foreground mb-1">Deadline <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Deadline <span className="text-danger-500">*</span></label>
           <input 
             name="deadline" 
             type="date" 
             required 
-            className="w-full px-4 py-2 border border-border-custom bg-foreground/5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-foreground"
+            className="w-full px-4 py-2 border border-border-custom bg-surface rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-foreground"
           />
         </div>
 
         {/* CUSTOM MULTI-SELECT DROPDOWN */}
         <div ref={dropdownRef} className="relative">
-          <label className="block text-sm font-bold text-foreground mb-1">Pilih Kelas <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Pilih Kelas <span className="text-danger-500">*</span></label>
           
           {/* Input Hidden untuk kirim data ke Server */}
           <input type="hidden" name="kelas" value={selectedClasses.join(', ')} />
@@ -112,8 +112,8 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
           <div 
             onClick={() => setIsOpen(!isOpen)}
             className={`w-full min-h-[42px] px-3 py-2 border rounded-lg cursor-pointer flex flex-wrap gap-2 items-center transition
-              ${isOpen ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border-custom hover:border-foreground/20'}
-              bg-foreground/5
+              ${isOpen ? 'border-primary-500 ring-2 ring-primary-500/20' : 'border-border-custom hover:border-foreground/20'}
+              bg-surface
             `}
           >
             {selectedClasses.length === 0 && (
@@ -122,12 +122,12 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
 
             {/* Tampilkan Tag Kelas yang Dipilih */}
             {selectedClasses.map((cls) => (
-              <span key={cls} className="bg-blue-500/10 text-blue-500 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 border border-blue-500/20">
+              <span key={cls} className="bg-primary-500/10 text-primary-500 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 border border-primary-500/20">
                 {cls}
                 <button 
                   type="button"
                   onClick={(e) => removeTag(cls, e)}
-                  className="hover:text-blue-400 hover:bg-blue-500/10 rounded-full w-4 h-4 flex items-center justify-center font-bold"
+                   className="hover:text-primary-400 hover:bg-primary-500/10 rounded-full w-4 h-4 flex items-center justify-center font-bold"
                 >
                   &times;
                 </button>
@@ -135,7 +135,7 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
             ))}
             
             {/* Panah Kecil di Kanan */}
-            <div className="ml-auto text-gray-400">
+            <div className="ml-auto text-foreground/40">
               <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
@@ -153,11 +153,11 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
                       key={cls}
                       onClick={() => toggleClass(cls)}
                       className={`px-4 py-2 text-sm cursor-pointer flex justify-between items-center transition
-                        ${isSelected ? 'bg-blue-500/10 text-blue-500 font-bold' : 'text-foreground/70 hover:bg-foreground/5'}
+                        ${isSelected ? 'bg-primary-500/10 text-primary-500 font-bold' : 'text-foreground/70 hover:bg-foreground/5'}
                       `}
                     >
                       <span>{cls}</span>
-                      {isSelected && <span className="text-blue-500 font-bold">✓</span>}
+                      {isSelected && <span className="text-primary-500 font-bold">✓</span>}
                     </div>
                   );
                 })
@@ -169,18 +169,18 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
       <div className="mb-4">
         <label className="block text-sm font-bold text-foreground mb-2">Metode Pengumpulan</label>
         <div className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer border border-border-custom p-3 rounded-lg bg-foreground/5 has-[:checked]:bg-blue-500/10 has-[:checked]:border-blue-500 transition-all group">
-            <input type="radio" name="tipe_pengumpulan" value="online" defaultChecked className="w-4 h-4 text-blue-600" />
+          <label className="flex items-center gap-2 cursor-pointer border border-border-custom p-3 rounded-lg bg-surface has-[:checked]:bg-primary-500/10 has-[:checked]:border-primary-500 transition-all group">
+            <input type="radio" name="tipe_pengumpulan" value="online" defaultChecked className="w-4 h-4 text-primary-600 focus:ring-primary-500" />
             <div>
-              <span className="block text-sm font-bold text-foreground group-has-[:checked]:text-blue-500">☁️ Upload File</span>
+              <span className="block text-sm font-bold text-foreground group-has-[:checked]:text-primary-500">☁️ Upload File</span>
               <span className="block text-xs text-foreground/40">Siswa wajib upload bukti (Foto/PDF)</span>
             </div>
           </label>
           
-          <label className="flex items-center gap-2 cursor-pointer border border-border-custom p-3 rounded-lg bg-foreground/5 has-[:checked]:bg-blue-500/10 has-[:checked]:border-blue-500 transition-all group">
-            <input type="radio" name="tipe_pengumpulan" value="offline" className="w-4 h-4 text-blue-600" />
+          <label className="flex items-center gap-2 cursor-pointer border border-border-custom p-3 rounded-lg bg-surface has-[:checked]:bg-primary-500/10 has-[:checked]:border-primary-500 transition-all group">
+            <input type="radio" name="tipe_pengumpulan" value="offline" className="w-4 h-4 text-primary-600 focus:ring-primary-500" />
             <div>
-              <span className="block text-sm font-bold text-foreground group-has-[:checked]:text-blue-500">🏫 Offline / Langsung</span>
+              <span className="block text-sm font-bold text-foreground group-has-[:checked]:text-primary-500">🏫 Offline / Langsung</span>
               <span className="block text-xs text-foreground/40">Dikumpulkan fisik di kelas</span>
             </div>
           </label>
@@ -189,7 +189,7 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg font-bold border border-red-100 text-center animate-pulse">
+        <div className="p-3 bg-danger-500/10 text-danger-600 text-sm rounded-lg font-bold border border-danger-500/20 text-center animate-pulse">
           {error}
         </div>
       )}
@@ -200,7 +200,7 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
           type="submit" 
           disabled={isLoading}
           className={`w-full py-3 rounded-lg text-white font-bold transition shadow-md
-            ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'}
+            ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 hover:shadow-lg'}
           `}
         >
           {isLoading ? 'Menyimpan...' : 'Simpan Tugas'}

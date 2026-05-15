@@ -76,15 +76,15 @@ export default async function HalamanPengumpulan({
     <div className="space-y-6 pb-20 md:pb-10">
       <div className="flex justify-between items-start px-2 md:px-0">
         <div>
-          <Link href="/admin/tugas" className="text-xs text-gray-500 hover:text-blue-600 mb-2 inline-flex items-center gap-1">
+          <Link href="/admin/tugas" className="text-xs text-foreground/40 hover:text-primary-500 mb-2 inline-flex items-center gap-1">
             ← Kembali
           </Link>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 leading-tight">{tugas.judul}</h1>
-          <div className="flex flex-wrap gap-2 mt-2 text-[10px] md:text-sm text-gray-600">
-            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100 font-medium">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{tugas.judul}</h1>
+          <div className="flex flex-wrap gap-2 mt-2 text-[10px] md:text-sm text-foreground/60">
+            <span className="bg-primary-500/10 text-primary-500 px-2 py-1 rounded border border-primary-500/20 font-medium">
               Total: {displayData.length} {isOffline ? 'Siswa' : 'Pengumpulan'}
             </span>
-            <span className="bg-yellow-50 text-yellow-700 px-2 py-1 rounded border border-yellow-100 font-medium">
+            <span className="bg-amber-500/10 text-amber-500 px-2 py-1 rounded border border-amber-500/20 font-medium">
               Kelas: {Array.isArray(tugas.kelas) ? tugas.kelas.join(', ') : tugas.kelas}
             </span>
           </div>
@@ -96,9 +96,9 @@ export default async function HalamanPengumpulan({
       )}
 
       {/* TAMPILAN DESKTOP - Perbaikan Struktur Tabel agar tidak Hydration Error */}
-      <div className="hidden md:block bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+      <div className="hidden md:block bg-surface rounded-xl shadow border border-border-custom overflow-hidden">
         <table className="w-full text-sm text-left border-collapse">
-          <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b text-[11px] tracking-wider">
+          <thead className="bg-foreground/5 text-foreground/70 uppercase font-bold border-b border-border-custom text-[11px] tracking-wider">
             <tr>
               <th className="px-6 py-4 w-10 text-center">No</th>
               <th className="px-6 py-4">Nama Siswa</th>
@@ -109,36 +109,36 @@ export default async function HalamanPengumpulan({
               <th className="px-6 py-4 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border-custom">
             {displayData.map((item: any, index: number) => {
               const siswa = item.member_id;
               if (!siswa) return null;
               return (
-                <tr key={item._id.toString()} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-gray-400 text-center">{index + 1}</td>
+                <tr key={item._id.toString()} className="hover:bg-foreground/5 transition-colors">
+                  <td className="px-6 py-4 font-mono text-foreground/20 text-center">{index + 1}</td>
                   <td className="px-6 py-4">
-                    <div className="font-bold text-gray-800">{siswa.nama_lengkap}</div>
-                    <div className="text-[11px] text-gray-500 uppercase">{siswa.nis} • {siswa.kelas}</div>
+                    <div className="font-bold text-foreground">{siswa.nama_lengkap}</div>
+                    <div className="text-[11px] text-foreground/40 uppercase">{siswa.nis} • {siswa.kelas}</div>
                   </td>
                   {!isOffline && (
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center">
                         {item.file_url ? (
                           isPdf(item.file_url) ? (
-                            <a href={item.file_url} target="_blank" className="w-12 h-12 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center">
+                            <a href={item.file_url} target="_blank" className="w-12 h-12 bg-danger-500/10 border border-danger-500/20 rounded flex flex-col items-center justify-center">
                               <span className="text-lg">📄</span>
-                              <span className="text-[8px] text-red-600 font-bold tracking-tighter">PDF</span>
+                              <span className="text-[8px] text-danger-600 font-bold tracking-tighter">PDF</span>
                             </a>
                           ) : (
-                            <div className="w-12 h-12 shadow-sm border border-gray-200 rounded overflow-hidden">
+                            <div className="w-12 h-12 shadow-sm border border-border-custom rounded overflow-hidden">
                               <ImagePreview src={`/api${item.file_url}`} className="w-full h-full object-cover" />
                             </div>
                           )
-                        ) : <span className="text-[10px] text-gray-300 italic">-</span>}
+                        ) : <span className="text-[10px] text-foreground/20 italic">-</span>}
                       </div>
                     </td>
                   )}
-                  {!isOffline && <td className="px-6 py-4 text-gray-600 text-xs">{formatDate(item.tanggal_mengumpulkan)}</td>}
+                  {!isOffline && <td className="px-6 py-4 text-foreground/60 text-xs">{formatDate(item.tanggal_mengumpulkan)}</td>}
                   {!isOffline && <td className="px-6 py-4"><SmartNote text={item.catatan_siswa || ""} limit={20} /></td>}
                   <td className="px-6 py-4 text-center">
                     {/* KLIK NILAI LANGSUNG */}
@@ -150,7 +150,7 @@ export default async function HalamanPengumpulan({
                     />
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <Link href={`/admin/siswa/${siswa._id}/nilai`} className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-[11px] font-bold">Detail ↗</Link>
+                    <Link href={`/admin/siswa/${siswa._id}/nilai`} className="bg-primary-600 text-white px-3 py-1.5 rounded-md text-[11px] font-bold shadow-lg shadow-primary-500/20">Detail ↗</Link>
                   </td>
                 </tr>
               );
@@ -165,9 +165,9 @@ export default async function HalamanPengumpulan({
           const siswa = item.member_id;
           if (!siswa) return null;
           return (
-            <div key={item._id.toString()} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-              <div className="p-3 bg-gray-50/50 flex justify-between items-center border-b">
-                <span className="text-[10px] font-bold text-gray-400">#{index + 1} — {siswa.kelas}</span>
+            <div key={item._id.toString()} className="bg-surface rounded-2xl border border-border-custom shadow-sm overflow-hidden flex flex-col">
+              <div className="p-3 bg-foreground/5 flex justify-between items-center border-b border-border-custom">
+                <span className="text-[10px] font-bold text-foreground/30">#{index + 1} — {siswa.kelas}</span>
                 <QuickGrade 
                   submissionId={item._id.toString()} 
                   currentNilai={item.nilai} 
@@ -193,9 +193,9 @@ export default async function HalamanPengumpulan({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-bold text-gray-900 text-sm truncate">{siswa.nama_lengkap}</h3>
-                  <p className="text-[10px] text-gray-500">{siswa.nis}</p>
-                  {!isOffline && <p className="text-[9px] text-blue-500 font-medium mt-1">{formatDate(item.tanggal_mengumpulkan)}</p>}
+                  <h3 className="font-bold text-foreground text-sm truncate">{siswa.nama_lengkap}</h3>
+                  <p className="text-[10px] text-foreground/40">{siswa.nis}</p>
+                  {!isOffline && <p className="text-[9px] text-primary-500 font-medium mt-1">{formatDate(item.tanggal_mengumpulkan)}</p>}
                 </div>
               </div>
             </div>

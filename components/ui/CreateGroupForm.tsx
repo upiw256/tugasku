@@ -119,11 +119,11 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
 
   return (
     <form action={handleSubmit} className="space-y-6 flex flex-col">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 border rounded-xl bg-gray-50">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 border border-border-custom rounded-xl bg-background">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Kelas <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Pilih Kelas <span className="text-danger-500">*</span></label>
           <select 
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
           >
@@ -133,7 +133,7 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Status Data Siswa</label>
+          <label className="block text-sm font-bold text-foreground mb-1">Status Data Siswa</label>
           <div className="w-full px-4 py-2 bg-foreground/5 border border-border-custom rounded-lg text-sm text-foreground/60">
             {isLoadingStudents ? 'Memuat...' : (selectedClass ? `${students.length} Siswa ditemukan di kelas ${selectedClass}` : 'Pilih kelas terlebih dahulu')}
           </div>
@@ -142,20 +142,20 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
 
       {/* Bagian Pembuatan Kelompok */}
       {selectedClass && students.length > 0 && (
-        <div className="p-4 border rounded-xl border-blue-500/30 bg-surface">
-          <div className="flex justify-between items-center mb-4 pb-3 border-b">
-            <h3 className="font-bold text-lg text-blue-800">Bentuk Kelompok</h3>
+        <div className="p-4 border rounded-xl border-primary-500/30 bg-surface">
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-border-custom">
+            <h3 className="font-bold text-lg text-primary-500">Bentuk Kelompok</h3>
           </div>
 
           <div className="flex items-end gap-3 mb-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Masukan Anggota / Kelompok</label>
+              <label className="block text-xs font-bold text-foreground/60 mb-1">Masukan Anggota / Kelompok</label>
               <input 
                 type="number" 
                 min="1" 
                 value={groupSize} 
                 onChange={(e) => setGroupSize(parseInt(e.target.value) || 1)}
-                className="w-24 px-3 py-1.5 border rounded focus:outline-none focus:border-blue-500"
+                className="w-24 px-3 py-1.5 border border-border-custom bg-background text-foreground rounded focus:outline-none focus:border-primary-500"
               />
             </div>
             <button 
@@ -171,13 +171,13 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
           {groups.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-80 overflow-y-auto pr-2">
               {groups.map((group, idx) => (
-                <div key={idx} className="bg-gray-50 border rounded-lg p-3">
-                  <div className="flex justify-between items-start border-b pb-2 mb-2">
-                    <h4 className="font-bold text-sm text-gray-700">{group.nama} <span className="text-xs font-normal bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded ml-1">{group.anggota.length} Anak</span></h4>
+                <div key={idx} className="bg-background border border-border-custom rounded-lg p-3">
+                  <div className="flex justify-between items-start border-b border-border-custom pb-2 mb-2">
+                    <h4 className="font-bold text-sm text-foreground">{group.nama} <span className="text-xs font-normal bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded ml-1">{group.anggota.length} Anak</span></h4>
                   </div>
                   
-                  <div className="mb-2 bg-yellow-50 px-2 py-1.5 rounded border border-yellow-200">
-                    <label className="text-[11px] font-bold text-yellow-800 uppercase tracking-wide mr-2">👑 Ketua:</label>
+                  <div className="mb-2 bg-primary-500/10 px-2 py-1.5 rounded border border-primary-500/20">
+                    <label className="text-[11px] font-bold text-primary-600 uppercase tracking-wide mr-2">👑 Ketua:</label>
                     <select 
                        className="px-2 py-1 text-xs border border-border-custom rounded bg-surface text-foreground outline-none w-3/4 max-w-[200px]"
                        value={group.ketua_id}
@@ -191,10 +191,10 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
                     </select>
                   </div>
 
-                  <p className="text-[10px] font-bold text-gray-400 mt-2">Daftar Anggota:</p>
-                  <ul className="text-xs text-gray-600 space-y-1 mt-1">
+                  <p className="text-[10px] font-bold text-foreground/30 mt-2">Daftar Anggota:</p>
+                  <ul className="text-xs text-foreground/60 space-y-1 mt-1">
                     {group.anggota.map(s => (
-                      <li key={s._id} className={s._id === group.ketua_id ? 'font-bold text-gray-800' : ''}>
+                      <li key={s._id} className={s._id === group.ketua_id ? 'font-bold text-foreground/90' : ''}>
                         {s._id === group.ketua_id ? '👑 ' : '• '} {s.nama_lengkap}
                       </li>
                     ))}
@@ -203,14 +203,14 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 text-gray-400 bg-gray-50 border border-dashed rounded font-medium">Klik Acak & Buat Kelompok untuk melihat hasil.</div>
+            <div className="text-center py-6 text-foreground/40 bg-background border border-border-custom border-dashed rounded font-medium">Klik Acak & Buat Kelompok untuk melihat hasil.</div>
           )}
 
         </div>
       )}
 
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg font-bold border border-red-100 text-center">
+        <div className="p-3 bg-danger-500/10 text-danger-600 text-sm rounded-lg font-bold border border-danger-500/20 text-center">
           {error}
         </div>
       )}

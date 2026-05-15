@@ -23,39 +23,39 @@ export default function ImportSiswaPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Import Data Siswa</h1>
+      <h1 className="text-2xl font-bold text-foreground">Import Data Siswa</h1>
       
       {/* Langkah 1: Download */}
-      <div className="p-6 bg-blue-50 border border-blue-100 rounded-xl">
-        <h3 className="font-bold text-blue-800 mb-2">1. Download Template</h3>
-        <p className="text-sm text-blue-600 mb-4">
+      <div className="p-6 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+        <h3 className="font-bold text-primary-500 mb-2">1. Download Template</h3>
+        <p className="text-sm text-primary-500/60 mb-4">
           Unduh format excel terlebih dahulu, lalu isi data siswa.
         </p>
         <button 
           type="button"
           onClick={downloadTemplate} 
-          className="bg-white text-blue-600 border border-blue-200 px-4 py-2 rounded shadow-sm hover:bg-blue-100 font-medium"
+          className="bg-surface text-primary-500 border border-primary-500/20 px-4 py-2 rounded shadow-sm hover:bg-primary-500/10 font-medium transition"
         >
           ⬇️ Download Template Excel
         </button>
       </div>
 
       {/* Langkah 2: Upload */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="font-bold text-gray-800 mb-4">2. Upload File Excel</h3>
+      <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
+        <h3 className="font-bold text-foreground mb-4">2. Upload File Excel</h3>
         <form action={handleSubmit} className="space-y-4">
           <input 
             type="file" 
             name="file" 
             accept=".xlsx" 
             required 
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer" 
+            className="block w-full text-sm text-foreground/40 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-600 file:text-white hover:file:bg-primary-700 cursor-pointer" 
           />
           <button 
             type="submit" 
             disabled={isLoading}
-            className={`w-full py-3 rounded-lg text-white font-bold transition shadow
-              ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}
+            className={`w-full py-3 rounded-lg text-white font-bold transition shadow-sm
+              ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'}
             `}
           >
             {isLoading ? 'Sedang Memproses...' : 'Mulai Import'}
@@ -65,7 +65,7 @@ export default function ImportSiswaPage() {
 
       {/* Pesan Feedback */}
       {message && (
-        <div className={`p-4 rounded-lg text-center font-bold border ${message.includes('Gagal') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+        <div className={`p-4 rounded-lg text-center font-bold border ${message.includes('Gagal') ? 'bg-danger-500/10 text-danger-600 border-danger-500/20' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'}`}>
           {message}
         </div>
       )}

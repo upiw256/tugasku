@@ -28,8 +28,8 @@ export default function ResetPasswordButton({
 
   const defaultClass = `text-xs px-3 py-1 rounded border transition font-medium ${
     isLoading 
-      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-wait' 
-      : 'bg-surface text-orange-600 border border-orange-500/30 hover:bg-orange-500/10'
+      ? 'bg-foreground/5 text-foreground/20 border-border-custom cursor-wait' 
+      : 'bg-surface text-orange-500 border border-orange-500/20 hover:bg-orange-500/10'
   }`;
 
   return (

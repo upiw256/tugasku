@@ -27,7 +27,7 @@ export default async function TambahTugasPage() {
         <h1 className="text-2xl font-bold text-gray-800">Buat Tugas Baru</h1>
       </div>
 
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-surface p-8 rounded-xl shadow-sm border border-border-custom">
         {/* Panggil komponen Form dan kirim data kelas */}
         <CreateTaskForm availableClasses={sortedClasses} />
       </div>

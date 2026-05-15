@@ -76,13 +76,13 @@ export default async function DataSiswaPage({
                 name="q"
                 defaultValue={query}
                 placeholder="Nama..."
-                className="border border-border-custom px-3 py-2 rounded text-sm h-[38px] bg-surface text-foreground outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-border-custom px-3 py-2 rounded text-sm h-[38px] bg-surface text-foreground outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <input type="hidden" name="page" value="1" />
             <button
               type="submit"
-              className="bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold h-[38px]"
+              className="bg-foreground text-background px-4 py-2 rounded text-sm font-bold h-[38px] hover:opacity-90 transition-all"
             >
               Cari
             </button>
@@ -90,7 +90,7 @@ export default async function DataSiswaPage({
 
           <Link 
               href="/admin/siswa/tambah" 
-              className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-blue-700 whitespace-nowrap h-[38px] flex items-center"
+              className="bg-primary-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-primary-700 shadow-lg shadow-primary-500/20 whitespace-nowrap h-[38px] flex items-center"
             >
               + Siswa
           </Link>

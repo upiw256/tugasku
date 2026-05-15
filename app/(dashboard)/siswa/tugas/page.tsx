@@ -50,11 +50,11 @@ export default async function HalamanTugasSiswa() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col md:flex-row justify-between md:items-end border-b pb-4 gap-2 px-2">
+      <header className="flex flex-col md:flex-row justify-between md:items-end border-b border-border-custom pb-4 gap-2 px-2">
         <div>
-           <h1 className="text-2xl font-bold text-gray-800">📚 Tugas Saya</h1>
-           <p className="text-gray-500 text-sm mt-1">
-             Kelas: <span className="font-bold text-blue-600 px-2 py-0.5 bg-blue-50 rounded">{member.kelas}</span>
+           <h1 className="text-2xl font-bold text-foreground">📚 Tugas Saya</h1>
+           <p className="text-foreground/60 text-sm mt-1">
+             Kelas: <span className="font-bold text-primary-500 px-2 py-0.5 bg-primary-500/10 rounded">{member.kelas}</span>
            </p>
         </div>
       </header>
@@ -62,9 +62,9 @@ export default async function HalamanTugasSiswa() {
       {/* GRID TUGAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
         {tasks.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-gray-400 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+            <div className="col-span-full py-16 text-center text-foreground/20 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
                 <span className="text-4xl block mb-2">🎉</span>
-                <p className="text-lg font-medium">Hore! Tidak ada tugas saat ini.</p>
+                <p className="text-lg font-medium text-foreground/40">Hore! Tidak ada tugas saat ini.</p>
             </div>
         ) : (
             tasks.map((task: any) => {
@@ -91,41 +91,41 @@ export default async function HalamanTugasSiswa() {
             const isClosed = task.is_active === false;
 
             return (
-                <div key={task._id.toString()} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full transition hover:shadow-md group relative">
+                <div key={task._id.toString()} className="bg-surface rounded-2xl shadow-sm border border-border-custom overflow-hidden flex flex-col h-full transition hover:shadow-md group relative">
                 
                 {/* Indikator Warna Atas */}
-                <div className={`h-1.5 w-full ${isClosed && !isDone ? 'bg-gray-400' : isDone ? 'bg-green-500' : isLate ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                <div className={`h-1.5 w-full ${isClosed && !isDone ? 'bg-foreground/20' : isDone ? 'bg-emerald-500' : isLate ? 'bg-danger-500' : 'bg-primary-500'}`}></div>
                 
                 <div className="p-5 flex-1 flex flex-col">
                     <div className="flex justify-between items-start mb-3 gap-2">
-                        <h3 className={`font-bold leading-snug ${isClosed && !isDone ? 'text-gray-400' : 'text-gray-800'}`}>{task.judul}</h3>
+                        <h3 className={`font-bold leading-snug ${isClosed && !isDone ? 'text-foreground/30' : 'text-foreground'}`}>{task.judul}</h3>
                         
                         {/* Badge Status Gembok atau Tipe Tugas */}
                         {isClosed ? (
-                          <span className="shrink-0 text-[10px] font-bold bg-red-50 text-red-600 px-2 py-1 rounded border border-red-100 uppercase">
+                          <span className="shrink-0 text-[10px] font-bold bg-danger-500/10 text-danger-500 px-2 py-1 rounded border border-danger-500/20 uppercase">
                             🔒 Ditutup
                           </span>
                         ) : (
-                          <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded border uppercase ${isOnline ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                          <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded border uppercase ${isOnline ? 'bg-primary-500/10 text-primary-500 border-primary-500/20' : 'bg-foreground/10 text-foreground/60 border-border-custom'}`}>
                             {isOnline ? '☁️ Upload' : '🏫 Offline'}
                           </span>
                         )}
                     </div>
                     
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                        {task.deskripsi || <span className="italic text-gray-400">Tidak ada deskripsi.</span>}
+                    <p className="text-sm text-foreground/60 mb-4 line-clamp-2 leading-relaxed">
+                        {task.deskripsi || <span className="italic text-foreground/20">Tidak ada deskripsi.</span>}
                     </p>
 
                     {/* Preview Foto (Hanya muncul jika sudah upload) */}
                     {isOnline && (
                         <div className="mb-4">
                             {isDone && cleanSubmission?.file_url ? (
-                                <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-100 shadow-inner">
+                                <div className="relative w-full h-32 rounded-xl overflow-hidden border border-border-custom shadow-inner">
                                     <ImagePreview src={cleanSubmission.file_url} className="w-full h-32" />
                                 </div>
                             ) : (
-                                <div className="w-full h-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center">
-                                    <span className="text-[10px] text-gray-400 italic">
+                                <div className="w-full h-12 bg-foreground/5 border-2 border-dashed border-border-custom rounded-xl flex items-center justify-center">
+                                    <span className="text-[10px] text-foreground/20 italic">
                                       {isClosed ? 'Waktu habis' : 'Belum ada file'}
                                     </span>
                                 </div>
@@ -134,21 +134,21 @@ export default async function HalamanTugasSiswa() {
                     )}
                     
                     {/* Info Deadline */}
-                    <div className="text-[11px] text-gray-500 mb-4 flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                    <div className="text-[11px] text-foreground/40 mb-4 flex items-center gap-1.5 bg-foreground/5 p-2 rounded-lg">
                         <span>📅 Deadline:</span>
-                        <span className={`font-bold ${isLate ? 'text-red-500' : 'text-gray-700'}`}>
+                        <span className={`font-bold ${isLate ? 'text-danger-500' : 'text-foreground/70'}`}>
                             {deadline.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                         </span>
                     </div>
 
                     {/* AREA FORM: DI SINI LOGIKA PENGHILANG FORM-NYA */}
-                    <div className="mt-auto pt-4 border-t border-gray-50">
+                    <div className="mt-auto pt-4 border-t border-border-custom">
                         {isOnline ? (
                             // JIKA DITUTUP DAN BELUM ADA FILE: Tampilkan Pesan Terkunci
                             isClosed ? (
-                              <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center space-y-1">
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">🚫 Akses Ditutup</p>
-                                <p className="text-[10px] text-gray-400">Pengumpulan tidak lagi diizinkan.</p>
+                              <div className="p-4 bg-foreground/5 border border-border-custom rounded-xl text-center space-y-1">
+                                <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">🚫 Akses Ditutup</p>
+                                <p className="text-[10px] text-foreground/20">Pengumpulan tidak lagi diizinkan.</p>
                               </div>
                             ) : (
                               // JIKA MASIH BUKA ATAU SUDAH KIRIM: Tampilkan Form
@@ -158,14 +158,14 @@ export default async function HalamanTugasSiswa() {
                             )
                         ) : (
                             // Bagian Tugas Offline (Sekolah)
-                            <div className={`p-4 rounded-xl text-center border border-dashed ${isDone ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                            <div className={`p-4 rounded-xl text-center border border-dashed ${isDone ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-foreground/5 border-border-custom'}`}>
                                 {isDone ? (
                                     <div>
-                                        <p className="text-xs font-bold text-green-700">✅ Sudah Dinilai</p>
-                                        <p className="text-[10px] text-gray-500 mt-1">Nilai: <span className="font-bold text-gray-800 text-sm">{cleanSubmission?.nilai}</span></p>
+                                        <p className="text-xs font-bold text-emerald-500">✅ Sudah Dinilai</p>
+                                        <p className="text-[10px] text-foreground/40 mt-1">Nilai: <span className="font-bold text-foreground text-sm">{cleanSubmission?.nilai}</span></p>
                                     </div>
                                 ) : (
-                                    <p className="text-xs font-bold text-gray-600 uppercase italic">🏫 Kumpulkan di Kelas</p>
+                                    <p className="text-xs font-bold text-foreground/40 uppercase italic">🏫 Kumpulkan di Kelas</p>
                                 )}
                             </div>
                         )}

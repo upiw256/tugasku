@@ -37,8 +37,8 @@ export default async function EditTugasPage({ params }: PageProps) {
   const classList = rawClasses.sort();
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-      <h1 className="text-xl font-bold text-gray-800 mb-6 border-b pb-4">
+    <div className="max-w-2xl mx-auto bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
+      <h1 className="text-xl font-bold text-foreground mb-6 border-b border-border-custom pb-4">
         ✏️ Edit Tugas
       </h1>
       

@@ -52,13 +52,13 @@ export default async function SiswaKuisPage() {
         <p className="opacity-90 mt-2 text-purple-100">Uji pemahamanmu dengan mengerjakan kuis yang sudah disiapkan!</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="font-bold text-gray-800 text-lg">Daftar Kuis</h2>
+      <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden">
+        <div className="p-6 border-b border-border-custom bg-foreground/5">
+          <h2 className="font-bold text-foreground text-lg">Daftar Kuis</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+            <thead className="text-xs text-foreground/40 uppercase bg-foreground/5 border-b border-border-custom">
               <tr>
                 <th className="px-6 py-3">Nama Kuis</th>
                 <th className="px-6 py-3">Waktu</th>
@@ -66,10 +66,10 @@ export default async function SiswaKuisPage() {
                 <th className="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border-custom">
               {quizzes.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-medium">Belum ada kuis untuk kelas {student.kelas}.</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-foreground/20 font-medium italic">Belum ada kuis untuk kelas {student.kelas}.</td>
                 </tr>
               ) : (
                 quizzes.map((kuis: any) => {
@@ -116,12 +116,12 @@ export default async function SiswaKuisPage() {
                   }
 
                   return (
-                    <tr key={idKuis} className="hover:bg-gray-50 transition">
+                    <tr key={idKuis} className="hover:bg-foreground/5 transition">
                       <td className="px-6 py-4">
-                        <p className="font-bold text-gray-800">{kuis.judul}</p>
-                        <p className="text-xs text-gray-500 line-clamp-1">{kuis.deskripsi || 'Kuis online'}</p>
+                        <p className="font-bold text-foreground">{kuis.judul}</p>
+                        <p className="text-xs text-foreground/40 line-clamp-1">{kuis.deskripsi || 'Kuis online'}</p>
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-500">
+                      <td className="px-6 py-4 text-xs text-foreground/30 font-medium">
                         <div>Mulai: {startTime.toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</div>
                         <div>Selesai: {endTime.toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</div>
                       </td>
@@ -132,12 +132,12 @@ export default async function SiswaKuisPage() {
                         {canTake ? (
                           <Link 
                             href={`/siswa/kuis/${idKuis}`} 
-                            className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+                            className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-purple-700 transition shadow-lg shadow-purple-600/20"
                           >
                             {statusPengerjaan?.status === 'DRAFT' ? 'Lanjutkan' : 'Mulai Kuis'}
                           </Link>
                         ) : (
-                          <button disabled className="bg-gray-100 text-gray-400 text-xs font-bold px-4 py-2 rounded-lg cursor-not-allowed">
+                          <button disabled className="bg-foreground/5 text-foreground/20 text-xs font-bold px-4 py-2 rounded-lg cursor-not-allowed">
                             {now < startTime ? 'Belum Buka' : 'Tutup'}
                           </button>
                         )}

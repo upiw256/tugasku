@@ -73,7 +73,7 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
         <label className="block text-sm font-bold text-foreground">Catatan Siswa</label>
         <textarea
           name="catatan"
-          className="w-full p-2 bg-foreground/5 border border-border-custom rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 bg-foreground/5 border border-border-custom rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-primary-500"
           placeholder="Tambahkan catatan jika ada..."
           rows={3}
         ></textarea>
@@ -83,7 +83,7 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
         type="submit"
         disabled={isUploading}
         className={`w-full py-3 rounded-lg font-bold text-white transition-all 
-          ${isUploading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+          ${isUploading ? 'bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'}`}
       >
         {isUploading ? "Sedang Mengirim..." : "Kirim Tugas"}
       </button>

@@ -18,15 +18,15 @@ export default async function TambahTugasKelompokPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/tugas-kelompok" className="text-gray-500 hover:text-gray-800 transition bg-gray-100 p-2 rounded-lg">
+        <Link href="/admin/tugas-kelompok" className="text-foreground/40 hover:text-foreground transition bg-foreground/5 p-2 rounded-lg border border-border-custom">
           ← Kembali
         </Link>
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <span className="text-3xl">👥</span> Bentuk Data Kelompok
         </h1>
       </div>
 
-      <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-surface p-6 md:p-8 rounded-xl shadow-sm border border-border-custom">
         <CreateGroupForm availableClasses={sortedClasses} />
       </div>
     </div>

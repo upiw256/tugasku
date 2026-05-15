@@ -61,54 +61,54 @@ export default function CreateTaskKelompokForm({ availableClasses }: { available
   return (
     <form action={handleSubmit} className="space-y-5">
       
-      <div className="bg-indigo-50 border border-indigo-200 text-indigo-800 p-4 rounded-lg text-sm mb-4">
+      <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 p-4 rounded-lg text-sm mb-4">
         <strong>Info:</strong> Tugas Kelompok ini akan otomatis didistribusikan kepada anggota-anggota di <strong>Data Kelompok</strong> yang telah eksis pada kelas yang Anda pilih.
       </div>
 
       <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Judul Tugas Kelompok <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-bold text-foreground mb-1">Judul Tugas Kelompok <span className="text-danger-500">*</span></label>
         <input 
           name="judul" 
           type="text" 
           required 
           placeholder="Contoh: Laporan Observasi (Kelompok)"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Deskripsi</label>
+        <label className="block text-sm font-bold text-foreground mb-1">Deskripsi</label>
         <textarea 
           name="deskripsi" 
           rows={4}
           placeholder="Detail tugas..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+          className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none"
         ></textarea>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Deadline <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Deadline <span className="text-danger-500">*</span></label>
           <input 
             name="deadline" 
             type="date" 
             required 
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-600"
+            className="w-full px-4 py-2 border border-border-custom bg-surface rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-foreground"
           />
         </div>
 
         <div ref={dropdownRef} className="relative">
-          <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Kelas <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-foreground mb-1">Pilih Kelas <span className="text-danger-500">*</span></label>
           <input type="hidden" name="kelas" value={selectedClasses.join(', ')} />
           <div 
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-full min-h-[42px] px-3 py-2 border rounded-lg cursor-pointer bg-white flex flex-wrap gap-2 items-center transition ${isOpen ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-300 hover:border-gray-400'}`}
+            className={`w-full min-h-[42px] px-3 py-2 border rounded-lg cursor-pointer bg-surface flex flex-wrap gap-2 items-center transition ${isOpen ? 'border-primary-500 ring-2 ring-primary-500/20' : 'border-border-custom hover:border-foreground/20'}`}
           >
-            {selectedClasses.length === 0 && <span className="text-gray-400 text-sm">-- Klik untuk pilih kelas --</span>}
+            {selectedClasses.length === 0 && <span className="text-foreground/20 text-sm">-- Klik untuk pilih kelas --</span>}
             {selectedClasses.map((cls) => (
-              <span key={cls} className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+              <span key={cls} className="bg-primary-500/10 text-primary-500 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
                 {cls}
-                <button type="button" onClick={(e) => removeTag(cls, e)} className="hover:text-blue-900 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center">&times;</button>
+                <button type="button" onClick={(e) => removeTag(cls, e)} className="hover:text-primary-600 hover:bg-primary-500/20 rounded-full w-4 h-4 flex items-center justify-center">&times;</button>
               </span>
             ))}
             <div className="ml-auto text-gray-400">
@@ -117,16 +117,16 @@ export default function CreateTaskKelompokForm({ availableClasses }: { available
           </div>
 
           {isOpen && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+            <div className="absolute z-10 w-full mt-1 bg-surface border border-border-custom rounded-lg shadow-xl max-h-60 overflow-y-auto">
               {availableClasses.length === 0 ? (
-                <div className="p-3 text-sm text-gray-500 text-center">Data kelas kosong.</div>
+                <div className="p-3 text-sm text-foreground/20 text-center">Data kelas kosong.</div>
               ) : (
                 availableClasses.map((cls) => {
                   const isSelected = selectedClasses.includes(cls);
                   return (
-                    <div key={cls} onClick={() => toggleClass(cls)} className={`px-4 py-2 text-sm cursor-pointer flex justify-between items-center transition ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}>
+                    <div key={cls} onClick={() => toggleClass(cls)} className={`px-4 py-2 text-sm cursor-pointer flex justify-between items-center transition ${isSelected ? 'bg-primary-500/10 text-primary-500 font-medium' : 'text-foreground/70 hover:bg-foreground/5'}`}>
                       <span>{cls}</span>
-                      {isSelected && <span className="text-blue-600">✓</span>}
+                      {isSelected && <span className="text-primary-500">✓</span>}
                     </div>
                   );
                 })
@@ -136,20 +136,20 @@ export default function CreateTaskKelompokForm({ availableClasses }: { available
         </div>
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-bold text-gray-700 mb-2">Metode Pengumpulan</label>
+        <label className="block text-sm font-bold text-foreground mb-2">Metode Pengumpulan</label>
         <div className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer border p-3 rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
-            <input type="radio" name="tipe_pengumpulan" value="online" defaultChecked className="w-4 h-4 text-blue-600" />
+          <label className="flex items-center gap-2 cursor-pointer border border-border-custom bg-surface p-3 rounded-lg has-[:checked]:bg-primary-500/10 has-[:checked]:border-primary-500 transition-all">
+            <input type="radio" name="tipe_pengumpulan" value="online" defaultChecked className="w-4 h-4 text-primary-600 focus:ring-primary-500" />
             <div>
               <span className="block text-sm font-bold">☁️ Upload File</span>
-              <span className="block text-xs text-gray-500">Perwakilan kelompok upload bukti file</span>
+              <span className="block text-xs text-foreground/40">Perwakilan kelompok upload bukti file</span>
             </div>
           </label>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg font-bold border border-red-100 text-center animate-pulse">
+        <div className="p-3 bg-danger-500/10 text-danger-600 text-sm rounded-lg font-bold border border-danger-500/20 text-center animate-pulse">
           {error}
         </div>
       )}

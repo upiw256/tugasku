@@ -165,7 +165,7 @@ export default function KuisManager({
                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                 </div>
               ) : pesertaList.length === 0 ? (
-                <div className="text-center py-20 text-foreground/40">Belum ada siswa yang mulai mengerjakan kuis ini.</div>
+                <div className="text-center py-20 text-foreground/20 italic font-medium">Belum ada siswa yang mulai mengerjakan kuis ini.</div>
               ) : (
                 <table className="w-full text-sm">
                   <thead className="bg-foreground/5 text-foreground/60 uppercase text-[10px] font-bold">
@@ -176,9 +176,9 @@ export default function KuisManager({
                       <th className="px-4 py-3 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-border-custom">
                     {pesertaList.map((p) => (
-                      <tr key={p._id} className="hover:bg-foreground/5 transition-colors border-b border-border-custom last:border-0">
+                      <tr key={p._id} className="hover:bg-foreground/5 transition-colors">
                         <td className="px-4 py-4">
                           <p className="font-bold text-foreground">{p.member_id?.nama_lengkap || 'Unknown'}</p>
                           <p className="text-[10px] text-foreground/40">Kelas: {p.member_id?.kelas} • NIS: {p.member_id?.nis}</p>
@@ -194,7 +194,7 @@ export default function KuisManager({
                         <td className="px-4 py-4 text-right">
                           <button 
                             onClick={() => handleResetTimer(p._id, p.member_id?.nama_lengkap)}
-                            className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-purple-200 transition"
+                            className="bg-primary-500/10 text-primary-500 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-500/20 transition border border-primary-500/20"
                           >
                              🔄 Reset Waktu
                           </button>
@@ -256,7 +256,7 @@ export default function KuisManager({
             <tbody>
               {initialKuis.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-400 font-medium">Belum ada kuis yang dibuat.</td>
+                  <td colSpan={5} className="px-6 py-8 text-center text-foreground/20 font-medium italic">Belum ada kuis yang dibuat.</td>
                 </tr>
               ) : (
                 initialKuis.map((kuis: any) => (
@@ -268,7 +268,7 @@ export default function KuisManager({
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {(Array.isArray(kuis.kelas) ? kuis.kelas : [kuis.kelas]).map((c: string) => (
-                          <span key={c} className="bg-blue-500/10 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-500/20">{c}</span>
+                          <span key={c} className="bg-primary-500/10 text-primary-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary-500/20">{c}</span>
                         ))}
                       </div>
                     </td>
