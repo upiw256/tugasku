@@ -6,6 +6,7 @@ import { submitGradeAction, deleteGradeAction } from '@/actions/grade-actions'; 
 export default function GradeHistoryRow({ grade, memberId }: { grade: any, memberId: string }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // State untuk Read More
 
   // Fungsi Simpan Edit
   const handleSave = async (formData: FormData) => {
@@ -76,17 +77,35 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
           <span className="font-bold text-foreground leading-tight">
             {grade.tugas_id?.judul || 'Tugas Terhapus'}
           </span>
+          
+          {/* Deskripsi Tugas */}
+          {grade.tugas_id?.deskripsi && (
+            <div className="mt-1">
+              <p className={`text-[10px] text-foreground/50 leading-relaxed ${!isExpanded ? 'line-clamp-1' : ''}`}>
+                {grade.tugas_id.deskripsi}
+              </p>
+              {grade.tugas_id.deskripsi.length > 50 && (
+                <button 
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-[9px] text-primary-500 font-bold hover:underline"
+                >
+                  {isExpanded ? 'Tutup' : 'Baca Selengkapnya'}
+                </button>
+              )}
+            </div>
+          )}
+
           {grade.file_url ? (
             <a 
               href={grade.file_url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-[10px] text-primary-500 hover:underline flex items-center gap-1 mt-1 font-medium bg-primary-500/10 w-fit px-1.5 py-0.5 rounded"
+              className="text-[10px] text-primary-500 hover:underline flex items-center gap-1 mt-2 font-medium bg-primary-500/10 w-fit px-1.5 py-0.5 rounded"
             >
               📂 Lihat File Hasil
             </a>
           ) : (
-            <span className="text-[10px] text-foreground/20 italic mt-1">
+            <span className="text-[10px] text-foreground/20 italic mt-2">
               Tidak ada lampiran file
             </span>
           )}

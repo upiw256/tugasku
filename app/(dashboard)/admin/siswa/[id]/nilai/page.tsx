@@ -26,7 +26,7 @@ export default async function InputNilaiPage({
 
   // 2. Ambil Nilai yang SUDAH ada (untuk Riwayat & Validasi)
   const gradesRaw = await Nilai.find({ member_id: id })
-    .populate('tugas_id', 'judul')
+    .populate('tugas_id', 'judul deskripsi')
     .sort({ tanggal_dinilai: -1 })
     .lean();
 
