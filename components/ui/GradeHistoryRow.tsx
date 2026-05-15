@@ -28,8 +28,8 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
   // Tampilan saat Mode Edit
   if (isEditing) {
     return (
-      <tr className="bg-yellow-50 border-b">
-        <td className="px-4 py-3 text-gray-600 text-sm">
+      <tr className="bg-primary-500/5 border-b border-border-custom">
+        <td className="px-4 py-3 text-foreground/60 text-sm">
           {grade.tugas_id?.judul || 'Tugas Terhapus'}
         </td>
         <td className="px-4 py-3">
@@ -42,7 +42,7 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
               type="number" 
               defaultValue={grade.nilai} 
               min="0" max="100" 
-              className="w-16 px-2 py-1 text-sm border border-orange-300 rounded focus:ring-2 focus:ring-orange-200 outline-none"
+              className="w-16 px-2 py-1 text-sm border border-border-custom bg-surface text-foreground rounded focus:ring-2 focus:ring-primary-500 outline-none"
               autoFocus
             />
             
@@ -57,7 +57,7 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
             <button 
               type="button" 
               onClick={() => setIsEditing(false)}
-              className="bg-gray-400 text-white px-2 py-1 rounded text-xs font-bold hover:bg-gray-500"
+              className="bg-danger-500/20 text-danger-600 px-2 py-1 rounded text-xs font-bold hover:bg-danger-500/30"
               title="Batal"
             >
               ✕
@@ -70,12 +70,30 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
 
   // Tampilan Normal
   return (
-    <tr className="hover:bg-gray-50 border-b last:border-0 group">
-      <td className="px-4 py-3 font-medium text-gray-700">
-        {grade.tugas_id?.judul || 'Tugas Terhapus'}
+    <tr className="hover:bg-foreground/5 border-b border-border-custom last:border-0 group transition-colors">
+      <td className="px-4 py-3">
+        <div className="flex flex-col">
+          <span className="font-bold text-foreground leading-tight">
+            {grade.tugas_id?.judul || 'Tugas Terhapus'}
+          </span>
+          {grade.file_url ? (
+            <a 
+              href={grade.file_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[10px] text-primary-500 hover:underline flex items-center gap-1 mt-1 font-medium bg-primary-500/10 w-fit px-1.5 py-0.5 rounded"
+            >
+              📂 Lihat File Hasil
+            </a>
+          ) : (
+            <span className="text-[10px] text-foreground/20 italic mt-1">
+              Tidak ada lampiran file
+            </span>
+          )}
+        </div>
       </td>
       <td className="px-4 py-3 flex justify-between items-center gap-4">
-        <span className={`font-bold ${grade.nilai < 75 ? 'text-red-500' : 'text-green-600'}`}>
+        <span className={`font-bold text-lg ${grade.nilai < 75 ? 'text-danger-500' : 'text-emerald-500'}`}>
           {grade.nilai}
         </span>
         
@@ -85,7 +103,7 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
           <button 
             onClick={() => setIsEditing(true)}
             disabled={isLoading}
-            className="text-xs text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-2 py-1 rounded border border-blue-100"
+            className="text-[10px] text-primary-500 font-bold bg-primary-500/10 px-2 py-1 rounded border border-primary-500/20 hover:bg-primary-500/20 transition"
           >
             Edit ✎
           </button>
@@ -94,7 +112,7 @@ export default function GradeHistoryRow({ grade, memberId }: { grade: any, membe
           <button 
             onClick={handleDelete}
             disabled={isLoading}
-            className="text-xs text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded border border-red-100"
+            className="text-[10px] text-danger-500 font-bold bg-danger-500/10 px-2 py-1 rounded border border-danger-500/20 hover:bg-danger-500/20 transition"
             title="Hapus Nilai"
           >
             Hapus 🗑️

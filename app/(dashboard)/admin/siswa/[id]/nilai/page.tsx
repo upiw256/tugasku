@@ -59,13 +59,13 @@ export default async function InputNilaiPage({
       {/* Header Info */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Input Nilai Siswa</h1>
-          <p className="text-gray-500">
-            Siswa: <span className="font-bold text-blue-600">{student.nama_lengkap}</span> | 
-            Kelas: <span className="font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-700">{student.kelas}</span>
+          <h1 className="text-2xl font-bold text-foreground">Input Nilai Siswa</h1>
+          <p className="text-foreground/60">
+            Siswa: <span className="font-bold text-primary-500">{student.nama_lengkap}</span> | 
+            Kelas: <span className="font-bold bg-foreground/5 px-2 py-0.5 rounded text-foreground/80">{student.kelas}</span>
           </p>
         </div>
-        <Link href="/admin/siswa" className="text-sm text-gray-500 hover:text-gray-800 underline">
+        <Link href="/admin/siswa" className="text-sm text-foreground/40 hover:text-foreground underline">
           ← Kembali ke Data Siswa
         </Link>
       </div>
@@ -73,14 +73,14 @@ export default async function InputNilaiPage({
       <div className="grid md:grid-cols-2 gap-8">
         
         {/* KOLOM KIRI: FORM INPUT BARU */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
-          <h2 className="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Input Nilai Baru</h2>
+        <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom h-fit">
+          <h2 className="font-bold text-lg text-foreground mb-4 border-b border-border-custom pb-2">Input Nilai Baru</h2>
           
           {tasksToGrade.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded border border-dashed text-gray-500 text-sm">
-              🎉 Semua tugas di kelas <b>{student.kelas}</b> sudah dinilai!
+            <div className="text-center py-8 bg-foreground/5 rounded border border-dashed border-border-custom text-foreground/40 text-sm">
+              <span className="opacity-100">🎉 Semua tugas di kelas <b className="text-foreground">{student.kelas}</b> sudah dinilai!</span>
               <br/>
-              <span className="text-xs text-gray-400">Gunakan tabel di samping untuk mengedit nilai.</span>
+              <span className="text-xs text-foreground/20">Gunakan tabel di samping untuk mengedit nilai.</span>
             </div>
           ) : (
             <form action={async (formData) => {
@@ -92,11 +92,11 @@ export default async function InputNilaiPage({
 
               {/* Pilih Tugas (Hanya yang belum dinilai) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Tugas</label>
+                <label className="block text-sm font-medium text-foreground/70 mb-1">Pilih Tugas</label>
                 <select 
                   name="tugas_id" 
                   required 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  className="w-full px-3 py-2 border border-border-custom rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-surface text-foreground"
                 >
                   <option value="">-- Pilih Judul Tugas --</option>
                   {tasksToGrade.map((t: any) => (
@@ -109,20 +109,20 @@ export default async function InputNilaiPage({
 
               {/* Input Nilai */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nilai (0-100)</label>
+                <label className="block text-sm font-medium text-foreground/70 mb-1">Nilai (0-100)</label>
                 <input 
                   name="nilai" 
                   type="number" 
                   min="0" max="100" 
                   required 
                   placeholder="Masukkan nilai..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
                 />
               </div>
 
               <button 
                 type="submit" 
-                className="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm mt-2"
+                className="w-full bg-primary-600 text-white py-2 rounded-lg font-bold hover:bg-primary-700 transition shadow-lg shadow-primary-500/20 mt-2"
               >
                 Simpan Nilai
               </button>
@@ -131,23 +131,23 @@ export default async function InputNilaiPage({
         </div>
 
         {/* KOLOM KANAN: RIWAYAT & EDIT */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-          <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-            <h2 className="font-bold text-gray-800">Riwayat Nilai</h2>
-            <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">{existingGrades.length} Item</span>
+        <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+          <div className="p-4 border-b border-border-custom bg-foreground/5 flex justify-between items-center">
+            <h2 className="font-bold text-foreground">Riwayat Nilai</h2>
+            <span className="text-xs bg-foreground/10 text-foreground/60 px-2 py-1 rounded-full">{existingGrades.length} Item</span>
           </div>
           
           <table className="w-full text-sm text-left">
-            <thead className="bg-white text-gray-500 border-b">
+            <thead className="bg-foreground/5 text-foreground/40 border-b border-border-custom uppercase text-[10px] font-bold">
               <tr>
                 <th className="px-4 py-2 w-2/3">Judul Tugas</th>
                 <th className="px-4 py-2">Nilai</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-border-custom">
               {existingGrades.length === 0 ? (
                  <tr>
-                   <td colSpan={2} className="p-4 text-center text-gray-400 italic">
+                   <td colSpan={2} className="p-4 text-center text-foreground/20 italic">
                      Belum ada nilai yang dimasukkan.
                    </td>
                  </tr>
