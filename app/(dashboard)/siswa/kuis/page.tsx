@@ -4,10 +4,15 @@ import { SoalPG, Member, PengerjaanKuis, User } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
+import MapelFilterSiswa from '@/components/siswa/MapelFilterSiswa';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SiswaKuisPage() {
+export default async function SiswaKuisPage({
+  searchParams
+}: {
+  searchParams: Promise<{ mapel?: string }>
+}) {
   noStore();
   const session = await auth();
   
@@ -16,6 +21,8 @@ export default async function SiswaKuisPage() {
   }
 
   await connectDB();
+  const params = await searchParams;
+  const selectedMapel = params.mapel || '';
   
   // Ambil data User untuk mendapatkan member_id
   const currentUser = await User.findById(session.user.id).lean();
@@ -28,10 +35,19 @@ export default async function SiswaKuisPage() {
     return <div className="p-10 text-center">Data siswa tidak ditemukan.</div>;
   }
 
-  // Ambil kuis yang sesuai dengan kelas siswa
-  const rawQuizzes = await SoalPG.find({ 
+  // Ambil list Mapel yang ada kuisnya untuk kelas ini
+  const allClassQuizzes = await SoalPG.find({
     $or: [{ kelas: student.kelas }, { kelas: { $in: [student.kelas] } }]
-  }).sort({ waktu_mulai: 1 }).lean();
+  }).select('mapel').lean();
+  const listMapel = Array.from(new Set(allClassQuizzes.map((k: any) => k.mapel).filter(Boolean))) as string[];
+
+  // Ambil kuis yang sesuai dengan kelas siswa dan filter mapel
+  const quizFilter: any = {
+    $or: [{ kelas: student.kelas }, { kelas: { $in: [student.kelas] } }]
+  };
+  if (selectedMapel) quizFilter.mapel = selectedMapel;
+
+  const rawQuizzes = await SoalPG.find(quizFilter).sort({ waktu_mulai: 1 }).lean();
 
   // Deep cleaning untuk menghindari isu serialisasi Mongoose
   const quizzes = JSON.parse(JSON.stringify(rawQuizzes));
@@ -46,15 +62,23 @@ export default async function SiswaKuisPage() {
   const now = new Date();
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-8 rounded-2xl text-white shadow-lg">
-        <h1 className="text-3xl font-bold">Kuis & Latihan</h1>
-        <p className="opacity-90 mt-2 text-purple-100">Uji pemahamanmu dengan mengerjakan kuis yang sudah disiapkan!</p>
+    <div className="space-y-10 max-w-5xl mx-auto pb-20">
+      <header className="relative overflow-hidden bg-gradient-to-br from-purple-700 to-blue-600 p-10 rounded-[2.5rem] text-white shadow-2xl shadow-purple-500/20 mx-2">
+        <div className="relative z-10">
+          <h1 className="text-4xl font-black uppercase tracking-tight">Kuis & Latihan</h1>
+          <p className="opacity-90 mt-2 text-purple-100 font-medium max-w-md">Uji pemahamanmu dengan mengerjakan kuis yang sudah disiapkan!</p>
+        </div>
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+      </header>
+
+      <div className="space-y-4 px-2">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 px-2">Mata Pelajaran Aktif</h2>
+        <MapelFilterSiswa listMapel={listMapel.sort()} currentMapel={selectedMapel} />
       </div>
 
-      <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden">
-        <div className="p-6 border-b border-border-custom bg-foreground/5">
-          <h2 className="font-bold text-foreground text-lg">Daftar Kuis</h2>
+      <div className="bg-surface rounded-[2rem] shadow-lg border border-border-custom overflow-hidden mx-2">
+        <div className="p-8 border-b border-border-custom bg-foreground/[0.01]">
+          <h2 className="font-black text-foreground text-xl uppercase tracking-tight">Daftar Kuis</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -117,9 +141,16 @@ export default async function SiswaKuisPage() {
 
                   return (
                     <tr key={idKuis} className="hover:bg-foreground/5 transition">
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-foreground">{kuis.judul}</p>
-                        <p className="text-xs text-foreground/40 line-clamp-1">{kuis.deskripsi || 'Kuis online'}</p>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col">
+                            {kuis.mapel && (
+                                <span className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-1">
+                                    {kuis.mapel}
+                                </span>
+                            )}
+                            <p className="font-bold text-foreground text-base leading-tight">{kuis.judul}</p>
+                            <p className="text-xs text-foreground/40 mt-1 line-clamp-1">{kuis.deskripsi || 'Kuis online'}</p>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-foreground/30 font-medium">
                         <div>Mulai: {startTime.toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</div>

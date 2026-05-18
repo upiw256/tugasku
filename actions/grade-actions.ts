@@ -27,6 +27,7 @@ export async function submitGradeAction(formData: FormData) {
 
     // Refresh halaman agar tabel nilai terupdate
     revalidatePath(`/admin/siswa/${memberId}/nilai`);
+    revalidatePath(`/guru/siswa/${memberId}/nilai`);
     
     return { success: true, message: 'Nilai berhasil disimpan!' };
   } catch (error) {

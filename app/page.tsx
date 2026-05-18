@@ -14,6 +14,8 @@ export default async function HomePage() {
     redirect("/admin"); // Arahkan ke dashboard admin utama
   } else if (session.user.role === "siswa") {
     redirect("/siswa");
+  } else if (session.user.role === "guru") {
+    redirect("/guru");
   }
 
   return null;

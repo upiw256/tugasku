@@ -8,9 +8,11 @@ interface Props {
   student: any;
   date: string;
   initialStatus: string | null;
+  mapel?: string;
+  guruId?: string;
 }
 
-export default function AdminAttendanceRow({ student, date, initialStatus }: Props) {
+export default function AdminAttendanceRow({ student, date, initialStatus, mapel, guruId }: Props) {
   const [status, setStatus] = useState(initialStatus);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +21,7 @@ export default function AdminAttendanceRow({ student, date, initialStatus }: Pro
     setStatus(newStatus);
     setLoading(true);
 
-    const res = await upsertAttendanceAction(student._id, date, newStatus);
+    const res = await upsertAttendanceAction(student._id, date, newStatus, mapel, guruId);
     setLoading(false);
     
     if (res.success) {

@@ -20,7 +20,7 @@ export default function AdminSystemSettings() {
   const handleReset = async () => {
     const result1 = await Swal.fire({
       title: '⚠️ BAHAYA: Reset Database?',
-      text: "Semua data siswa, tugas, nilai, dan absensi akan DIHAPUS PERMANEN. Hanya akun Admin yang tersisa.",
+      text: "Seluruh data (Siswa, Guru, Materi, Kuis, Tugas, Nilai, & Absensi) akan DIHAPUS PERMANEN. Hanya akun Admin utama yang akan tersisa.",
       icon: 'warning',
       background: 'var(--surface)',
       color: 'var(--foreground)',
@@ -203,7 +203,9 @@ export default function AdminSystemSettings() {
         <h2 className="text-lg font-bold text-red-500 mb-2 flex items-center gap-2">
           <span>⛔</span> Danger Zone
         </h2>
-        <p className="text-sm text-red-500/60 mb-4 font-medium">Reset Pabrik: Menghapus seluruh data siswa dan nilai secara permanen.</p>
+        <p className="text-sm text-red-500/60 mb-4 font-medium italic">
+          Reset Pabrik: Menghapus seluruh data master (Siswa, Guru, Mapel) dan data transaksional (Tugas, Nilai, Kuis, Materi, Absensi) secara permanen.
+        </p>
         <button 
           onClick={handleReset}
           disabled={loading}

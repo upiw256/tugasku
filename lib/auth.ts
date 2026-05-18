@@ -85,6 +85,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: foundUser.nama_lengkap || foundUser.role, 
             email: foundUser.user, // Simpan username di field email session
             role: foundUser.role,
+            guru_id: foundUser.guru_id ? foundUser.guru_id.toString() : undefined,
           }
         } catch (error) {
           console.error("⚠️ Auth Error:", error)
@@ -94,19 +95,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any, user: any }) {
       if (user) {
         token.role = user.role
         token.id = user.id
+        if (user.guru_id) token.guru_id = user.guru_id
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any, token: any }) {
       if (session.user) {
-        session.user.role = token.role as string
-        session.user.id = token.id as string
+        (session.user as any).role = token.role as string
+        (session.user as any).id = token.id as string
         // Pastikan email di session terisi username dari database
         session.user.email = token.email as string 
+        if (token.guru_id) (session.user as any).guru_id = token.guru_id as string
       }
       return session
     },

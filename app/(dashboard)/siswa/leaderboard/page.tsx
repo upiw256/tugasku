@@ -1,20 +1,22 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Member, Nilai, PengerjaanKuis, User } from '@/models';
+import { Member, Nilai, PengerjaanKuis, User, Tugas, SoalPG } from '@/models';
+import MapelFilterSiswa from '@/components/siswa/MapelFilterSiswa';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 export default async function SiswaLeaderboardPage({ 
   searchParams 
 }: { 
-  searchParams: Promise<{ type?: string, kelas?: string }> 
+  searchParams: Promise<{ type?: string, kelas?: string, mapel?: string }> 
 }) {
   const session = await auth();
   if (!session) redirect('/login');
 
   await connectDB();
   const params = await searchParams;
-  const viewType = params.type || 'kelas'; // Default siswa liat kelas dulu
+  const viewType = params.type || 'kelas'; 
+  const selectedMapel = params.mapel || '';
   
   // Ambil data diri siswa dari akun (berdasarkan email session)
   const userAccount = await User.findOne({ user: session.user.email });
@@ -22,25 +24,67 @@ export default async function SiswaLeaderboardPage({
   const userKelas = currentUser?.kelas || '';
   const selectedKelas = params.kelas || userKelas;
 
-  // 1. Filter (Hanya untuk filter query match)
-  const filter = viewType === 'kelas' ? { kelas: selectedKelas } : {};
+  // Ambil list Mapel untuk filter (Hanya yang ada di kelas siswa ini)
+  const allTugasMapels = await Tugas.distinct('mapel', {
+    $or: [{ kelas: userKelas }, { kelas: { $in: [userKelas] } }]
+  });
+  const allKuisMapels = await SoalPG.distinct('mapel', {
+    $or: [{ kelas: userKelas }, { kelas: { $in: [userKelas] } }]
+  });
+  const listMapel = Array.from(new Set([...allTugasMapels, ...allKuisMapels].filter(Boolean))) as string[];
 
-  // 2. Agregasi Efisien
+  // 1. Filter Dasar (Hanya untuk filter query match Member)
+  const memberFilter = viewType === 'kelas' ? { kelas: selectedKelas } : {};
+
+  // 2. Agregasi Efisien dengan Filter Mapel di dalam Lookup
   const studentStats = await Member.aggregate([
-    { $match: filter },
+    { $match: memberFilter },
     {
       $lookup: {
         from: "nilais",
-        localField: "_id",
-        foreignField: "member_id",
+        let: { student_id: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$member_id", "$$student_id"] } } },
+          // Join ke Tugas untuk cek Mapel
+          {
+            $lookup: {
+              from: "tugas",
+              localField: "tugas_id",
+              foreignField: "_id",
+              as: "tinfo"
+            }
+          },
+          { $unwind: "$tinfo" },
+          ...(selectedMapel ? [{ $match: { "tinfo.mapel": selectedMapel } }] : [])
+        ],
         as: "tugas_data"
       }
     },
     {
       $lookup: {
         from: "pengerjaankuis",
-        localField: "_id",
-        foreignField: "member_id",
+        let: { student_id: "$_id" },
+        pipeline: [
+          { 
+            $match: { 
+              $and: [
+                { $expr: { $eq: ["$member_id", "$$student_id"] } },
+                { status: "SUBMITTED" }
+              ]
+            } 
+          },
+          // Join ke SoalPG (Kuis) untuk cek Mapel
+          {
+            $lookup: {
+              from: "soalpgs",
+              localField: "kuis_id",
+              foreignField: "_id",
+              as: "kinfo"
+            }
+          },
+          { $unwind: "$kinfo" },
+          ...(selectedMapel ? [{ $match: { "kinfo.mapel": selectedMapel } }] : [])
+        ],
         as: "kuis_data"
       }
     },
@@ -49,27 +93,9 @@ export default async function SiswaLeaderboardPage({
         nama_lengkap: 1,
         kelas: 1,
         poin_keaktifan: 1,
-        totalTugas: { $ifNull: [{ $avg: "$tugas_data.nilai" }, 0] },
-        totalKuis: {
-          $ifNull: [
-            {
-              $avg: {
-                $map: {
-                  input: {
-                    $filter: {
-                      input: "$kuis_data",
-                      as: "k",
-                      cond: { $eq: ["$$k.status", "SUBMITTED"] }
-                    }
-                  },
-                  as: "item",
-                  in: "$$item.nilai"
-                }
-              }
-            },
-            0
-          ]
-        }
+        // Cari rata-rata kalau ada datanya
+        avgTugas: { $ifNull: [{ $avg: "$tugas_data.nilai" }, 0] },
+        avgKuis: { $ifNull: [{ $avg: "$kuis_data.nilai" }, 0] }
       }
     },
     {
@@ -79,15 +105,22 @@ export default async function SiswaLeaderboardPage({
         kelas: 1,
         totalScore: {
           $add: [
-            { $ifNull: ["$totalTugas", 0] },
-            { $ifNull: ["$totalKuis", 0] },
-            { $ifNull: ["$poin_keaktifan", 0] }
+            "$avgTugas",
+            "$avgKuis",
+            // Poin keaktifan HANYA dihitung kalau tidak sedang filter mapel spesifik
+            // Agar ranking mapel murni akademis
+            { $cond: [{ $eq: [selectedMapel, ""] }, { $ifNull: ["$poin_keaktifan", 0] }, 0] }
           ]
+        },
+        detail: {
+            tugas: "$avgTugas",
+            kuis: "$avgKuis",
+            aktif: { $cond: [{ $eq: [selectedMapel, ""] }, "$poin_keaktifan", 0] }
         }
       }
     },
     { $sort: { totalScore: -1 } },
-    { $limit: 50 }
+    { $limit: 100 }
   ]);
 
   const leaderboard = studentStats.map(item => ({
@@ -95,12 +128,8 @@ export default async function SiswaLeaderboardPage({
       nama: item.nama,
       kelas: item.kelas,
       totalScore: Number(item.totalScore).toFixed(2).replace(/\.00$/, ''),
-      isMe: item._id.toString() === session.user.member_id,
-      detail: { 
-        tugas: Number(item.totalTugas).toFixed(2).replace(/\.00$/, ''), 
-        kuis: Number(item.totalKuis).toFixed(2).replace(/\.00$/, ''), 
-        aktif: item.poinAktif 
-      }
+      isMe: item._id.toString() === currentUser?._id?.toString(),
+      detail: item.detail
   }));
 
   return (
@@ -125,6 +154,11 @@ export default async function SiswaLeaderboardPage({
                 🌍 Peringkat Global
             </Link>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 px-2">Filter Mata Pelajaran</h2>
+        <MapelFilterSiswa listMapel={listMapel.sort()} currentMapel={selectedMapel} />
       </div>
 
       <div className="bg-surface rounded-3xl shadow-lg border border-border-custom overflow-hidden">

@@ -209,3 +209,75 @@ export async function addActivityPoint(memberId: string, points: number = 5): Pr
     return { success: false, message: 'Gagal menambah poin keaktifan.' };
   }
 }
+
+// SYNC STUDENTS FROM API
+export async function syncStudentsFromApiAction(): Promise<ActionState> {
+  try {
+    await connectDB();
+
+    const response = await fetch('https://api.sman1margaasih.sch.id/api/siswa', {
+      headers: {
+        'X-Barrier': 'margaasih'
+      }
+    });
+
+    if (!response.ok) {
+      return { success: false, message: `Gagal mengambil data dari API: ${response.statusText}` };
+    }
+
+    const data = await response.json();
+    const rows = data.rows || [];
+
+    let updatedCount = 0;
+    let createdCount = 0;
+
+    for (const row of rows) {
+      const nis = row.nisn; // Map nisn ke nis
+      const nama = row.nama; // Map nama ke nama_lengkap
+      const kelas = row.nama_rombel; // Map nama_rombel ke kelas
+
+      if (!nis || !nama) continue;
+
+      // 1. Simpan/Update Data Siswa (Member)
+      // Cek dulu apakah data sudah ada untuk statistis
+      const existingMember = await Member.findOne({ nis: nis }).lean();
+      
+      const member = await Member.findOneAndUpdate(
+        { nis: nis },
+        { 
+          nama_lengkap: nama, 
+          kelas: kelas 
+        },
+        { upsert: true, new: true }
+      );
+
+      if (existingMember) {
+          updatedCount++;
+      } else {
+          createdCount++;
+      }
+
+      // 2. Simpan/Update Akun Login (User)
+      // Jika NIS sama, username NIS@siswa.com juga sama.
+      await User.findOneAndUpdate(
+        { user: `${nis}@siswa.com` },
+        { 
+          password: md5('123456'), 
+          role: 'siswa',
+          member_id: member._id
+        },
+        { upsert: true }
+      );
+    }
+
+    revalidatePath('/admin/siswa');
+    return { 
+      success: true, 
+      message: `Sinkronisasi Selesai! Berhasil memproses ${rows.length} data (Baru: ${createdCount}, Update: ${updatedCount}).` 
+    };
+
+  } catch (error) {
+    console.error("Sync Students API error:", error);
+    return { success: false, message: 'Terjadi kesalahan saat sinkronisasi data API Siswa.' };
+  }
+}

@@ -4,13 +4,20 @@ import { Tugas, Nilai, Member, User, Kelompok } from '@/models';
 import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import { redirect } from 'next/navigation';
 import ImagePreview from '@/components/ui/ImagePreview';
+import MapelFilterSiswa from '@/components/siswa/MapelFilterSiswa';
 
-export default async function HalamanTugasSiswa() {
+export default async function HalamanTugasSiswa({
+  searchParams
+}: {
+  searchParams: Promise<{ mapel?: string }>
+}) {
   // 1. Cek Sesi Login
   const session = await auth();
   if (!session || session.user.role !== 'siswa') redirect('/login');
 
   await connectDB();
+  const params = await searchParams;
+  const selectedMapel = params.mapel || '';
 
   // 2. Ambil Data Member (Siswa)
   const user = await User.findOne({ user: session.user.email });
@@ -21,43 +28,49 @@ export default async function HalamanTugasSiswa() {
   const member = await Member.findById(user.member_id);
   if (!member) return <div className="p-8 text-red-500 font-bold">Profil siswa belum terhubung.</div>;
 
-  // 3. Ambil Semua Tugas yang sesuai kelas siswa
-  const rawTasks = await Tugas.find({
+  // Ambil list Mapel yang ada tugasnya untuk kelas ini
+  const allClassTasks = await Tugas.find({
+    $or: [{ kelas: member.kelas }, { kelas: { $in: [member.kelas] } }]
+  }).select('mapel').lean();
+  const listMapel = Array.from(new Set(allClassTasks.map((t: any) => t.mapel).filter(Boolean))) as string[];
+
+  // 3. Ambil Semua Tugas yang sesuai kelas siswa dan mapel filter
+  const taskQuery: any = {
     $or: [
       { kelas: member.kelas },             
       { kelas: { $in: [member.kelas] } }   
     ]
-  })
+  };
+  if (selectedMapel) {
+    taskQuery.mapel = selectedMapel;
+  }
+
+  const tasks = await Tugas.find(taskQuery)
+  .populate('guru_id') // AMBIL DATA GURU
   .sort({ deadline: -1 })
   .lean();
 
   const myGroups = await Kelompok.find({ anggota: member._id }).lean();
 
-  // Filter tugas: Jika tipe_tugas 'kelompok', sembunyikan untuk member yang BUKAN ketua
-  const tasks = rawTasks.filter((task: any) => {
-    if (task.tipe_tugas === 'kelompok') {
-        const group = myGroups.find((g: any) => g.kelas === task.kelas || (Array.isArray(task.kelas) && task.kelas.includes(g.kelas)));
-        // Jika tidak ada kelompok atau dia bukan ketua, jangan tampilkan tugas ini
-        if (!group || group.ketua?.toString() !== member._id.toString()) {
-            return false;
-        }
-    }
-    return true;
-  });
-
   // 4. Ambil Data Pengumpulan (Nilai) punya siswa ini
   const mySubmissions = await Nilai.find({ member_id: member._id }).lean();
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col md:flex-row justify-between md:items-end border-b border-border-custom pb-4 gap-2 px-2">
-        <div>
-           <h1 className="text-2xl font-bold text-foreground">📚 Tugas Saya</h1>
-           <p className="text-foreground/60 text-sm mt-1">
-             Kelas: <span className="font-bold text-primary-500 px-2 py-0.5 bg-primary-500/10 rounded">{member.kelas}</span>
+    <div className="space-y-10 pb-10">
+      <header className="relative overflow-hidden bg-gradient-to-br from-indigo-700 to-primary-600 p-10 rounded-[2.5rem] text-white shadow-2xl shadow-primary-500/20 mx-2">
+        <div className="relative z-10">
+           <h1 className="text-4xl font-black uppercase tracking-tight">📚 Tugas Saya</h1>
+           <p className="text-primary-100 font-medium mt-2">
+             Kelas: <span className="font-bold bg-white/20 px-3 py-1 rounded-xl backdrop-blur-md">{member.kelas}</span>
            </p>
         </div>
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
       </header>
+
+      <div className="space-y-4 px-2">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 px-2">Mata Pelajaran Aktif</h2>
+        <MapelFilterSiswa listMapel={listMapel.sort()} currentMapel={selectedMapel} />
+      </div>
 
       {/* GRID TUGAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
@@ -77,7 +90,7 @@ export default async function HalamanTugasSiswa() {
                 cleanSubmission = { 
                   ...rawSubmission, 
                   _id: rawSubmission._id.toString(),
-                  file_url: rawSubmission.file_url // Pastikan file_url terbaca
+                  file_url: rawSubmission.file_url 
                 };
             }
 
@@ -97,8 +110,18 @@ export default async function HalamanTugasSiswa() {
                 <div className={`h-1.5 w-full ${isClosed && !isDone ? 'bg-foreground/20' : isDone ? 'bg-emerald-500' : isLate ? 'bg-danger-500' : 'bg-primary-500'}`}></div>
                 
                 <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-3 gap-2">
-                        <h3 className={`font-bold leading-snug ${isClosed && !isDone ? 'text-foreground/30' : 'text-foreground'}`}>{task.judul}</h3>
+                    <div className="flex justify-between items-start mb-1 gap-2">
+                        <div className="flex flex-col">
+                            {task.mapel && (
+                                <span className="text-[10px] font-black text-primary-500 uppercase tracking-widest mb-1">
+                                    {task.mapel}
+                                </span>
+                            )}
+                            <h3 className={`font-bold leading-snug ${isClosed && !isDone ? 'text-foreground/30' : 'text-foreground'}`}>{task.judul}</h3>
+                            {task.guru_id && (
+                                <p className="text-[10px] text-foreground/40 font-medium mt-1">oleh: {task.guru_id.nama_lengkap}</p>
+                            )}
+                        </div>
                         
                         {/* Badge Status Gembok atau Tipe Tugas */}
                         {isClosed ? (
@@ -112,7 +135,7 @@ export default async function HalamanTugasSiswa() {
                         )}
                     </div>
                     
-                    <p className="text-sm text-foreground/60 mb-4 line-clamp-2 leading-relaxed">
+                    <p className="text-sm text-foreground/60 my-4 line-clamp-2 leading-relaxed">
                         {task.deskripsi || <span className="italic text-foreground/20">Tidak ada deskripsi.</span>}
                     </p>
 

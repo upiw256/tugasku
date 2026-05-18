@@ -8,18 +8,34 @@ const MemberSchema = new Schema({
   poin_keaktifan: { type: Number, default: 0 },
 }, { timestamps: false });
 
+// Schema untuk Pengajaran Guru
+const PengajaranSchema = new Schema({
+  mapel: { type: String, required: true },
+  kelas: [{ type: String }] // Daftar kelas untuk mapel ini
+}, { _id: false });
+
+// Schema untuk Guru
+const GuruSchema = new Schema({
+  nip: { type: String, required: true, unique: true },
+  nama_lengkap: { type: String, required: true },
+  pengajaran: [PengajaranSchema]
+}, { timestamps: true });
+
 // 2. Schema untuk Login (Users)
 const UserSchema = new Schema({
   user: { type: String, required: true, unique: true }, // Email/Username
   password: { type: String, required: true }, // Password MD5
-  role: { type: String, enum: ['admin', 'siswa'], default: 'siswa' },
+  role: { type: String, enum: ['admin', 'guru', 'siswa'], default: 'siswa' },
   member_id: { type: Schema.Types.ObjectId, ref: 'Member' }, // Nyambung ke Member
+  guru_id: { type: Schema.Types.ObjectId, ref: 'Guru' }, // Nyambung ke Guru
 }, { timestamps: false });
 
 // 3. Schema untuk Tugas
 const TugasSchema = new Schema({
   judul: { type: String, required: true },
   deskripsi: String,
+  mapel: { type: String }, // MAPEL
+  guru_id: { type: Schema.Types.ObjectId, ref: 'Guru' },
   deadline: { type: Date, required: true },
   kelas: { type: Schema.Types.Mixed, required: true },
   is_active: { type: Boolean, default: true }, // Kolom gembok
@@ -53,9 +69,11 @@ const NilaiSchema = new Schema({
 
 const AbsensiSchema = new mongoose.Schema({
   member_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
-  tanggal: { type: Date, required: true }, // Disimpan format YYYY-MM-DD (jam 00:00) untuk mencegah dobel
-  waktu: { type: Date, default: Date.now }, // Jam spesifik saat klik (contoh: 07:15)
-  status: { type: String, default: 'Hadir' }, // Hadir, Izin, Sakit (Nanti bisa dikembangkan)
+  mapel: { type: String }, // Mapel terkait (Opsional, untuk absensi per mapel)
+  guru_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Guru' }, // Guru yang mengabsen
+  tanggal: { type: Date, required: true }, // Disimpan format YYYY-MM-DD
+  waktu: { type: Date, default: Date.now }, 
+  status: { type: String, default: 'Hadir' }, 
 }, { timestamps: true });
 
 const announcementSchema = new mongoose.Schema({
@@ -69,6 +87,8 @@ const announcementSchema = new mongoose.Schema({
 const tugasSchema = new mongoose.Schema({
   judul: { type: String, required: true },
   deskripsi: { type: String },
+  mapel: { type: String },
+  guru_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Guru' },
   deadline: { type: Date, required: true },
   kelas: { type: mongoose.Schema.Types.Mixed, required: true },
   is_active: { type: Boolean, default: true },
@@ -111,6 +131,8 @@ const MateriSchema = new mongoose.Schema({
   judul: { type: String, required: true },
   deskripsi: { type: String },
   file_url: { type: String, required: true },
+  mapel: { type: String },
+  guru_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Guru' },
   kelas: { type: mongoose.Schema.Types.Mixed, required: true },
   diunggah_oleh: { type: String, required: true }, // Nama pengunggah (Admin / Guru)
   tanggal_upload: { type: Date, default: Date.now }
@@ -120,6 +142,8 @@ const MateriSchema = new mongoose.Schema({
 const SoalPGSchema = new mongoose.Schema({
   judul: { type: String, required: true },
   deskripsi: { type: String },
+  mapel: { type: String },
+  guru_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Guru' },
   kelas: { type: mongoose.Schema.Types.Mixed, required: true },
   daftar_soal: [{
     id: { type: String },
@@ -170,7 +194,9 @@ const logKuisSchema = new mongoose.Schema({
 
 // Export model menggunakan pola yang aman untuk Next.js (Hot Reload)
 // Definisi model yang bersih untuk Next.js
+// Definisi model yang bersih untuk Next.js
 export const Member = models.Member || model('Member', MemberSchema);
+export const Guru = models.Guru || model('Guru', GuruSchema);
 export const User = models.User || model('User', UserSchema);
 export const Tugas = models.Tugas || model('Tugas', TugasSchema);
 export const Nilai = models.Nilai || model('Nilai', NilaiSchema);

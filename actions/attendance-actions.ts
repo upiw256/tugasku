@@ -50,7 +50,7 @@ export async function doAttendanceAction() {
     return { success: false, message: 'Terjadi kesalahan sistem' };
   }
 }
-export async function upsertAttendanceAction(memberId: string, dateStr: string, status: string) {
+export async function upsertAttendanceAction(memberId: string, dateStr: string, status: string, mapel?: string, guruId?: string) {
   try {
     await connectDB();
 
@@ -59,16 +59,19 @@ export async function upsertAttendanceAction(memberId: string, dateStr: string, 
     dateObj.setHours(0, 0, 0, 0);
 
     // Cari kalau sudah ada update, kalau belum buat baru (upsert)
+    // Filter sekarang menyertakan mapel untuk mendukung absensi per mata pelajaran
     await Absensi.findOneAndUpdate(
-      { member_id: memberId, tanggal: dateObj },
+      { member_id: memberId, tanggal: dateObj, mapel: mapel || null },
       { 
         status: status,
+        guru_id: guruId || null,
         waktu: new Date(), // Update waktu pencatatan
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
     revalidatePath('/admin/absensi');
+    revalidatePath('/guru/absensi');
     return { success: true, message: 'Status berhasil disimpan' };
   } catch (error) {
     console.error(error);

@@ -2,8 +2,13 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { Materi, Member } from '@/models';
 import { redirect } from 'next/navigation';
+import MapelFilterSiswa from '@/components/siswa/MapelFilterSiswa';
 
-export default async function SiswaMateriPage() {
+export default async function SiswaMateriPage({
+  searchParams
+}: {
+  searchParams: Promise<{ mapel?: string }>
+}) {
   const session = await auth();
   
   if (!session || session.user.role !== 'siswa') {
@@ -11,6 +16,8 @@ export default async function SiswaMateriPage() {
   }
 
   await connectDB();
+  const params = await searchParams;
+  const selectedMapel = params.mapel || '';
   
   // Ambil data siswa untuk tahu kelasnya
   const student = await Member.findOne({ nis: session.user.email }).lean();
@@ -18,19 +25,44 @@ export default async function SiswaMateriPage() {
     return <div className="p-10 text-center">Data siswa tidak ditemukan.</div>;
   }
 
-  // Ambil materi yang sesuai dengan kelas siswa
-  const materi = await Materi.find({ 
+  // Ambil semua mapel unik yang tersedia untuk kelas ini
+  const allMateriForClass = await Materi.find({ 
     $or: [
       { kelas: student.kelas },
       { kelas: { $in: [student.kelas] } }
     ]
-  }).sort({ tanggal_upload: -1 }).lean();
+  }).select('mapel').lean();
+  
+  const listMapel = Array.from(new Set(allMateriForClass.map((m: any) => m.mapel).filter(Boolean))) as string[];
+
+  // Ambil materi yang sesuai dengan kelas dan mapel (jika ada)
+  const filterQuery: any = {
+    $or: [
+      { kelas: student.kelas },
+      { kelas: { $in: [student.kelas] } }
+    ]
+  };
+  if (selectedMapel) {
+    filterQuery.mapel = selectedMapel;
+  }
+
+  const materi = await Materi.find(filterQuery).sort({ tanggal_upload: -1 }).lean();
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 rounded-2xl text-white shadow-lg">
-        <h1 className="text-3xl font-bold">Materi Belajar</h1>
-        <p className="opacity-90 mt-2 text-blue-100">Ayo perluas wawasanmu dengan membaca materi dari Bapak/Ibu Guru!</p>
+    <div className="space-y-8 max-w-5xl mx-auto pb-10">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 p-10 rounded-[2.5rem] text-white shadow-2xl shadow-blue-500/20">
+        <div className="relative z-10">
+          <h1 className="text-4xl font-black uppercase tracking-tight">Materi Belajar</h1>
+          <p className="opacity-90 mt-2 text-blue-100 font-medium max-w-md">Eksplorasi ribuan wawasan baru yang telah disiapkan khusus untuk kelas {student.kelas}!</p>
+        </div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 -mr-10 -mt-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-48 h-48 bg-primary-400/20 rounded-full blur-2xl"></div>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 px-2">Filter Mata Pelajaran</h2>
+        <MapelFilterSiswa listMapel={listMapel.sort()} currentMapel={selectedMapel} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -43,7 +75,12 @@ export default async function SiswaMateriPage() {
           materi.map((m: any) => (
             <div key={m._id.toString()} className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom flex flex-col hover:shadow-md transition group">
               <div className="flex-1">
-                <span className="text-[10px] font-bold text-primary-500 bg-primary-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">{student.kelas}</span>
+                <div className="flex gap-2 items-center">
+                    <span className="text-[10px] font-bold text-primary-500 bg-primary-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">{student.kelas}</span>
+                    {m.mapel && (
+                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">{m.mapel}</span>
+                    )}
+                </div>
                 <h3 className="text-lg font-bold text-foreground mt-2 line-clamp-1">{m.judul}</h3>
                 <p className="text-sm text-foreground/40 mt-2 line-clamp-2">{m.deskripsi || 'Tidak ada deskripsi.'}</p>
               </div>

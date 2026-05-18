@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     await connectDB();
     const body = await req.json();
-    const { judul, deskripsi, file_url, kelas } = body;
+    const { judul, deskripsi, file_url, kelas, mapel, guru_id } = body;
 
     if (!judul || !file_url || !kelas) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -42,6 +42,8 @@ export async function POST(req: Request) {
       deskripsi,
       file_url,
       kelas,
+      mapel,
+      guru_id,
       diunggah_oleh: session.user.email, // Menggunakan username/email dari session
       tanggal_upload: new Date()
     });

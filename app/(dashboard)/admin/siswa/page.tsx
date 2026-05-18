@@ -11,6 +11,8 @@ import KelasFilter from '@/components/admin/KelasFilter';
 // Import komponen baru
 import DownloadAkunSiswa from '@/components/admin/DownloadButton';
 import SiswaTable from '@/components/admin/SiswaTable';
+import SyncSiswaButton from '@/components/admin/SyncSiswaButton';
+import CleanupSiswaButton from '@/components/admin/CleanupSiswaButton';
 
 export default async function DataSiswaPage({
   searchParams,
@@ -59,7 +61,9 @@ export default async function DataSiswaPage({
         </h1>
         <div className="flex flex-wrap gap-2 items-end justify-end w-full md:w-auto">
           
-          {/* TOMBOL DOWNLOAD (FITUR BARU) */}
+          <CleanupSiswaButton />
+          <SyncSiswaButton />
+          
           <DownloadAkunSiswa listKelas={sortedClasses} />
           
           <div className="hidden md:block w-[1px] h-[30px] bg-border-custom mx-1"></div>

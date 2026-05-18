@@ -2,28 +2,42 @@
 
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Absensi, Member, Nilai, Tugas, User } from '@/models';
+import { 
+  Absensi, 
+  Member, 
+  Nilai, 
+  Tugas, 
+  User, 
+  Guru, 
+  Materi, 
+  SoalPG, 
+  PengerjaanKuis, 
+  Kelompok, 
+  Pengumuman, 
+  LogKuis, 
+  LogTugas 
+} from '@/models';
 import { revalidatePath } from 'next/cache';
 import { decryptData } from '@/lib/crypto';
 import crypto from 'crypto';
 
 // --- HELPER: Membuat Hash dari Object Data ---
-// Digunakan untuk membandingkan apakah dua kumpulan data identik
 function createDataHash(data: any) {
-  // 1. Urutkan array agar urutan data tidak mempengaruhi hash
-  // Kita urutkan berdasarkan _id
-  const sortedData = Array.isArray(data) 
-    ? data.sort((a: any, b: any) => (a._id?.toString() > b._id?.toString() ? 1 : -1)) 
-    : data;
-
-  // 2. Ubah ke JSON String
-  const jsonString = JSON.stringify(sortedData);
+  // Kita urutkan data rekursif untuk hash yang konsisten meskipun urutan di DB berbeda
+  const stringified = JSON.stringify(data, (key, value) => {
+    if (Array.isArray(value)) {
+        return value.sort((a, b) => {
+            const idA = a._id?.toString() || JSON.stringify(a);
+            const idB = b._id?.toString() || JSON.stringify(b);
+            return idA > idB ? 1 : -1;
+        });
+    }
+    return value;
+  });
   
-  // 3. Buat MD5 Hash
-  return crypto.createHash('md5').update(jsonString).digest('hex');
+  return crypto.createHash('md5').update(stringified).digest('hex');
 }
 
-// ... (resetDatabaseAction TETAP SAMA seperti sebelumnya) ...
 export async function resetDatabaseAction() {
     try {
       const session = await auth();
@@ -33,17 +47,25 @@ export async function resetDatabaseAction() {
   
       await connectDB();
   
-      // Hapus Data Transaksional & Master (Kecuali User Admin)
-      await Absensi.deleteMany({});
-      await Nilai.deleteMany({});
-      await Tugas.deleteMany({});
-      await Member.deleteMany({}); // Data detail siswa
-      
-      // Hapus User Siswa (Role bukan admin)
-      await User.deleteMany({ role: { $ne: 'admin' } });
+      // Hapus SEMUA data transaksional & master kecuali User Admin
+      await Promise.all([
+        Absensi.deleteMany({}),
+        Nilai.deleteMany({}),
+        Tugas.deleteMany({}),
+        Member.deleteMany({}),
+        Guru.deleteMany({}),
+        Materi.deleteMany({}),
+        SoalPG.deleteMany({}),
+        PengerjaanKuis.deleteMany({}),
+        Kelompok.deleteMany({}),
+        Pengumuman.deleteMany({}),
+        LogKuis.deleteMany({}),
+        LogTugas.deleteMany({}),
+        User.deleteMany({ role: { $ne: 'admin' } })
+      ]);
   
       revalidatePath('/');
-      return { success: true, message: 'Database berhasil di-reset bersih!' };
+      return { success: true, message: 'Database telah dibersihkan sepenuhnya!' };
   
     } catch (error) {
       console.error(error);
@@ -51,8 +73,6 @@ export async function resetDatabaseAction() {
     }
 }
 
-
-// --- UPDATE: RESTORE DENGAN VALIDASI DUPLIKASI ---
 export async function restoreDatabaseAction(formData: FormData) {
   try {
     const session = await auth();
@@ -67,7 +87,7 @@ export async function restoreDatabaseAction(formData: FormData) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    let backupData;
+    let backupData: any;
     try {
       const decryptedString = decryptData(buffer);
       backupData = JSON.parse(decryptedString);
@@ -75,71 +95,92 @@ export async function restoreDatabaseAction(formData: FormData) {
       return { success: false, message: 'Gagal membuka file. File rusak atau kunci enkripsi salah.' };
     }
 
+    // Validasi struktur minimal
     if (!backupData.members || !backupData.users) {
-        return { success: false, message: 'Format data backup tidak valid.' };
+        return { success: false, message: 'Format data backup tidak valid atau terlalu tua.' };
     }
 
     await connectDB();
 
-    // ================= VALIDASI DUPLIKASI =================
-    // Kita ambil data database SAAT INI untuk dibandingkan
-    const currentMembers = await Member.find({}).lean();
-    const currentTugas = await Tugas.find({}).lean();
-    const currentNilai = await Nilai.find({}).lean();
-    const currentAbsensi = await Absensi.find({}).lean();
-    // Ambil user siswa saja (karena admin tidak kita restore)
-    const currentSiswaUsers = await User.find({ role: { $ne: 'admin' } }).lean();
+    // ================= VALIDASI PERUBAHAN (Hash) =================
+    // Ambil data state sekarang
+    const currentState = {
+        members: await Member.find({}).lean(),
+        gurus: await Guru.find({}).lean(),
+        tugas: await Tugas.find({}).lean(),
+        nilai: await Nilai.find({}).lean(),
+        absensi: await Absensi.find({}).lean(),
+        materi: await Materi.find({}).lean(),
+        soal_pg: await SoalPG.find({}).lean(),
+        pengerjaan_kuis: await PengerjaanKuis.find({}).lean(),
+        kelompok: await Kelompok.find({}).lean(),
+        pengumuman: await Pengumuman.find({}).lean(),
+        users: await User.find({ role: { $ne: 'admin' } }).lean(),
+    };
 
-    // Siapkan data backup yang relevan (buang admin dari backup user jika ada)
+    // Siapkan data backup (tanpa admin)
     const backupSiswaUsers = backupData.users.filter((u: any) => u.role !== 'admin');
+    const backupState = {
+        members: backupData.members || [],
+        gurus: backupData.gurus || [],
+        tugas: backupData.tugas || [],
+        nilai: backupData.nilai || [],
+        absensi: backupData.absensi || [],
+        materi: backupData.materi || [],
+        soal_pg: backupData.soal_pg || [],
+        pengerjaan_kuis: backupData.pengerjaan_kuis || [],
+        kelompok: backupData.kelompok || [],
+        pengumuman: backupData.pengumuman || [],
+        users: backupSiswaUsers
+    };
 
-    // Buat Hash dari kedua kubu
-    const currentHash = createDataHash({
-        m: currentMembers,
-        t: currentTugas,
-        n: currentNilai,
-        a: currentAbsensi,
-        u: currentSiswaUsers
-    });
-
-    const backupHash = createDataHash({
-        m: backupData.members,
-        t: backupData.tugas,
-        n: backupData.nilai,
-        a: backupData.absensi,
-        u: backupSiswaUsers
-    });
-
-    // BANDINGKAN!
-    if (currentHash === backupHash) {
-        return { 
-            success: false, // Kita return false agar UI tidak reload
-            message: '⚠️ Data backup SAMA PERSIS dengan database saat ini. Tidak ada perubahan yang dilakukan.' 
-        };
+    if (createDataHash(currentState) === createDataHash(backupState)) {
+        return { success: false, message: '⚠️ Data backup SAMA PERSIS dengan database saat ini.' };
     }
-    // ======================================================
 
+    // --- EKSEKUSI RESTORE ---
+    // 1. Bersihkan koleksi target
+    await Promise.all([
+        Absensi.deleteMany({}),
+        Nilai.deleteMany({}),
+        Tugas.deleteMany({}),
+        Member.deleteMany({}),
+        Guru.deleteMany({}),
+        Materi.deleteMany({}),
+        SoalPG.deleteMany({}),
+        PengerjaanKuis.deleteMany({}),
+        Kelompok.deleteMany({}),
+        Pengumuman.deleteMany({}),
+        LogKuis.deleteMany({}),
+        LogTugas.deleteMany({}),
+        User.deleteMany({ role: { $ne: 'admin' } })
+    ]);
 
-    // --- PROSES RESTORE (Jika Data Berbeda) ---
-    // Bersihkan Data Lama
-    await Absensi.deleteMany({});
-    await Nilai.deleteMany({});
-    await Tugas.deleteMany({});
-    await Member.deleteMany({});
-    await User.deleteMany({ role: { $ne: 'admin' } });
+    // 2. Masukkan data dari backup
+    const insertJobs = [];
+    if (backupState.members.length) insertJobs.push(Member.insertMany(backupState.members));
+    if (backupState.gurus.length) insertJobs.push(Guru.insertMany(backupState.gurus));
+    if (backupState.tugas.length) insertJobs.push(Tugas.insertMany(backupState.tugas));
+    if (backupState.nilai.length) insertJobs.push(Nilai.insertMany(backupState.nilai));
+    if (backupState.absensi.length) insertJobs.push(Absensi.insertMany(backupState.absensi));
+    if (backupState.materi.length) insertJobs.push(Materi.insertMany(backupState.materi));
+    if (backupState.soal_pg.length) insertJobs.push(SoalPG.insertMany(backupState.soal_pg));
+    if (backupState.pengerjaan_kuis.length) insertJobs.push(PengerjaanKuis.insertMany(backupState.pengerjaan_kuis));
+    if (backupState.kelompok.length) insertJobs.push(Kelompok.insertMany(backupState.kelompok));
+    if (backupState.pengumuman.length) insertJobs.push(Pengumuman.insertMany(backupState.pengumuman));
+    if (backupState.users.length) insertJobs.push(User.insertMany(backupState.users));
+    
+    // Log juga di-restore jika ada
+    if (backupData.log_kuis?.length) insertJobs.push(LogKuis.insertMany(backupData.log_kuis));
+    if (backupData.log_tugas?.length) insertJobs.push(LogTugas.insertMany(backupData.log_tugas));
 
-    // Masukkan Data Baru
-    if (backupData.members.length) await Member.insertMany(backupData.members);
-    if (backupData.tugas.length) await Tugas.insertMany(backupData.tugas);
-    if (backupData.nilai.length) await Nilai.insertMany(backupData.nilai);
-    if (backupData.absensi.length) await Absensi.insertMany(backupData.absensi);
-    if (backupSiswaUsers.length) await User.insertMany(backupSiswaUsers);
+    await Promise.all(insertJobs);
 
     revalidatePath('/');
-    return { success: true, message: 'Data berhasil dipulihkan dari file backup!' };
+    return { success: true, message: 'Seluruh data aplikasi berhasil dipulihkan!' };
 
   } catch (error) {
     console.error("Restore Error:", error);
-    return { success: false, message: 'Terjadi kesalahan sistem saat restore.' };
+    return { success: false, message: 'Terjadi kesalahan sistem saat restore data.' };
   }
 }

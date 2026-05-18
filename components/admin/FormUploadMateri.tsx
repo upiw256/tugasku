@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
-export default function FormUploadMateri({ availableClasses }: { availableClasses: string[] }) {
+export default function FormUploadMateri({ 
+  availableClasses, 
+  fixedMapel, 
+  fixedGuruId 
+}: { 
+  availableClasses: string[],
+  fixedMapel?: string,
+  fixedGuruId?: string
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [judul, setJudul] = useState('');
@@ -37,7 +45,9 @@ export default function FormUploadMateri({ availableClasses }: { availableClasse
           judul,
           deskripsi,
           file_url: fileUrl,
-          kelas: selectedClasses
+          kelas: selectedClasses,
+          mapel: fixedMapel,
+          guru_id: fixedGuruId
         }),
       });
 

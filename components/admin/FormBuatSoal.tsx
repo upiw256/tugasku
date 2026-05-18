@@ -17,11 +17,15 @@ interface Soal {
 export default function FormBuatSoal({ 
   availableClasses, 
   editData = null,
-  onCancel = () => {}
+  onCancel = () => {},
+  fixedMapel,
+  fixedGuruId
 }: { 
   availableClasses: string[];
   editData?: any;
   onCancel?: () => void;
+  fixedMapel?: string;
+  fixedGuruId?: string;
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -140,7 +144,9 @@ export default function FormBuatSoal({
           daftar_soal: daftarSoal,
           waktu_mulai: waktuMulai,
           waktu_selesai: waktuSelesai,
-          durasi: Number(durasi)
+          durasi: Number(durasi),
+          mapel: fixedMapel,
+          guru_id: fixedGuruId
         }),
       });
 

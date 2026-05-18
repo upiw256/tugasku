@@ -8,10 +8,14 @@ import Swal from 'sweetalert2';
 
 export default function KuisManager({ 
   availableClasses, 
-  initialKuis 
+  initialKuis,
+  fixedMapel,
+  fixedGuruId
 }: { 
   availableClasses: string[];
   initialKuis: any[];
+  fixedMapel?: string;
+  fixedGuruId?: string;
 }) {
   const router = useRouter();
   const [editingKuis, setEditingKuis] = useState<any | null>(null);
@@ -226,6 +230,8 @@ export default function KuisManager({
           availableClasses={availableClasses} 
           editData={editingKuis} 
           onCancel={cancelEdit}
+          fixedMapel={fixedMapel}
+          fixedGuruId={fixedGuruId}
         />
         {editingKuis && (
           <button 
