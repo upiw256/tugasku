@@ -5,6 +5,7 @@ import ImagePreview from '@/components/ui/ImagePreview';
 import SmartNote from '@/components/ui/LinkPreview';
 import QuickGrade from '@/components/ui/QuickGrade';
 import OfflineGradeManager from '@/components/admin/OfflineGradeManager';
+import StaggerList from '@/components/ui/StaggerList';
 
 const formatDate = (date: Date) => {
   if (!date) return '-';
@@ -109,12 +110,12 @@ export default async function HalamanPengumpulan({
               <th className="px-6 py-4 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border-custom">
+          <StaggerList as="tbody" selector=".tr-stagger" className="divide-y divide-border-custom">
             {displayData.map((item: any, index: number) => {
               const siswa = item.member_id;
               if (!siswa) return null;
               return (
-                <tr key={item._id.toString()} className="hover:bg-foreground/5 transition-colors">
+                <tr key={item._id.toString()} className="tr-stagger opacity-0 hover:bg-foreground/5 transition-colors">
                   <td className="px-6 py-4 font-mono text-foreground/20 text-center">{index + 1}</td>
                   <td className="px-6 py-4">
                     <div className="font-bold text-foreground">{siswa.nama_lengkap}</div>
@@ -155,17 +156,17 @@ export default async function HalamanPengumpulan({
                 </tr>
               );
             })}
-          </tbody>
+          </StaggerList>
         </table>
       </div>
 
       {/* MOBILE (Grid) - Tidak terpengaruh Table Hydration Error */}
-      <div className="grid grid-cols-1 gap-4 md:hidden px-2">
+      <StaggerList className="grid grid-cols-1 gap-4 md:hidden px-2">
         {displayData.map((item: any, index: number) => {
           const siswa = item.member_id;
           if (!siswa) return null;
           return (
-            <div key={item._id.toString()} className="bg-surface rounded-2xl border border-border-custom shadow-sm overflow-hidden flex flex-col">
+            <div key={item._id.toString()} className="stagger-item opacity-0 bg-surface rounded-2xl border border-border-custom shadow-sm overflow-hidden flex flex-col">
               <div className="p-3 bg-foreground/5 flex justify-between items-center border-b border-border-custom">
                 <span className="text-[10px] font-bold text-foreground/30">#{index + 1} — {siswa.kelas}</span>
                 <QuickGrade 
@@ -201,7 +202,7 @@ export default async function HalamanPengumpulan({
             </div>
           );
         })}
-      </div>
+      </StaggerList>
     </div>
   );
 }

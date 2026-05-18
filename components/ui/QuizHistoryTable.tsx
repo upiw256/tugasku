@@ -113,9 +113,16 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                       <span className="flex-shrink-0 w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center text-sm font-bold text-foreground">
                         {idx + 1}
                       </span>
-                      <h3 className="text-foreground font-bold pt-1 leading-relaxed">
-                        {soal.pertanyaan}
-                      </h3>
+                      <div className="flex-1 flex flex-col">
+                        {soal.gambar_url && (
+                          <div className="mb-2 mt-1 rounded-lg overflow-hidden border border-border-custom bg-surface self-start max-w-sm">
+                            <img src={soal.gambar_url} alt="Gambar Soal" className="w-full max-h-48 object-contain bg-foreground/5" />
+                          </div>
+                        )}
+                        <h3 className="text-foreground font-bold pt-1 leading-relaxed">
+                          {soal.pertanyaan}
+                        </h3>
+                      </div>
                     </div>
 
                     <div className="ml-12 grid grid-cols-1 gap-2">

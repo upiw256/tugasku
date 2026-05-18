@@ -131,7 +131,8 @@ const SoalPGSchema = new mongoose.Schema({
       D: { type: String, required: true },
       E: { type: String, required: true }
     },
-    jawaban_benar: { type: String, enum: ['A', 'B', 'C', 'D', 'E'], required: true }
+    jawaban_benar: { type: String, enum: ['A', 'B', 'C', 'D', 'E'], required: true },
+    gambar_url: { type: String } // URL Opsional untuk kuis bergambar
   }],
   dibuat_oleh: { type: String, required: true }, // Nama pembuat (Admin / Guru)
   waktu_mulai: { type: Date, required: true },

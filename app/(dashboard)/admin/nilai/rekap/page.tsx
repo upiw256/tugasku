@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Member, Tugas, Nilai } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AnimatedNumber from '@/components/ui/AnimatedNumber';
 
 export default async function RekapNilaiPage({ 
   searchParams 
@@ -43,7 +44,7 @@ export default async function RekapNilaiPage({
 
     // D. Mapping Nilai biar gampang akses di Table
     grades.forEach((g: any) => {
-      const key = `${g.member_id}_${g.tugas_id}`;
+      const key = `${g.member_id.toString()}_${g.tugas_id.toString()}`;
       gradeMap[key] = g.nilai;
     });
   }
@@ -131,16 +132,17 @@ export default async function RekapNilaiPage({
                                 
                                 {/* Loop Kolom Nilai */}
                                 {tasks.map((t: any) => {
-                                    const key = `${student._id}_${t._id}`;
+                                    const key = `${student._id.toString()}_${t._id.toString()}`;
                                     const nilai = gradeMap[key];
                                     if(nilai !== undefined) total += nilai;
 
                                     return (
                                         <td key={t._id} className="px-4 py-4 text-center border-r border-border-custom">
                                             {nilai !== undefined ? (
-                                                <span className={`font-bold ${nilai < 75 ? 'text-red-500' : 'text-green-500'}`}>
-                                                    {nilai}
-                                                </span>
+                                                <AnimatedNumber 
+                                                    value={nilai} 
+                                                    className={`font-bold ${nilai < 75 ? 'text-red-500' : 'text-green-500'}`} 
+                                                />
                                             ) : (
                                                 <span className="text-foreground/20">-</span>
                                             )}
@@ -150,7 +152,10 @@ export default async function RekapNilaiPage({
 
                                 {/* Kolom Rata-rata */}
                                 <td className="px-6 py-4 text-center font-bold bg-foreground/5">
-                                    {(tasks.length > 0 ? (total / tasks.length).toFixed(1) : 0)}
+                                    <AnimatedNumber 
+                                        value={tasks.length > 0 ? (total / tasks.length) : 0} 
+                                        decimals={1}
+                                    />
                                 </td>
                             </tr>
                         );

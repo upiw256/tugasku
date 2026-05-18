@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AdminRealtimeNotifier from '@/components/admin/AdminRealtimeNotifier';
 import Sidebar from '@/components/ui/Sidebar';
+import PageTransition from '@/components/ui/PageTransition';
 
 export default async function DashboardLayout({
   children,
@@ -37,7 +38,9 @@ export default async function DashboardLayout({
         {/* Konten Utama */}
         {/* pt-16 ditambahkan agar konten tidak tertutup header di tampilan mobile */}
         <main className="p-4 md:p-6 pt-20 md:pt-6 bg-background">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </div>
 

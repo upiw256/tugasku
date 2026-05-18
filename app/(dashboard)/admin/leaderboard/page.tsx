@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db';
 import { Member, Nilai, PengerjaanKuis } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import StaggerList from '@/components/ui/StaggerList';
+import AnimatedNumber from '@/components/ui/AnimatedNumber';
 
 export default async function LeaderboardPage({ 
   searchParams 
@@ -155,7 +157,7 @@ export default async function LeaderboardPage({
       )}
 
       {/* Leaderboard List */}
-      <div className="grid gap-4">
+      <StaggerList className="grid gap-4">
         {leaderboard.map((item, index) => {
           const rank = index + 1;
           
@@ -163,6 +165,7 @@ export default async function LeaderboardPage({
             <div 
               key={item._id.toString()}
               className={`
+                stagger-item opacity-0
                 relative flex items-center justify-between p-4 rounded-2xl border transition-all duration-300
                 ${rank === 1 ? 'bg-amber-500/10 border-amber-500/20 shadow-md scale-[1.02] z-10' : 'bg-surface border-border-custom hover:border-blue-400/50'}
               `}
@@ -195,7 +198,9 @@ export default async function LeaderboardPage({
 
               {/* Score Display */}
               <div className="text-right">
-                <div className="text-2xl font-black text-foreground">{item.totalScore}</div>
+                <div className="text-2xl font-black text-foreground">
+                    <AnimatedNumber value={item.totalScore} decimals={1} />
+                </div>
                 <div className="text-[10px] text-foreground/40 font-bold uppercase tracking-wider">Total Poin</div>
               </div>
               
@@ -214,7 +219,7 @@ export default async function LeaderboardPage({
                 Belum ada data skor untuk ditampilkan.
             </div>
         )}
-      </div>
+      </StaggerList>
     </div>
   );
 }

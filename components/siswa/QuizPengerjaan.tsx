@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { animate, stagger } from 'animejs';
 
 interface Soal {
   id: string;
@@ -27,6 +28,48 @@ export default function QuizPengerjaan({
   const [jawaban, setJawaban] = useState<Record<string, string>>(initialJawaban);
   const [timeLeft, setTimeLeft] = useState<number>(initialTimeLeft * 1000);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const questionsRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressTextRef = useRef<HTMLSpanElement>(null);
+
+  // Animasi Masuk (Stagger)
+  useEffect(() => {
+    if (questionsRef.current) {
+      animate('.question-card', {
+        translateY: [20, 0],
+        opacity: [0, 1],
+        delay: stagger(100),
+        duration: 800,
+        easing: 'easeOutExpo'
+      });
+    }
+  }, []);
+
+  // Animasi Progress Bar
+  useEffect(() => {
+    const totalSoal = kuis.daftar_soal.length;
+    const sudahDijawab = Object.keys(jawaban).length;
+    const percentage = (sudahDijawab / totalSoal) * 100;
+
+    if (progressBarRef.current) {
+      animate(progressBarRef.current, {
+        width: `${percentage}%`,
+        duration: 500,
+        easing: 'easeOutQuad'
+      });
+    }
+
+    if (progressTextRef.current) {
+      const currentVal = parseInt(progressTextRef.current.innerText) || 0;
+      animate(progressTextRef.current, {
+        innerText: [currentVal, sudahDijawab],
+        round: 1,
+        duration: 500,
+        easing: 'linear'
+      });
+    }
+  }, [jawaban, kuis.daftar_soal.length]);
 
   useEffect(() => {
     // 1. Cek jika waktu sudah habis saat pertama kali masuk
@@ -106,6 +149,13 @@ export default function QuizPengerjaan({
   }, []);
 
   const handlePilihJawaban = async (soalId: string, pilihan: string) => {
+    // Animasi feedback saat memilih (opsional)
+    animate(`#btn-${soalId}-${pilihan}`, {
+      scale: [1, 0.95, 1],
+      duration: 300,
+      easing: 'easeInOutQuad'
+    });
+
     const barujawaban = { ...jawaban, [soalId]: pilihan };
     setJawaban(barujawaban);
 
@@ -138,7 +188,6 @@ export default function QuizPengerjaan({
   const handleSubmit = async () => {
     if (isSubmitting) return;
     
-    // Validasi apakah semua soal sudah dijawab (opsional, tapi guru mungkin ingin siswa diingatkan)
     const jumlahSoal = kuis.daftar_soal.length;
     const sudahDijawab = Object.keys(jawaban).length;
     
@@ -183,30 +232,54 @@ export default function QuizPengerjaan({
   };
 
   return (
-    <div className="space-y-8 pb-24 relative">
+    <div className="space-y-8 pb-32 relative">
       {/* Sticky Header Waktu */}
-      <div className="sticky top-4 z-10 flex justify-between items-center bg-surface/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-border-custom">
-        <div>
-          <h1 className="font-bold text-foreground text-lg leading-tight">{kuis.judul}</h1>
-          <p className="text-xs text-primary-500 font-medium">Progress: {Object.keys(jawaban).length} / {kuis.daftar_soal.length} Terjawab</p>
+      <div className="sticky top-4 z-10 space-y-4">
+        <div className="flex justify-between items-center bg-surface/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-border-custom">
+          <div>
+            <h1 className="font-bold text-foreground text-lg leading-tight">{kuis.judul}</h1>
+            <p className="text-xs text-primary-500 font-medium">
+              Progress: <span ref={progressTextRef}>{Object.keys(jawaban).length}</span> / {kuis.daftar_soal.length} Terjawab
+            </p>
+          </div>
+          <div className={`px-4 py-2 rounded-xl font-mono font-bold text-center border-2 ${timeLeft < 300000 ? 'bg-danger-500/10 text-danger-500 border-danger-500/20 animate-pulse' : 'bg-primary-500/10 text-primary-500 border-primary-500/20'}`}>
+            <div className="text-[10px] uppercase opacity-60">Sisa Waktu</div>
+            <div className="text-xl">{formatTime(timeLeft)}</div>
+          </div>
         </div>
-        <div className={`px-4 py-2 rounded-xl font-mono font-bold text-center border-2 ${timeLeft < 300000 ? 'bg-danger-500/10 text-danger-500 border-danger-500/20 animate-pulse' : 'bg-primary-500/10 text-primary-500 border-primary-500/20'}`}>
-          <div className="text-[10px] uppercase opacity-60">Sisa Waktu</div>
-          <div className="text-xl">{formatTime(timeLeft)}</div>
+        
+        {/* Progress Bar Dinamis */}
+        <div className="h-2 w-full bg-foreground/5 rounded-full overflow-hidden border border-border-custom shadow-inner">
+          <div 
+            ref={progressBarRef}
+            className="h-full bg-gradient-to-r from-primary-500 to-primary-600 shadow-[0_0_10px_rgba(var(--primary-500),0.5)]"
+            style={{ width: '0%' }}
+          />
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div ref={questionsRef} className="space-y-6">
         {kuis.daftar_soal.map((soal: any, index: number) => (
-          <div key={soal.id} className="bg-surface p-6 rounded-2xl shadow-sm border border-border-custom space-y-4 hover:shadow-md transition">
+          <div 
+            key={soal.id} 
+            className="question-card opacity-0 bg-surface p-6 rounded-2xl shadow-sm border border-border-custom space-y-4 hover:shadow-md transition-shadow"
+          >
             <div className="flex gap-4">
                <span className="flex-shrink-0 w-8 h-8 bg-primary-500/10 text-primary-500 flex items-center justify-center rounded-lg font-bold text-sm">{index + 1}</span>
-               <p className="text-foreground font-medium leading-relaxed pt-1 whitespace-pre-wrap">{soal.pertanyaan}</p>
+               <div className="flex-1 flex flex-col">
+                 {soal.gambar_url && (
+                   <div className="mb-3 rounded-lg overflow-hidden border border-border-custom bg-surface self-start max-w-xl">
+                     <img src={soal.gambar_url} alt="Gambar Soal" className="w-full max-h-72 object-contain bg-foreground/5" />
+                   </div>
+                 )}
+                 <p className="text-foreground font-medium leading-relaxed pt-1 whitespace-pre-wrap">{soal.pertanyaan}</p>
+               </div>
             </div>
             
             <div className="grid grid-cols-1 gap-3 pl-12 mt-2">
               {(['A', 'B', 'C', 'D', 'E'] as const).map(opt => (
                 <button
+                  id={`btn-${soal.id}-${opt}`}
                   key={opt}
                   onClick={() => handlePilihJawaban(soal.id, opt)}
                   className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
@@ -229,7 +302,7 @@ export default function QuizPengerjaan({
         ))}
       </div>
 
-      <div className="fixed bottom-8 left-0 right-0 px-4 md:px-0">
+      <div className="fixed bottom-8 left-0 right-0 px-4 md:px-0 z-20">
         <div className="max-w-4xl mx-auto">
           <button 
             onClick={handleSubmit}

@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { PengerjaanKuis, Member, User } from '@/models';
 import { redirect } from 'next/navigation';
 import QuizHistoryTable from '@/components/ui/QuizHistoryTable';
+import AnimatedNumber from '@/components/ui/AnimatedNumber';
 
 export default async function SiswaNilaiPage() {
   const session = await auth();
@@ -59,14 +60,18 @@ export default async function SiswaNilaiPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-sm">
            <p className="text-sm text-foreground/40 font-medium">Total Kuis</p>
-           <p className="text-3xl font-bold text-foreground">{history.length}</p>
+           <p className="text-3xl font-bold text-foreground">
+             <AnimatedNumber value={history.length} />
+           </p>
         </div>
         <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-sm">
            <p className="text-sm text-foreground/40 font-medium">Rata-rata Nilai</p>
            <p className="text-3xl font-bold text-emerald-500">
-             {history.length > 0 
-               ? Math.round(history.reduce((a, b) => a + (b.nilai || 0), 0) / history.length) 
-               : 0}
+             <AnimatedNumber 
+               value={history.length > 0 
+                 ? Math.round(history.reduce((a, b) => a + (b.nilai || 0), 0) / history.length) 
+                 : 0} 
+             />
            </p>
         </div>
         <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-sm">

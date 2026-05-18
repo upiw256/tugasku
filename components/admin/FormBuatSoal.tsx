@@ -11,6 +11,7 @@ interface Soal {
     A: string; B: string; C: string; D: string; E: string;
   };
   jawaban_benar: string;
+  gambar_url?: string;
 }
 
 export default function FormBuatSoal({ 
@@ -50,6 +51,7 @@ export default function FormBuatSoal({
   const [aiTopic, setAiTopic] = useState('');
   const [numQuestions, setNumQuestions] = useState(5);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiImageFile, setAiImageFile] = useState<File | null>(null);
 
   const handleAiGenerate = async () => {
     if (!aiTopic) {
@@ -59,10 +61,19 @@ export default function FormBuatSoal({
 
     setIsAiLoading(true);
     try {
-      const res = await fetch('/api/ai/generate-kuis', {
+      let imageBase64 = null;
+      if (aiImageFile) {
+        imageBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(aiImageFile);
+        });
+      }
+
+      const res = await fetch('/api/ai/generate-kuis-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topik: aiTopic, jumlahSoal: numQuestions }),
+        body: JSON.stringify({ topik: aiTopic, jumlahSoal: numQuestions, imageBase64 }),
       });
 
       const data = await res.json();
@@ -92,7 +103,7 @@ export default function FormBuatSoal({
 
   const updateSoal = (index: number, field: string, value: any) => {
     const newSoalList = [...daftarSoal];
-    if (field === 'pertanyaan' || field === 'jawaban_benar') {
+    if (field === 'pertanyaan' || field === 'jawaban_benar' || field === 'gambar_url') {
       (newSoalList[index] as any)[field] = value;
     } else {
       (newSoalList[index].opsi as any)[field] = value;
@@ -236,6 +247,27 @@ export default function FormBuatSoal({
                 title="Jumlah Soal"
               />
             </div>
+            
+            <div className="relative border border-indigo-500/30 rounded-lg bg-surface flex items-center px-3" title="Lampirkan Gambar (Opsional)">
+               <input 
+                 type="file" 
+                 id="ai-image-upload" 
+                 className="hidden" 
+                 accept="image/*"
+                 onChange={(e) => {
+                   if (e.target.files && e.target.files[0]) {
+                     setAiImageFile(e.target.files[0]);
+                   }
+                 }}
+               />
+               <label htmlFor="ai-image-upload" className="cursor-pointer text-indigo-500 font-bold hover:text-indigo-600 text-sm flex items-center gap-1">
+                 {aiImageFile ? `🖼️ ${aiImageFile.name.slice(0,10)}...` : '📎 Gambar +'}
+               </label>
+               {aiImageFile && (
+                 <button type="button" onClick={() => setAiImageFile(null)} className="ml-2 text-red-500 font-bold text-lg leading-none shrink-0" title="Hapus">&times;</button>
+               )}
+            </div>
+
             <button 
               type="button"
               disabled={isAiLoading}
@@ -258,6 +290,40 @@ export default function FormBuatSoal({
             <button type="button" onClick={() => removeSoal(index)} className="absolute top-4 right-4 text-foreground/40 hover:text-red-500 font-bold">&times;</button>
             <div>
               <label className="block text-sm font-bold text-foreground mb-1">Pertanyaan #{index + 1}</label>
+              
+              {soal.gambar_url ? (
+                <div className="relative inline-block mb-3 border rounded border-border-custom overflow-hidden">
+                   <img src={soal.gambar_url} alt="Soal Image" className="h-32 object-contain bg-foreground/5" />
+                   <button type="button" onClick={() => updateSoal(index, 'gambar_url', '')} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs" title="Hapus Gambar">&times;</button>
+                </div>
+              ) : (
+                <div className="mb-2">
+                   <input 
+                     type="file" 
+                     id={`img-upload-${index}`} 
+                     className="hidden" 
+                     accept="image/*"
+                     onChange={async (e) => {
+                       const file = e.target.files?.[0];
+                       if (!file) return;
+                       const loadingToast = toast.loading('Mengunggah gambar...');
+                       const formData = new FormData();
+                       formData.append('file', file);
+                       try {
+                         const res = await fetch('/api/upload-lokal', { method: 'POST', body: formData });
+                         const data = await res.json();
+                         if (res.ok) updateSoal(index, 'gambar_url', data.url);
+                         else toast.error('Gagal mengunggah gambar');
+                       } catch { toast.error('Gagal koneksi ke server'); }
+                       finally { toast.dismiss(loadingToast); }
+                     }}
+                   />
+                   <label htmlFor={`img-upload-${index}`} className="text-xs bg-foreground/10 text-foreground px-2 py-1 rounded cursor-pointer hover:bg-foreground/20 transition inline-block">
+                     🖼️ Tambah Gambar
+                   </label>
+                </div>
+              )}
+
               <textarea value={soal.pertanyaan} onChange={(e) => updateSoal(index, 'pertanyaan', e.target.value)} rows={2} required className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Tulis soal kuis..." />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
