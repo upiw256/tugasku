@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Materi, Member } from '@/models';
+import { Materi, Member, User } from '@/models';
 import { redirect } from 'next/navigation';
 import MapelFilterSiswa from '@/components/siswa/MapelFilterSiswa';
 
@@ -20,7 +20,12 @@ export default async function SiswaMateriPage({
   const selectedMapel = params.mapel || '';
   
   // Ambil data siswa untuk tahu kelasnya
-  const student = await Member.findOne({ nis: session.user.email }).lean();
+  const user = await User.findOne({ user: session.user.email });
+  if (!user || !user.member_id) {
+    return <div className="p-10 text-center">Data siswa tidak ditemukan. Hubungi Admin.</div>;
+  }
+  
+  const student = await Member.findById(user.member_id).lean();
   if (!student) {
     return <div className="p-10 text-center">Data siswa tidak ditemukan.</div>;
   }
