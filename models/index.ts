@@ -113,7 +113,19 @@ const MateriSchema = new mongoose.Schema({
   file_url: { type: String, required: true },
   kelas: { type: mongoose.Schema.Types.Mixed, required: true },
   diunggah_oleh: { type: String, required: true }, // Nama pengunggah (Admin / Guru)
-  tanggal_upload: { type: Date, default: Date.now }
+  tanggal_upload: { type: Date, default: Date.now },
+  downloads: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] // Untuk track siapa yang download
+});
+
+// Schema untuk Komentar Materi (Diskusi Realtime)
+const MateriCommentSchema = new mongoose.Schema({
+  materi_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Materi', required: true },
+  user_email: { type: String, required: true },
+  nama_pengirim: { type: String, required: true },
+  role_pengirim: { type: String, required: true }, // 'admin' atau 'siswa'
+  kelas_siswa: { type: String }, // Agar bisa filter per diskusi kelas jika dibutuhkan
+  komentar: { type: String, required: true },
+  dibuat_pada: { type: Date, default: Date.now }
 });
 
 // Schema untuk Kuis (Soal PG)
@@ -183,3 +195,4 @@ export const Materi = models.Materi || model('Materi', MateriSchema);
 export const SoalPG = models.SoalPG || model('SoalPG', SoalPGSchema);
 export const PengerjaanKuis = models.PengerjaanKuis || model('PengerjaanKuis', PengerjaanKuisSchema);
 export const LogKuis = models.LogKuis || model('LogKuis', logKuisSchema);
+export const MateriComment = models.MateriComment || model('MateriComment', MateriCommentSchema);

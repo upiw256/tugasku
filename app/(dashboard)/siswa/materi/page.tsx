@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { Materi, Member, User } from '@/models';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function SiswaMateriPage() {
   const session = await auth();
@@ -54,15 +55,13 @@ export default async function SiswaMateriPage() {
               </div>
               <div className="mt-6 pt-4 border-t border-border-custom flex justify-between items-center">
                 <span className="text-xs text-foreground/30">📅 {new Date(m.tanggal_upload).toLocaleDateString('id-ID')}</span>
-                <a 
-                  href={m.file_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                <Link 
+                  href={`/siswa/materi/${m._id.toString()}`}
                   className="bg-primary-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                   Buka Materi
-                </a>
+                </Link>
               </div>
             </div>
           ))

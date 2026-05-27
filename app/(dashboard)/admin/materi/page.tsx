@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Member, Materi } from '@/models';
 import { redirect } from 'next/navigation';
 import FormUploadMateri from '@/components/admin/FormUploadMateri';
+import Link from 'next/link';
 
 export default async function AdminMateriPage() {
   const session = await auth();
@@ -27,6 +28,7 @@ export default async function AdminMateriPage() {
       deskripsi: m.deskripsi || "",
       file_url: m.file_url || "",
       kelas: m.kelas || [],
+      downloadsCount: m.downloads ? m.downloads.length : 0,
       tanggal_upload: m.tanggal_upload ? m.tanggal_upload.toISOString() : new Date().toISOString()
     }));
 
@@ -58,13 +60,15 @@ export default async function AdminMateriPage() {
                   <th className="px-6 py-3 font-bold">Judul Materi</th>
                   <th className="px-6 py-3 font-bold">Kelas</th>
                   <th className="px-6 py-3 font-bold">File</th>
+                  <th className="px-6 py-3 font-bold text-center">Downloads</th>
                   <th className="px-6 py-3 font-bold">Diunggah Pada</th>
+                  <th className="px-6 py-3 font-bold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-custom">
                 {existingMateri.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-foreground/20">Belum ada materi yang diunggah.</td>
+                    <td colSpan={6} className="px-6 py-8 text-center text-foreground/20">Belum ada materi yang diunggah.</td>
                   </tr>
                 ) : (
                   existingMateri.map((m: any) => (
@@ -78,13 +82,23 @@ export default async function AdminMateriPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1 font-bold">
+                        <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1 font-bold w-max">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                           Lihat File
                         </a>
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="bg-green-500/10 text-green-600 font-bold px-3 py-1 rounded-full text-xs">
+                          {m.downloadsCount} Kali
+                        </span>
+                      </td>
                       <td className="px-6 py-4 text-xs text-foreground/40">
                         {new Date(m.tanggal_upload).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Link href={`/admin/materi/${m._id}`} className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors inline-block w-max">
+                          Kelola & Diskusi
+                        </Link>
                       </td>
                     </tr>
                   ))
