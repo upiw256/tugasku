@@ -4,5 +4,9 @@ export async function register() {
     const { setupWorker } = await import('@/lib/worker');
     setupWorker();
     console.log('🚀 Background Worker Aktif');
+
+    // Seed akun admin default jika belum ada (dijalankan sekali saat startup)
+    const { seedDefaultAdmin } = await import('@/lib/seed');
+    await seedDefaultAdmin();
   }
 }
