@@ -10,6 +10,7 @@ export async function GET() {
     { header: 'NIS (Wajib)', key: 'nis', width: 15 },
     { header: 'Nama Lengkap (Wajib)', key: 'nama', width: 30 },
     { header: 'Kelas', key: 'kelas', width: 10 },
+    { header: 'Jenis Kelamin (L/P)', key: 'jenis_kelamin', width: 15 },
     { header: 'Email (Opsional)', key: 'email', width: 25 },
     { header: 'Password (Opsional)', key: 'pass', width: 15 },
   ];
@@ -19,6 +20,7 @@ export async function GET() {
     nis: '1001', 
     nama: 'Contoh Siswa', 
     kelas: 'X 12', 
+    jenis_kelamin: 'L',
     email: 'siswa@sekolah.com', 
     pass: 'rahasia123' 
   });

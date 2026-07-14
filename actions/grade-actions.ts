@@ -1,7 +1,7 @@
 'use server'
 
 import { connectDB } from '@/lib/db';
-import { Nilai, Member } from '@/models';
+import { Nilai, Member, Tugas, Kelompok } from '@/models';
 import { revalidatePath } from 'next/cache';
 import ExcelJS from 'exceljs';
 
@@ -19,10 +19,26 @@ export async function submitGradeAction(formData: FormData) {
     }
 
     // Cari apakah nilai sudah ada, kalau ada update, kalau belum buat baru (upsert)
-    await Nilai.findOneAndUpdate(
-      { member_id: memberId, tugas_id: tugasId }, // Kriteria cari
-      { nilai: nilaiAngka, tanggal_dinilai: new Date() }, // Data update
-      { upsert: true, new: true, setDefaultsOnInsert: true } // Opsi
+    const tugas = await Tugas.findById(tugasId);
+    if (!tugas) return { success: false, message: 'Tugas tidak ditemukan' };
+
+    let isKetua = false;
+    let targetAnggotaIds = [memberId];
+
+    if (tugas.tipe_tugas === 'kelompok') {
+      const kelompok = await Kelompok.findOne({ tugas_id: tugasId, ketua: memberId });
+      if (kelompok) {
+        isKetua = true;
+        targetAnggotaIds = kelompok.anggota;
+      }
+    }
+
+    // Jika yang dinilai adalah KETUA (pada tugas kelompok), otomatis update semua nilai anggotanya.
+    // Jika BUKAN KETUA (atau tugas individu), hanya update nilai individu.
+    await Nilai.updateMany(
+      { tugas_id: tugasId, member_id: { $in: targetAnggotaIds } },
+      { $set: { nilai: nilaiAngka, tanggal_dinilai: new Date() } },
+      { upsert: true }
     );
 
     // Refresh halaman agar tabel nilai terupdate

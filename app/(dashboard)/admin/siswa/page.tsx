@@ -104,6 +104,7 @@ export default async function DataSiswaPage({
           nis: s.nis,
           nama_lengkap: s.nama_lengkap,
           kelas: s.kelas,
+          jenis_kelamin: s.jenis_kelamin,
           poin_keaktifan: s.poin_keaktifan || 0
         }))} 
       />

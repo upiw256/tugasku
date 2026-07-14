@@ -54,9 +54,9 @@ export default async function SiswaDashboard() {
 
   // 6. Hitung Tugas Pending
   const pendingTasksCount = tasks.filter((t: any) => {
-    // Cek apakah tugas ini sudah ada nilainya?
-    const isGraded = allGrades.some((g: any) => g.tugas_id.toString() === t._id.toString());
-    return !isGraded; // Kembalikan true jika BELUM dinilai
+    const gradeData = allGrades.find((g: any) => g.tugas_id.toString() === t._id.toString());
+    const isDone = gradeData ? (!!gradeData.file_url || gradeData.nilai > 0) : false;
+    return !isDone; 
   }).length;
 
   // 7. Ambil Hasil Kuis
@@ -254,16 +254,26 @@ export default async function SiswaDashboard() {
                 ) : (
                     tasks.map((task: any) => {
                         const gradeData = allGrades.find((g: any) => g.tugas_id.toString() === task._id.toString());
-                        const isDone = !!gradeData;
+                        // Cek apakah selesai: punya file_url ATAU nilainya > 0
+                        const isDone = gradeData ? (!!gradeData.file_url || gradeData.nilai > 0) : false;
                         const deadline = new Date(task.deadline);
                         const isLate = !isDone && deadline < new Date();
 
                         return (
                             <div key={task._id} className="p-5 hover:bg-foreground/5 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-bold text-foreground text-lg">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <h3 className="font-bold text-foreground text-lg flex items-center gap-2 mr-2">
                                             {task.judul}
+                                            {task.tipe_tugas === 'kelompok' ? (
+                                                <span className="text-[10px] bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded border border-indigo-500/20 uppercase font-bold tracking-wider">
+                                                    👥 Kelompok
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] bg-sky-500/10 text-sky-500 px-2 py-0.5 rounded border border-sky-500/20 uppercase font-bold tracking-wider">
+                                                    👤 Individu
+                                                </span>
+                                            )}
                                         </h3>
                                         {isDone ? (
                                             <span className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full font-bold border border-green-500/20">
@@ -291,7 +301,7 @@ export default async function SiswaDashboard() {
                                     <div className="text-right min-w-[80px]">
                                         <p className="text-xs text-foreground/40 mb-1 font-bold">NILAI</p>
                                         <span className={`text-2xl font-black ${gradeData.nilai < 75 ? 'text-red-500' : 'text-blue-500'}`}>
-                                            {gradeData.nilai}
+                                            {gradeData.nilai > 0 || isDone ? gradeData.nilai : '-'}
                                         </span>
                                     </div>
                                 ) : (

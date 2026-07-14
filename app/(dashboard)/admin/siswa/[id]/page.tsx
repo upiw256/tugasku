@@ -48,6 +48,15 @@ export default async function Page({
           <input name="kelas" defaultValue={student.kelas} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded focus:ring-2 focus:ring-primary-500 outline-none" required />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-foreground/70 mb-1">Jenis Kelamin</label>
+          <select name="jenis_kelamin" defaultValue={student.jenis_kelamin || ''} className="w-full border border-border-custom bg-surface text-foreground p-2 rounded focus:ring-2 focus:ring-primary-500 outline-none" required>
+            <option value="">Pilih Jenis Kelamin</option>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+
         <div className="pt-4">
             <button type="submit" className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-bold shadow-lg shadow-primary-500/20 transition-all">
                 Simpan Perubahan

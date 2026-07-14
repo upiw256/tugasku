@@ -5,6 +5,7 @@ const MemberSchema = new Schema({
   nis: { type: String, required: true, unique: true },
   nama_lengkap: { type: String, required: true },
   kelas: { type: String, required: true },
+  jenis_kelamin: { type: String, enum: ['L', 'P'] },
   poin_keaktifan: { type: Number, default: 0 },
 }, { timestamps: false });
 

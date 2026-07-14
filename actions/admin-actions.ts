@@ -36,18 +36,20 @@ export async function importStudentsAction(formData: FormData): Promise<ActionSt
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return; 
 
-      // Ambil data kolom (Pastikan urutannya di Excel nanti: NIS, Nama, Kelas, Email, Password)
+      // Ambil data kolom (Pastikan urutannya di Excel nanti: NIS, Nama, Kelas, Jenis Kelamin, Email, Password)
       // getCell(1) artinya kolom A, getCell(2) kolom B, dst.
       const nisRaw = row.getCell(1).value; 
       const namaRaw = row.getCell(2).value;
       const kelasRaw = row.getCell(3).value;
-      const emailRaw = row.getCell(4).value;
-      const passRaw = row.getCell(5).value;
+      const jenisKelaminRaw = row.getCell(4).value;
+      const emailRaw = row.getCell(5).value;
+      const passRaw = row.getCell(6).value;
 
       // Konversi ke string aman
       const nis = nisRaw?.toString() || '';
       const nama = namaRaw?.toString() || '';
       const kelas = kelasRaw?.toString() || '';
+      const jenis_kelamin = jenisKelaminRaw?.toString() || '';
       const email = emailRaw?.toString() || '';
       const pass = passRaw?.toString() || '';
 
@@ -56,7 +58,7 @@ export async function importStudentsAction(formData: FormData): Promise<ActionSt
           // 1. Simpan/Update Data Siswa (Member)
           const newMember = await Member.findOneAndUpdate(
             { nis: nis },
-            { nama_lengkap: nama, kelas: kelas },
+            { nama_lengkap: nama, kelas: kelas, jenis_kelamin: jenis_kelamin },
             { upsert: true, new: true } // Buat baru jika belum ada
           );
 
@@ -140,12 +142,14 @@ export async function updateStudentAction(memberId: string, formData: FormData) 
     const nama = formData.get('nama') as string;
     const nis = formData.get('nis') as string;
     const kelas = formData.get('kelas') as string;
+    const jenis_kelamin = formData.get('jenis_kelamin') as string;
 
     // Update Member
     await Member.findByIdAndUpdate(memberId, {
       nama_lengkap: nama,
       nis: nis,
-      kelas: kelas
+      kelas: kelas,
+      jenis_kelamin: jenis_kelamin
     });
 
     // Update User (Jika NIS berubah, username login juga bisa diupdate jika mau, tapi opsional)
@@ -164,6 +168,7 @@ export async function createStudentAction(formData: FormData) {
     const nis = formData.get('nis') as string;
     const nama = formData.get('nama') as string;
     const kelas = formData.get('kelas') as string;
+    const jenis_kelamin = formData.get('jenis_kelamin') as string;
 
     // Cek apakah NIS sudah terdaftar
     const existingMember = await Member.findOne({ nis });
@@ -175,7 +180,8 @@ export async function createStudentAction(formData: FormData) {
     const newMember = await Member.create({
       nis,
       nama_lengkap: nama,
-      kelas
+      kelas,
+      jenis_kelamin
     });
 
     // 2. Buat User Login Otomatis

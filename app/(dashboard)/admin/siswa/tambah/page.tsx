@@ -4,6 +4,7 @@ import { createStudentAction } from '@/actions/admin-actions';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ImportSiswaForm from '@/components/ui/ImportSiswaForm';
 
 export default function TambahSiswaPage() {
   const router = useRouter();
@@ -73,6 +74,20 @@ export default function TambahSiswaPage() {
             />
           </div>
 
+          {/* Input Jenis Kelamin */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Jenis Kelamin</label>
+            <select
+              name="jenis_kelamin"
+              required
+              className="w-full px-3 py-2 border border-border-custom bg-surface text-foreground rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+            >
+              <option value="">Pilih Jenis Kelamin</option>
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+          </div>
+
           {/* Error Message */}
           {error && (
             <div className="p-3 bg-danger-500/10 text-danger-600 text-sm rounded-lg font-medium border border-danger-500/20">
@@ -101,6 +116,8 @@ export default function TambahSiswaPage() {
           <li>Password Default: <code>123456</code></li>
         </ul>
       </div>
+
+      <ImportSiswaForm />
     </div>
   );
 }

@@ -35,7 +35,7 @@ export async function GET(request: Request) {
 
     // 1. AMBIL DATA MEMBER
     const members = await Member.find({ kelas: kelas })
-      .select('_id nama_lengkap')
+      .select('_id nama_lengkap jenis_kelamin')
       .lean();
 
     if (!members || members.length === 0) {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     }
 
     // 2. BUAT MAP & KUMPULKAN ID
-    const memberMap = new Map<string, string>();
+    const memberMap = new Map<string, { nama: string, jk: string }>();
     
     // PERBAIKAN DI SINI:
     // Tambahkan ': any[]' agar TypeScript tahu ini array yang menampung apa saja (ObjectId)
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
       // Pastikan _id ada sebelum diproses
       if (m._id) {
         const idStr = m._id.toString();
-        memberMap.set(idStr, m.nama_lengkap);
+        memberMap.set(idStr, { nama: m.nama_lengkap, jk: m.jenis_kelamin || '' });
         memberIds.push(m._id);
       }
     });
@@ -74,12 +74,13 @@ export async function GET(request: Request) {
     // 4. GABUNGKAN DATA
     const finalData = users.map((u: any) => {
       const memberIdStr = u.member_id?.toString();
-      const realName = memberMap.get(memberIdStr) || "Nama Tidak Ditemukan";
+      const memberInfo = memberMap.get(memberIdStr) || { nama: "Nama Tidak Ditemukan", jk: "" };
 
       return {
-        nama: realName,
+        nama: memberInfo.nama,
         username: u.user,
-        kelas: kelas
+        kelas: kelas,
+        jenis_kelamin: memberInfo.jk
       };
     });
 
@@ -93,6 +94,7 @@ export async function GET(request: Request) {
     worksheet.columns = [
       { header: "No", key: "no", width: 5 },
       { header: "Nama Lengkap", key: "nama", width: 35 },
+      { header: "Jenis Kelamin (L/P)", key: "jk", width: 18 },
       { header: "Username", key: "username", width: 15 },
       { header: "Kelas", key: "kelas", width: 10 },
       { header: "Password Default", key: "password", width: 20 },
@@ -104,6 +106,7 @@ export async function GET(request: Request) {
       worksheet.addRow({
         no: index + 1,
         nama: data.nama,
+        jk: data.jenis_kelamin,
         username: data.username,
         kelas: data.kelas,
         password: "123456"

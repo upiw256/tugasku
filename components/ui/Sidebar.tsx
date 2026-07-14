@@ -114,6 +114,12 @@ export default function Sidebar({ user }: { user: any }) {
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
     },
     {
+      role: 'siswa_ketua',
+      label: 'Tugas Kelompok',
+      href: '/siswa/tugas-kelompok',
+      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    },
+    {
       role: 'siswa',
       label: 'Rank & Juara',
       href: '/siswa/leaderboard',
@@ -143,8 +149,13 @@ export default function Sidebar({ user }: { user: any }) {
       setIsRefreshing(false);
     }
   };
-  // Filter menu berdasarkan role user
-  const filteredMenus = allMenus.filter(m => m.role === user.role);
+  // Filter menu berdasarkan role user (termasuk role khusus siswa_ketua)
+  const filteredMenus = allMenus.filter(m => {
+    if (m.role === user.role) return true;
+    // Tampilkan menu siswa_ketua hanya jika siswa DAN isKetua
+    if (m.role === 'siswa_ketua' && user.role === 'siswa' && user.isKetua) return true;
+    return false;
+  });
 
   // --- PENGELOMPOKAN MENU (Agar mirip desain referensi) ---
   // Kita pisahkan menu "Pengaturan" ke grup "Tools", sisanya "General"

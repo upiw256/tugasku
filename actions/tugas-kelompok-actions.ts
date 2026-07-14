@@ -41,6 +41,7 @@ export async function createTugasKelompokAction(formData: FormData) {
       const savedK = await Kelompok.create({
         nama_kelompok: k.nama,
         tugas_id: newTugas._id,
+        ketua: k.ketua,
         kelas,
         anggota: k.anggota
       });

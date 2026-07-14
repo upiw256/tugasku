@@ -11,6 +11,7 @@ interface Student {
   nis: string;
   nama_lengkap: string;
   kelas: string;
+  jenis_kelamin?: string;
   poin_keaktifan: number;
 }
 
@@ -28,6 +29,7 @@ export default function SiswaTable({ students }: { students: Student[] }) {
           <tr>
             <th className="px-6 py-4 hidden md:table-cell">NIS</th>
             <th className="px-6 py-4">Nama Siswa</th>
+            <th className="px-6 py-4 hidden md:table-cell">L/P</th>
             <th className="px-6 py-4 hidden md:table-cell">Kelas</th>
             <th className="px-6 py-4 text-center hidden md:table-cell">Aksi</th>
           </tr>
@@ -55,6 +57,9 @@ export default function SiswaTable({ students }: { students: Student[] }) {
                          <span className="bg-blue-500/10 text-blue-500 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">
                             {s.kelas}
                          </span>
+                         <span className={`${s.jenis_kelamin === 'P' ? 'bg-pink-500/10 text-pink-500' : s.jenis_kelamin === 'L' ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-500/10 text-gray-500'} text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider`}>
+                            {s.jenis_kelamin || '-'}
+                         </span>
                          <span className="text-[10px] text-foreground/30 font-mono">
                             {s.nis}
                          </span>
@@ -69,6 +74,11 @@ export default function SiswaTable({ students }: { students: Student[] }) {
                         )}
                     </div>
                   </div>
+                </td>
+                <td className="px-6 py-4 hidden md:table-cell">
+                  <span className={`text-xs px-2.5 py-1 rounded font-bold uppercase tracking-widest leading-none border ${s.jenis_kelamin === 'P' ? 'bg-pink-500/10 text-pink-500 border-pink-500/20' : s.jenis_kelamin === 'L' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-gray-500/10 text-gray-500 border-gray-500/20'}`}>
+                    {s.jenis_kelamin || '-'}
+                  </span>
                 </td>
                 <td className="px-6 py-4 hidden md:table-cell">
                   <span className="bg-blue-500/10 text-blue-500 text-xs px-2.5 py-1 rounded font-bold border border-blue-500/20 uppercase tracking-widest leading-none">

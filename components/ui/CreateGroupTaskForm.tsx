@@ -14,6 +14,7 @@ interface Student {
 interface Group {
   nama: string;
   anggota: Student[];
+  ketua_id?: string;
 }
 
 export default function CreateGroupTaskForm({ availableClasses }: { availableClasses: string[] }) {
@@ -73,11 +74,26 @@ export default function CreateGroupTaskForm({ availableClasses }: { availableCla
     const newGroups: Group[] = [];
     
     for (let i = 0; i < shuffled.length; i += groupSize) {
+      const anggotaGroup = shuffled.slice(i, i + groupSize);
       newGroups.push({
         nama: `Kelompok ${(i / groupSize) + 1}`,
-        anggota: shuffled.slice(i, i + groupSize)
+        anggota: anggotaGroup,
+        ketua_id: anggotaGroup[0]?._id
       });
     }
+
+    // Jika grup terakhir hanya berisi 1-2 orang (sisa), gabungkan merata ke kelompok lain (jika target ukuran > 2)
+    if (newGroups.length > 1 && groupSize > 2) {
+      const lastGroup = newGroups[newGroups.length - 1];
+      if (lastGroup.anggota.length <= 2) {
+        newGroups.pop();
+        lastGroup.anggota.forEach((siswa, index) => {
+          const targetIndex = index % newGroups.length;
+          newGroups[targetIndex].anggota.push(siswa);
+        });
+      }
+    }
+
     setGroups(newGroups);
   };
 
@@ -106,6 +122,7 @@ export default function CreateGroupTaskForm({ availableClasses }: { availableCla
     // Format kelompok untuk backend
     const kelompokData = groups.map(g => ({
       nama: g.nama,
+      ketua: g.ketua_id,
       anggota: g.anggota.map(s => s._id)
     }));
 
@@ -199,10 +216,31 @@ export default function CreateGroupTaskForm({ availableClasses }: { availableCla
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto pr-2">
               {groups.map((group, idx) => (
                 <div key={idx} className="bg-background border border-border-custom rounded-lg p-3">
-                  <h4 className="font-bold text-sm border-b border-border-custom pb-1 mb-2 text-foreground">{group.nama} <span className="text-xs font-normal bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded ml-2">{group.anggota.length} orang</span></h4>
-                  <ul className="text-xs text-foreground/60 space-y-1">
+                  <div className="flex justify-between items-start border-b border-border-custom pb-2 mb-2">
+                    <h4 className="font-bold text-sm text-foreground">{group.nama} <span className="text-xs font-normal bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded ml-1">{group.anggota.length} Anak</span></h4>
+                  </div>
+                  
+                  <div className="mb-2 bg-primary-500/10 px-2 py-1.5 rounded border border-primary-500/20">
+                    <label className="text-[11px] font-bold text-primary-600 uppercase tracking-wide mr-2">👑 Ketua:</label>
+                    <select 
+                       className="px-2 py-1 text-xs border border-border-custom rounded bg-surface text-foreground outline-none w-3/4 max-w-[200px]"
+                       value={group.ketua_id || ''}
+                       onChange={(e) => {
+                          const newGroups = [...groups];
+                          newGroups[idx].ketua_id = e.target.value;
+                          setGroups(newGroups);
+                       }}
+                    >
+                       {group.anggota.map(a => <option key={a._id} value={a._id}>{a.nama_lengkap}</option>)}
+                    </select>
+                  </div>
+
+                  <p className="text-[10px] font-bold text-foreground/30 mt-2">Daftar Anggota:</p>
+                  <ul className="text-xs text-foreground/60 space-y-1 mt-1">
                     {group.anggota.map(s => (
-                      <li key={s._id}>• {s.nama_lengkap}</li>
+                      <li key={s._id} className={s._id === group.ketua_id ? 'font-bold text-foreground/90' : ''}>
+                        {s._id === group.ketua_id ? '👑 ' : '• '} {s.nama_lengkap}
+                      </li>
                     ))}
                   </ul>
                 </div>

@@ -80,6 +80,19 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
         ketua_id: anggotaGroup[0]?._id // Default jadikan elemen pertama sebagai ketua
       });
     }
+
+    // Jika grup terakhir hanya berisi 1-2 orang (sisa), gabungkan merata ke kelompok lain (jika target ukuran > 2)
+    if (newGroups.length > 1 && groupSize > 2) {
+      const lastGroup = newGroups[newGroups.length - 1];
+      if (lastGroup.anggota.length <= 2) {
+        newGroups.pop();
+        lastGroup.anggota.forEach((siswa, index) => {
+          const targetIndex = index % newGroups.length;
+          newGroups[targetIndex].anggota.push(siswa);
+        });
+      }
+    }
+
     setGroups(newGroups);
   };
 
