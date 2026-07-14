@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.5 AS base
+FROM oven/bun:latest AS base
 WORKDIR /app
 
 # --- deps ---
@@ -30,7 +30,7 @@ ENV NEXT_DISABLE_TURBOPACK=1
 RUN bun run build
 
 # --- runner ---
-FROM oven/bun:1.3.5 AS runner
+FROM oven/bun:latest AS runner
 WORKDIR /app
 
 # ENV NODE_ENV=production
