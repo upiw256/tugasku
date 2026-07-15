@@ -46,15 +46,21 @@ export default async function HalamanTugasKelompok() {
     if (!kelompok) {
       const kelasStr = Array.isArray((tugas as any).kelas) ? (tugas as any).kelas[0] : (tugas as any).kelas;
       kelompok = await Kelompok.findOne({
-        $or: [
-          { tugas_id: { $exists: false } },
-          { tugas_id: null }
+        $and: [
+          {
+            $or: [
+              { tugas_id: { $exists: false } },
+              { tugas_id: null }
+            ]
+          },
+          {
+            $or: [
+              { anggota: member._id },
+              { ketua: member._id }
+            ]
+          }
         ],
-        kelas: kelasStr,
-        $or: [
-          { anggota: member._id },
-          { ketua: member._id }
-        ]
+        kelas: kelasStr
       } as any).lean();
     }
 
