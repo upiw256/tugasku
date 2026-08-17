@@ -45,3 +45,56 @@ export async function createKelompokAction(formData: FormData) {
     return { success: false, message: error.message || 'Gagal menyimpan kelompok' };
   }
 }
+
+export async function moveMemberAction(memberId: string, fromGroupId: string, toGroupId: string) {
+  try {
+    await connectDB();
+    
+    // Hapus dari grup asal
+    const fromGroup = await Kelompok.findById(fromGroupId);
+    if (!fromGroup) return { success: false, message: 'Kelompok asal tidak ditemukan' };
+    
+    fromGroup.anggota = fromGroup.anggota.filter((id: any) => id.toString() !== memberId);
+    if (fromGroup.ketua && fromGroup.ketua.toString() === memberId) {
+       fromGroup.ketua = fromGroup.anggota[0] || null;
+    }
+    await fromGroup.save();
+
+    // Tambah ke grup tujuan
+    const toGroup = await Kelompok.findById(toGroupId);
+    if (!toGroup) return { success: false, message: 'Kelompok tujuan tidak ditemukan' };
+
+    toGroup.anggota.push(memberId);
+    if (!toGroup.ketua) {
+       toGroup.ketua = memberId;
+    }
+    await toGroup.save();
+
+    revalidatePath('/admin/tugas-kelompok');
+    
+    return { success: true, message: 'Berhasil memindahkan anggota' };
+  } catch (error: any) {
+    console.error('Move Member Error:', error);
+    return { success: false, message: error.message || 'Gagal memindahkan anggota' };
+  }
+}
+
+export async function setKetuaAction(groupId: string, memberId: string) {
+  try {
+    await connectDB();
+    
+    const group = await Kelompok.findById(groupId);
+    if (!group) return { success: false, message: 'Kelompok tidak ditemukan' };
+    
+    group.ketua = memberId;
+    await group.save();
+    
+    revalidatePath('/admin/tugas-kelompok');
+    
+    return { success: true, message: 'Berhasil mengubah ketua' };
+  } catch (error: any) {
+    console.error('Set Ketua Error:', error);
+    return { success: false, message: error.message || 'Gagal mengubah ketua' };
+  }
+}
+

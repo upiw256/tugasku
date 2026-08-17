@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Kelompok, Member } from '@/models';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import DragDropGroupList from '@/components/ui/DragDropGroupList';
 
 export default async function DataKelompokPage({
   searchParams,
@@ -74,42 +75,7 @@ export default async function DataKelompokPage({
 
       {/* Grid Card Kelompok */}
       {query ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {kelompokList.map((k: any) => (
-            <div key={k._id} className="bg-surface rounded-xl shadow-sm border border-border-custom p-5 hover:shadow-md transition-all group">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">{k.nama_kelompok}</h3>
-                  <span className="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold border border-blue-500/20 uppercase tracking-tighter">Kelas: {k.kelas}</span>
-                </div>
-                <span className="text-[10px] text-foreground/60 font-bold bg-foreground/5 px-2 py-0.5 rounded border border-border-custom">{k.anggota.length} Anak</span>
-              </div>
-              
-              <div className="mt-4 border-t border-border-custom pt-3">
-                <p className="text-[10px] font-bold text-foreground/40 mb-2 uppercase tracking-widest">Anggota:</p>
-                <ul className="space-y-1.5">
-                  {k.anggota.map((siswa: any, idx: number) => {
-                    const isKetua = k.ketua && k.ketua.toString() === siswa._id.toString();
-                    return (
-                      <li key={siswa._id || idx} className={`text-sm flex gap-2 ${isKetua ? 'font-bold text-foreground border-l-2 border-yellow-500 pl-2' : 'text-foreground/70'}`}>
-                        <span className="text-foreground/20 font-mono flex-shrink-0 w-4">{idx + 1}.</span> 
-                        <span className="truncate">{siswa.nama_lengkap} {isKetua && <span className="text-yellow-500 ml-1" title="Ketua Kelompok">👑 (Ketua)</span>}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-              
-            </div>
-          ))}
-
-          {kelompokList.length === 0 && (
-            <div className="col-span-full py-12 text-center bg-foreground/5 border border-dashed border-border-custom rounded-xl">
-              <p className="text-foreground/60 font-medium">Belum ada kelompok yang dibentuk untuk kelas ini.</p>
-              <p className="text-foreground/40 text-sm mt-1">Klik tombol Generate Kelompok untuk memulai pembentukan.</p>
-            </div>
-          )}
-        </div>
+        <DragDropGroupList initialList={JSON.parse(JSON.stringify(kelompokList))} />
       ) : (
         <div className="py-12 text-center bg-blue-500/5 border border-blue-500/20 rounded-xl">
           <p className="text-blue-500 font-medium">↑ Pilih kelas dari menu dropdown di atas untuk melihat data kelompok.</p>

@@ -96,6 +96,31 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
     setGroups(newGroups);
   };
 
+  const moveStudent = (studentId: string, fromGroupIdx: number, toGroupIdx: number) => {
+    if (fromGroupIdx === toGroupIdx) return;
+    const newGroups = groups.map(g => ({
+      ...g,
+      anggota: [...g.anggota]
+    }));
+    
+    const studentIndex = newGroups[fromGroupIdx].anggota.findIndex(s => s._id === studentId);
+    if (studentIndex === -1) return;
+    
+    const student = newGroups[fromGroupIdx].anggota.splice(studentIndex, 1)[0];
+    
+    if (newGroups[fromGroupIdx].ketua_id === studentId) {
+      newGroups[fromGroupIdx].ketua_id = newGroups[fromGroupIdx].anggota[0]?._id;
+    }
+    
+    newGroups[toGroupIdx].anggota.push(student);
+    
+    if (!newGroups[toGroupIdx].ketua_id) {
+      newGroups[toGroupIdx].ketua_id = student._id;
+    }
+    
+    setGroups(newGroups);
+  };
+
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
     setError('');
@@ -205,10 +230,26 @@ export default function CreateGroupForm({ availableClasses }: { availableClasses
                   </div>
 
                   <p className="text-[10px] font-bold text-foreground/30 mt-2">Daftar Anggota:</p>
-                  <ul className="text-xs text-foreground/60 space-y-1 mt-1">
+                  <ul className="space-y-1 mt-1">
                     {group.anggota.map(s => (
-                      <li key={s._id} className={s._id === group.ketua_id ? 'font-bold text-foreground/90' : ''}>
-                        {s._id === group.ketua_id ? '👑 ' : '• '} {s.nama_lengkap}
+                      <li key={s._id} className={`flex items-center justify-between text-xs ${s._id === group.ketua_id ? 'font-bold text-foreground/90' : 'text-foreground/60'}`}>
+                        <div className="flex-1 truncate" title={s.nama_lengkap}>
+                          {s._id === group.ketua_id ? '👑 ' : '• '} {s.nama_lengkap}
+                        </div>
+                        {groups.length > 1 && (
+                          <select 
+                            title="Pindah ke kelompok lain"
+                            className="bg-background border border-border-custom rounded text-[10px] py-0.5 px-1 outline-none w-[90px] text-foreground/70 flex-shrink-0 ml-2"
+                            value={idx}
+                            onChange={(e) => moveStudent(s._id, idx, parseInt(e.target.value))}
+                          >
+                            {groups.map((g, gIdx) => (
+                              <option key={gIdx} value={gIdx}>
+                                Pindah ke {gIdx + 1}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </li>
                     ))}
                   </ul>
