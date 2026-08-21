@@ -64,17 +64,24 @@ export async function submitTaskAction(formData: FormData) {
     const uploadDir = path.join(baseUploadPath, folderName);
     const filePath = path.join(uploadDir, fileName);
 
-    // 4. Masuk Antrian Redis
+    // 4. Proses File (Sekarang kita ubah jadi sinkron tanpa Antrian agar tidak gagal diam-diam)
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    await uploadQueue.add('proses-file', {
-      buffer: buffer,
-      filePath: filePath,
-      uploadDir: uploadDir,
-      isImage: isImage,
-      fileName: fileName
-    });
+    // Buat foldernya
+    const fs = await import('fs/promises');
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    // Tulis ke fisik atau convert dengan Sharp (webp)
+    if (isImage) {
+      const sharp = (await import('sharp')).default;
+      await sharp(buffer)
+        .resize(1200, null, { withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toFile(filePath);
+    } else {
+      await fs.writeFile(filePath, buffer);
+    }
 
     // 5. Update MongoDB (Forward ke Semua Anggota Jika Kelompok)
     const fileUrl = `/api/uploads/${folderName}/${fileName}`;
@@ -91,11 +98,11 @@ export async function submitTaskAction(formData: FormData) {
     );
 
     revalidatePath('/admin/tugas');
-    return { success: true, message: "Tugas berhasil dikirim dan sedang diproses!" };
+    return { success: true, message: "Tugas berhasil dikirim dan tersimpan!" };
 
-  } catch (e) {
-    console.error("❌ Gagal memproses antrian upload:", e);
-    return { success: false, message: "Gagal mengirim tugas, coba lagi nanti" };
+  } catch (e: any) {
+    console.error("❌ Gagal menyimpan file tugas:", e);
+    return { success: false, message: "Gagal menyimpan tugas secara fisik: " + e.message };
   }
 }
 
