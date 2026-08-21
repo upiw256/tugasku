@@ -28,7 +28,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - uploads_data:/app/public/uploads
+      - ./public/uploads:/app/public/uploads
 
   mongo:
     container_name: mongodb_container
@@ -53,4 +53,3 @@ services:
 volumes:
   mongodb_data:
   redis_data: # Tambahkan volume untuk redis
-  uploads_data: # Tambahkan volume untuk uploads
