@@ -77,7 +77,7 @@ export async function submitTaskAction(formData: FormData) {
     });
 
     // 5. Update MongoDB (Forward ke Semua Anggota Jika Kelompok)
-    const fileUrl = `/uploads/${folderName}/${fileName}`;
+    const fileUrl = `/api/uploads/${folderName}/${fileName}`;
     await Nilai.updateMany(
       { tugas_id: tugasId, member_id: { $in: targetAnggotaIds } },
       { 

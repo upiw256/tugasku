@@ -25,6 +25,7 @@ export async function GET(
     const ext = path.extname(filePath).toLowerCase();
     let contentType = 'image/jpeg';
     if (ext === '.png') contentType = 'image/png';
+    else if (ext === '.webp') contentType = 'image/webp';
     else if (ext === '.pdf') contentType = 'application/pdf';
 
     // Kirim gambarnya ke layar!
