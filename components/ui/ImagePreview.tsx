@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ImagePreviewProps {
   src: string
@@ -28,8 +29,8 @@ export default function ImagePreview({ src, alt = "Preview", className = "" }: I
         </div>
       </div>
 
-      {/* Modal Overlay */}
-      {isOpen && (
+      {/* Modal Overlay via Portal untuk menghindari masalah form z-index / CSS Stacking pada parent element */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setIsOpen(false)}
@@ -54,7 +55,8 @@ export default function ImagePreview({ src, alt = "Preview", className = "" }: I
               onClick={(e) => e.stopPropagation()} 
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
