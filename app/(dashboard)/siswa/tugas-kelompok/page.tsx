@@ -5,6 +5,11 @@ import { redirect } from 'next/navigation';
 import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import ImagePreview from '@/components/ui/ImagePreview';
 
+const getSafeFileUrl = (url: string) => {
+  if (!url) return '';
+  return url.startsWith('/api') ? url : `/api${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default async function HalamanTugasKelompok() {
   const session = await auth();
   if (!session || session.user.role !== 'siswa') redirect('/login');
@@ -146,11 +151,11 @@ export default async function HalamanTugasKelompok() {
                     <div className="mb-4">
                       <div className="relative w-full h-28 rounded-xl overflow-hidden border border-border-custom shadow-inner">
                         {submission.file_url.endsWith('.pdf') ? (
-                          <a href={submission.file_url} target="_blank" className="flex h-full items-center justify-center bg-danger-500/5 text-danger-500 gap-2 text-sm font-bold">
+                          <a href={getSafeFileUrl(submission.file_url)} target="_blank" className="flex h-full items-center justify-center bg-danger-500/5 text-danger-500 gap-2 text-sm font-bold">
                             📄 Lihat PDF
                           </a>
                         ) : (
-                          <ImagePreview src={submission.file_url} className="w-full h-28" />
+                          <ImagePreview src={getSafeFileUrl(submission.file_url)} className="w-full h-28" />
                         )}
                       </div>
                     </div>

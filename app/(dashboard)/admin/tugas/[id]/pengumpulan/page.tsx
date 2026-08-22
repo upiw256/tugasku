@@ -21,6 +21,11 @@ const formatDate = (date: Date) => {
 
 const isPdf = (url: string) => url?.toLowerCase()?.endsWith('.pdf') || false;
 
+const getSafeFileUrl = (url: string) => {
+  if (!url) return '';
+  return url.startsWith('/api') ? url : `/api${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default async function HalamanPengumpulan({ 
   params,
   searchParams 
@@ -126,13 +131,13 @@ export default async function HalamanPengumpulan({
                       <div className="flex justify-center">
                         {item.file_url ? (
                           isPdf(item.file_url) ? (
-                            <a href={item.file_url} target="_blank" className="w-12 h-12 bg-danger-500/10 border border-danger-500/20 rounded flex flex-col items-center justify-center">
+                            <a href={getSafeFileUrl(item.file_url)} target="_blank" className="w-12 h-12 bg-danger-500/10 border border-danger-500/20 rounded flex flex-col items-center justify-center">
                               <span className="text-lg">📄</span>
                               <span className="text-[8px] text-danger-600 font-bold tracking-tighter">PDF</span>
                             </a>
                           ) : (
                             <div className="w-12 h-12 shadow-sm border border-border-custom rounded overflow-hidden">
-                              <ImagePreview src={`/api${item.file_url}`} className="w-full h-full object-cover" />
+                              <ImagePreview src={getSafeFileUrl(item.file_url)} className="w-full h-full object-cover" />
                             </div>
                           )
                         ) : <span className="text-[10px] text-foreground/20 italic">-</span>}
@@ -181,13 +186,13 @@ export default async function HalamanPengumpulan({
                   <div className="shrink-0">
                     {item.file_url ? (
                       isPdf(item.file_url) ? (
-                        <div className="w-16 h-16 bg-red-50 border border-red-200 rounded-xl flex flex-col items-center justify-center">
+                        <a href={getSafeFileUrl(item.file_url)} target="_blank" className="w-16 h-16 bg-red-50 border border-red-200 rounded-xl flex flex-col items-center justify-center hover:bg-red-100 transition-colors">
                           <span className="text-xl">📄</span>
                           <span className="text-[9px] text-red-600 font-bold">PDF</span>
-                        </div>
+                        </a>
                       ) : (
                         <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                          <ImagePreview src={`/api${item.file_url}`} className="w-full h-full object-cover" />
+                          <ImagePreview src={getSafeFileUrl(item.file_url)} className="w-full h-full object-cover" />
                         </div>
                       )
                     ) : <div className="w-16 h-16 bg-gray-50 rounded-xl border border-dashed flex items-center justify-center text-[10px] text-gray-300">N/A</div>}

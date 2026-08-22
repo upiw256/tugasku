@@ -5,6 +5,11 @@ import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import { redirect } from 'next/navigation';
 import ImagePreview from '@/components/ui/ImagePreview';
 
+const getSafeFileUrl = (url: string) => {
+  if (!url) return '';
+  return url.startsWith('/api') ? url : `/api${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default async function HalamanTugasSiswa() {
   // 1. Cek Sesi Login
   const session = await auth();
@@ -117,7 +122,13 @@ export default async function HalamanTugasSiswa() {
                         <div className="mb-4">
                             {isDone && cleanSubmission?.file_url ? (
                                 <div className="relative w-full h-32 rounded-xl overflow-hidden border border-border-custom shadow-inner">
-                                    <ImagePreview src={cleanSubmission.file_url} className="w-full h-32" />
+                                    {cleanSubmission.file_url.endsWith('.pdf') ? (
+                                        <a href={getSafeFileUrl(cleanSubmission.file_url)} target="_blank" className="flex h-full items-center justify-center bg-danger-500/5 text-danger-500 gap-2 text-sm font-bold">
+                                          📄 Lihat PDF
+                                        </a>
+                                    ) : (
+                                        <ImagePreview src={getSafeFileUrl(cleanSubmission.file_url)} className="w-full h-32" />
+                                    )}
                                 </div>
                             ) : (
                                 <div className="w-full h-12 bg-foreground/5 border-2 border-dashed border-border-custom rounded-xl flex items-center justify-center">
