@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch (err) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/upload-lokal/route.ts'}): ${err?.message || err}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/upload-lokal/route.ts'}): ${(err as any)?.message || String(err)}`, tipe: 'error' }).catch(() => {});
 
       // Folder mungkin sudah ada
     }

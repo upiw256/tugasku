@@ -76,7 +76,7 @@ export async function restoreDatabaseAction(formData: FormData) {
       const decryptedString = decryptData(buffer);
       backupData = JSON.parse(decryptedString);
     } catch (err) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${err?.message || err}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(err as any)?.message || String(err)}`, tipe: 'error' }).catch(() => {});
 
       return { success: false, message: 'Gagal membuka file. File rusak atau kunci enkripsi salah.' };
     }

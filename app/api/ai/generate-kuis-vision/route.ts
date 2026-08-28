@@ -117,7 +117,7 @@ export async function POST(req: Request) {
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch (err) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${err?.message || err}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${(err as any)?.message || String(err)}`, tipe: 'error' }).catch(() => {});
 
       // Folder mungkin sudah ada
     }
@@ -138,7 +138,7 @@ export async function POST(req: Request) {
             q.gambar_url = `/uploads/${uniqueName}`;
           }
         } catch (e) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${e?.message || e}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${(e as any)?.message || String(e)}`, tipe: 'error' }).catch(() => {});
 
           console.error("Gagal mendownload gambar AI:", e);
         }
