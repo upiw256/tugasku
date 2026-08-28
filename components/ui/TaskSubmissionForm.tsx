@@ -6,21 +6,28 @@ import { toast } from "react-hot-toast";
 
 export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fungsi untuk Preview Gambar
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Mohon pilih file gambar (JPG/PNG).");
-        if (fileInputRef.current) fileInputRef.current.value = "";
+      const isImage = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
+      if (!isImage && !isPdf) {
+        alert('Mohon pilih file gambar (JPG/PNG/HEIC) atau PDF.');
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+      setSelectedFile(file);
+      if (isImage) {
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewUrl(objectUrl);
+        return () => URL.revokeObjectURL(objectUrl);
+      } else {
+        setPreviewUrl(null); // PDF tidak perlu preview gambar
+      }
     }
   };
 
@@ -30,8 +37,10 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
         setIsUploading(true);
         const res = await submitTaskAction(formData);
         if (res.success) {
-          alert("Berhasil dikirim!");
+          alert('Berhasil dikirim!');
           setPreviewUrl(null);
+          setSelectedFile(null);
+          if (fileInputRef.current) fileInputRef.current.value = '';
         } else {
           alert(res.message);
         }
@@ -42,12 +51,12 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
       <input type="hidden" name="tugasId" value={tugasId} />
 
       <div className="space-y-2">
-        <label className="block text-sm font-bold text-foreground">Upload Foto Tugas</label>
+        <label className="block text-sm font-bold text-foreground">Upload Foto / PDF Tugas</label>
         <input
           ref={fileInputRef}
           type="file"
-          name="file" // Name harus "file" agar dibaca Server Action
-          accept="image/*"
+          name="file"
+          accept="image/*,application/pdf"
           onChange={handleFileChange}
           required
           className="block w-full text-sm text-foreground/40 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-foreground/5 file:text-foreground hover:file:bg-foreground/10"
@@ -61,8 +70,24 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
           <img src={previewUrl} alt="Preview" className="max-h-60 mx-auto rounded shadow-sm" />
           <button 
             type="button" 
-            onClick={() => { setPreviewUrl(null); if(fileInputRef.current) fileInputRef.current.value=""; }}
+            onClick={() => { setPreviewUrl(null); setSelectedFile(null); if(fileInputRef.current) fileInputRef.current.value=''; }}
             className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full text-xs"
+          >
+            ✕ Hapus
+          </button>
+        </div>
+      )}
+      {selectedFile && !previewUrl && (
+        <div className="mt-4 p-3 border-2 border-dashed border-border-custom rounded-lg bg-foreground/5 flex items-center gap-3">
+          <span className="text-2xl">📄</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{selectedFile.name}</p>
+            <p className="text-xs text-foreground/50">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setSelectedFile(null); if(fileInputRef.current) fileInputRef.current.value=''; }}
+            className="bg-red-500 text-white px-2 py-1 rounded-full text-xs shrink-0"
           >
             ✕ Hapus
           </button>

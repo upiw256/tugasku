@@ -62,12 +62,17 @@ export async function submitTaskAction(formData: FormData) {
     // 3. Konfigurasi Path & Nama File
     const folderName = tugas.judul.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const isImage = file.type.startsWith('image/');
-    const extension = isImage ? 'webp' : 'pdf';
-    const fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis.trim().replace(/\s+/g, '')}.${extension}`;
+    
+    // Ambil ekstensi aslinya
+    const originalExt = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() || '' : '';
+    
+    // Default ekstensi: jika gambar coba webp, jika dokumen gunakan aslinya
+    let extension = isImage ? 'webp' : (originalExt || 'bin');
+    let fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis.trim().replace(/\s+/g, '')}.${extension}`;
 
     const baseUploadPath = path.join(process.cwd(), 'public', 'uploads');
     const uploadDir = path.join(baseUploadPath, folderName);
-    const filePath = path.join(uploadDir, fileName);
+    let filePath = path.join(uploadDir, fileName);
 
     // 4. Proses File (Sekarang kita ubah jadi sinkron tanpa Antrian agar tidak gagal diam-diam)
     const arrayBuffer = await file.arrayBuffer();
@@ -79,11 +84,19 @@ export async function submitTaskAction(formData: FormData) {
 
     // Tulis ke fisik atau convert dengan Sharp (webp)
     if (isImage) {
-      const sharp = (await import('sharp')).default;
-      await sharp(buffer)
-        .resize(1200, null, { withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toFile(filePath);
+      try {
+        const sharp = (await import('sharp')).default;
+        await sharp(buffer)
+          .resize(1200, null, { withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toFile(filePath);
+      } catch (sharpError) {
+        // Fallback jika format tidak disupport (misal HEIC / raw)
+        extension = originalExt || 'jpg';
+        fileName = `${siswa.nama_lengkap.replace(/\s+/g, '_')}_${siswa.nis.trim().replace(/\s+/g, '')}.${extension}`;
+        filePath = path.join(uploadDir, fileName);
+        await fs.writeFile(filePath, buffer);
+      }
     } else {
       await fs.writeFile(filePath, buffer);
     }

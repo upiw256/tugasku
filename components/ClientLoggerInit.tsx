@@ -9,54 +9,45 @@ export default function ClientLoggerInit() {
     if (isSetup.current) return;
     isSetup.current = true;
 
-    if (typeof window !== 'undefined') {
-      const originalError = console.error;
+    try {
+      // Rate limiter
+      let lastSentAt = 0;
+      
+      const sendToLogger = (msg: string) => {
+        if (!msg || msg.length < 3) return;
+        // Rate limit: max 1 log per 3 seconds
+        const now = Date.now();
+        if (now - lastSentAt < 3000) return;
+        lastSentAt = now;
 
-      // Anti-spam mechanism
-      let isLogging = false;
+        // Filter non-actionable noise
+        const noise = ['Hydration', 'Third-party cookie', 'ResizeObserver', 'Non-Error promise'];
+        if (noise.some(n => msg.includes(n))) return;
 
-      const sendToLogger = async (msg: string) => {
-        if (isLogging) return;
-        isLogging = true;
-        try {
-          if (msg.includes('Hydration') || msg.includes('Third-party cookie')) {
-             return;
-          }
-          await fetch('/api/client-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              action: msg,
-              currentUrl: window.location.pathname
-            })
-          });
-        } catch (err) {
-          // Ignore fetch errors to prevent loops
-        } finally {
-          setTimeout(() => { isLogging = false; }, 2000); // Rate limit to 1 cliet log per 2 seconds
-        }
+        // Fire and forget - do NOT await, do NOT throw
+        fetch('/api/client-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: msg.substring(0, 400),
+            currentUrl: window.location.pathname
+          })
+        }).catch(() => {}); // Swallow all errors silently
       };
 
-      console.error = function (...args) {
-        originalError.apply(console, args);
-        
-        try {
-          const message = args.map(a => {
-            if (a instanceof Error) return a.message;
-            return typeof a === 'object' ? JSON.stringify(a) : String(a);
-          }).join(' ');
-          
-          sendToLogger(message);
-        } catch (e) {}
-      };
-
+      // Only intercept uncaught runtime errors (safe - doesn't override console)
       window.addEventListener('error', (event) => {
-        sendToLogger(event.message);
+        try { sendToLogger(event.message); } catch (e) {}
       });
       
       window.addEventListener('unhandledrejection', (event) => {
-        sendToLogger(event.reason?.message || String(event.reason));
+        try {
+          const msg = event.reason?.message || String(event.reason);
+          sendToLogger(msg);
+        } catch (e) {}
       });
+    } catch (e) {
+      // Fail silently - logger must never crash the app
     }
   }, []);
 
