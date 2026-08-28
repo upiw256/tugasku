@@ -5,6 +5,8 @@ import { connectDB } from '@/lib/db';
 import { Materi, MateriComment, Member, User } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { pusherServer } from '@/lib/pusher';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 // Fungsi untuk mencatat download materi
 export async function trackMateriDownload(materiId: string) {
@@ -38,6 +40,8 @@ export async function trackMateriDownload(materiId: string) {
     revalidatePath(`/admin/materi`);
     return { success: true };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/materi-discussion.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error tracking download:', error);
     return { success: false, message: 'Gagal mencatat log' };
   }
@@ -61,6 +65,8 @@ export async function getLogUnduhan(materiId: string) {
     
     return { success: true, data };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/materi-discussion.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error getting download log:', error);
     return { success: false, data: [] };
   }
@@ -99,6 +105,8 @@ export async function getDiskusiMateri(materiId: string, kelasSiswa?: string) {
       }))
     };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/materi-discussion.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error getting discussions:', error);
     return { success: false, data: [] };
   }
@@ -156,6 +164,8 @@ export async function postKomentarDiskusi(materiId: string, komentar: string) {
       }
     };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/materi-discussion.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error posting comment:', error);
     return { success: false, message: 'Gagal mengirim komentar' };
   }
@@ -174,6 +184,8 @@ export async function deleteKomentarDiskusi(commentId: string) {
     
     return { success: true };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/materi-discussion.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error deleting comment:', error);
     return { success: false, message: 'Gagal menghapus komentar' };
   }
@@ -201,6 +213,8 @@ export async function clearDiskusiMateri(materiId: string, kelas?: string) {
     
     return { success: true };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/materi-discussion.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error clearing discussions:', error);
     return { success: false, message: 'Gagal clear chat' };
   }

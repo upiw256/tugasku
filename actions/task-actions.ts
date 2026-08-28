@@ -4,6 +4,8 @@ import { connectDB } from '@/lib/db';
 import { Tugas, Nilai } from '@/models';
 import ExcelJS from 'exceljs';
 import { revalidatePath } from 'next/cache';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function importTasksAction(formData: FormData) {
   await connectDB();
@@ -69,6 +71,8 @@ export async function importTasksAction(formData: FormData) {
     return { success: true, message: `Berhasil import ${count} tugas!` };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/task-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Error import tugas:", error);
     return { success: false, message: 'Gagal import. Cek format tanggal/kolom excel.' };
   }
@@ -86,6 +90,8 @@ export async function deleteTaskAction(tugasId: string) {
     revalidatePath('/admin/tugas');
     return { success: true, message: 'Tugas berhasil dihapus' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/task-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return { success: false, message: 'Gagal menghapus tugas' };
   }
 }
@@ -121,6 +127,8 @@ export async function createTaskAction(formData: FormData) {
     return { success: true, message: 'Berhasil membuat tugas baru!' };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/task-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Create task error:", error);
     return { success: false, message: 'Gagal membuat tugas. Cek koneksi server.' };
   }
@@ -180,6 +188,8 @@ export async function createTaskKelompokAction(formData: FormData) {
     revalidatePath('/admin/tugas');
     return { success: true, message: 'Berhasil membuat tugas kelompok!' };
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/task-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Create task kelompok error:", error);
     return { success: false, message: error.message || 'Gagal membuat tugas kelompok.' };
   }

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import AttendanceChart from '@/components/ui/AttendanceChart';
 import GradesChart from '@/components/ui/GradesChart';
 import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
+import RealtimeLog from '@/components/ui/RealtimeLog';
+import { LogAktivitasSiswa } from '@/models';
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -143,6 +145,18 @@ export default async function AdminDashboardPage() {
     };
   });
 
+  // --- LOG AKTIVITAS LIVE (INITIAL) ---
+  const initialLogsRaw = await LogAktivitasSiswa.find({})
+    .sort({ waktu: -1 })
+    .limit(50)
+    .lean();
+    
+  const initialLogs = initialLogsRaw.map((log: any) => ({
+    ...log,
+    _id: log._id.toString(),
+    waktu: log.waktu.toISOString(),
+  }));
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -257,6 +271,11 @@ export default async function AdminDashboardPage() {
         <div className="lg:col-span-1">
           <GradesChart data={gradesChartData} />
         </div>
+      </div>
+
+      {/* --- GRID BARIS 3: REALTIME LOGS --- */}
+      <div className="grid grid-cols-1 gap-6">
+        <RealtimeLog initialLogs={initialLogs} />
       </div>
 
       {/* Action Buttons */}

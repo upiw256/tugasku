@@ -6,6 +6,8 @@ import { Absensi, Member, Nilai, Tugas, User } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { decryptData } from '@/lib/crypto';
 import crypto from 'crypto';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 // --- HELPER: Membuat Hash dari Object Data ---
 // Digunakan untuk membandingkan apakah dua kumpulan data identik
@@ -46,6 +48,8 @@ export async function resetDatabaseAction() {
       return { success: true, message: 'Database berhasil di-reset bersih!' };
   
     } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
       console.error(error);
       return { success: false, message: 'Gagal melakukan reset.' };
     }
@@ -72,6 +76,8 @@ export async function restoreDatabaseAction(formData: FormData) {
       const decryptedString = decryptData(buffer);
       backupData = JSON.parse(decryptedString);
     } catch (err) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${err?.message || err}`, tipe: 'error' }).catch(() => {});
+
       return { success: false, message: 'Gagal membuka file. File rusak atau kunci enkripsi salah.' };
     }
 
@@ -139,6 +145,8 @@ export async function restoreDatabaseAction(formData: FormData) {
     return { success: true, message: 'Data berhasil dipulihkan dari file backup!' };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Restore Error:", error);
     return { success: false, message: 'Terjadi kesalahan sistem saat restore.' };
   }

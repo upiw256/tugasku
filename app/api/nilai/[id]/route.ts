@@ -2,6 +2,8 @@ import { connectDB } from '@/lib/db';
 import { Nilai, Tugas, Kelompok } from '@/models';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function PATCH(
   request: Request,
@@ -64,6 +66,8 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, data: updatedNilai });
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/nilai/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("API Error:", error);
     return NextResponse.json({ error: 'Gagal update nilai' }, { status: 500 });
   }

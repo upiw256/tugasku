@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function POST(req: Request) {
   try {
@@ -115,6 +117,8 @@ export async function POST(req: Request) {
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch (err) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${err?.message || err}`, tipe: 'error' }).catch(() => {});
+
       // Folder mungkin sudah ada
     }
 
@@ -134,6 +138,8 @@ export async function POST(req: Request) {
             q.gambar_url = `/uploads/${uniqueName}`;
           }
         } catch (e) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${e?.message || e}`, tipe: 'error' }).catch(() => {});
+
           console.error("Gagal mendownload gambar AI:", e);
         }
       }
@@ -142,6 +148,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(finalQuestions);
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('AI Generate Vision error:', error);
     return NextResponse.json({ error: 'Gagal membuat soal otomatis: ' + error.message }, { status: 500 });
   }

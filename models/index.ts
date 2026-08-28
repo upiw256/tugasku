@@ -181,6 +181,16 @@ const logKuisSchema = new mongoose.Schema({
   waktu: { type: Date, default: Date.now }
 });
 
+// Schema untuk Log Aktivitas Siswa (Realtime Dashboard)
+const LogAktivitasSiswaSchema = new mongoose.Schema({
+  nama_siswa: { type: String, default: 'Sistem' },
+  kelas: { type: String, default: 'Aplikasi' },
+  kategori: { type: String, enum: ['Siswa', 'Sistem', 'Console', 'Client'], default: 'Siswa' },
+  aksi: { type: String, required: true },
+  tipe: { type: String, enum: ['success', 'warning', 'error'], default: 'success' },
+  waktu: { type: Date, default: Date.now }
+});
+
 // Export model menggunakan pola yang aman untuk Next.js (Hot Reload)
 // Definisi model yang bersih untuk Next.js
 export const Member = models.Member || model('Member', MemberSchema);
@@ -197,3 +207,4 @@ export const SoalPG = models.SoalPG || model('SoalPG', SoalPGSchema);
 export const PengerjaanKuis = models.PengerjaanKuis || model('PengerjaanKuis', PengerjaanKuisSchema);
 export const LogKuis = models.LogKuis || model('LogKuis', logKuisSchema);
 export const MateriComment = models.MateriComment || model('MateriComment', MateriCommentSchema);
+export const LogAktivitasSiswa = models.LogAktivitasSiswa || model('LogAktivitasSiswa', LogAktivitasSiswaSchema);

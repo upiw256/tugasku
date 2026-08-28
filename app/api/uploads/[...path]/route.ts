@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function GET(
   request: Request,
@@ -36,6 +38,8 @@ export async function GET(
       },
     });
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/uploads/[...path]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return new NextResponse('Ups, ada yang salah', { status: 500 });
   }
 }

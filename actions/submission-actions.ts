@@ -6,9 +6,11 @@ import { Nilai, User, Tugas, Kelompok } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { uploadQueue } from '@/lib/queue'; 
 import path from 'path';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
 
 // --- FUNGSI 1: Kirim Tugas (Siswa) ---
 export async function submitTaskAction(formData: FormData) {
+  let logSiswa = { nama: 'Siswa Unknown', kelas: '-' };
   try {
     // 1. Validasi Sesi
     const session = await auth();
@@ -35,6 +37,7 @@ export async function submitTaskAction(formData: FormData) {
     if (!user) return { success: false, message: "Data siswa tidak ditemukan" };
 
     const siswa = user.member_id;
+    logSiswa = { nama: siswa.nama_lengkap, kelas: siswa.kelas };
 
     // --- CEK LOGIKA KELOMPOK (HANYA KETUA) ---
     let targetAnggotaIds: any[] = [siswa._id]; // Default: hanya dirinya sendiri
@@ -42,11 +45,13 @@ export async function submitTaskAction(formData: FormData) {
     if (tugas.tipe_tugas === 'kelompok') {
       const kelompok = await Kelompok.findOne({ anggota: siswa._id });
       if (!kelompok) {
+        await logAktivitasSiswa({ nama_siswa: logSiswa.nama, kelas: logSiswa.kelas, aksi: `Mencoba kirim tugas kelompok tapi tidak punya kelompok`, tipe: 'warning' });
         return { success: false, message: "Kamu belum memiliki kelompok untuk kelas ini!" };
       }
       
       // Cek apakah dia ketua
       if (kelompok.ketua?.toString() !== siswa._id.toString()) {
+        await logAktivitasSiswa({ nama_siswa: logSiswa.nama, kelas: logSiswa.kelas, aksi: `Mencoba kirim tugas kelompok (Bukan Ketua)`, tipe: 'warning' });
         return { success: false, message: "❌ Hanya ketua kelas/kelompok yang diizinkan untuk mengumpulkan presentasi/file laporan ini!" };
       }
 
@@ -98,10 +103,12 @@ export async function submitTaskAction(formData: FormData) {
     );
 
     revalidatePath('/admin/tugas');
+    await logAktivitasSiswa({ nama_siswa: logSiswa.nama, kelas: logSiswa.kelas, aksi: `Berhasil mengumpulkan tugas: ${tugas.judul}`, tipe: 'success' });
     return { success: true, message: "Tugas berhasil dikirim dan tersimpan!" };
 
   } catch (e: any) {
     console.error("❌ Gagal menyimpan file tugas:", e);
+    await logAktivitasSiswa({ nama_siswa: logSiswa.nama, kelas: logSiswa.kelas, aksi: `Error sistem saat menyimpan tugas: ${e.message}`, tipe: 'error' });
     return { success: false, message: "Gagal menyimpan tugas secara fisik: " + e.message };
   }
 }

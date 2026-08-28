@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db';
 import { Materi } from '@/models';
 import { auth } from '@/lib/auth';
 import { pusherServer } from '@/lib/pusher';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function GET(req: Request) {
   try {
@@ -18,6 +20,8 @@ export async function GET(req: Request) {
     const materi = await Materi.find(query).sort({ tanggal_upload: -1 });
     return NextResponse.json(materi);
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/materi/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -55,6 +59,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(newMateri, { status: 201 });
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/materi/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

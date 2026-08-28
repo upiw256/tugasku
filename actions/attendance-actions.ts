@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { Absensi, Member, User } from '@/models'; // Pastikan import Absensi
 import { revalidatePath } from 'next/cache';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function doAttendanceAction() {
   try {
@@ -46,6 +48,8 @@ export async function doAttendanceAction() {
     return { success: true, message: 'Berhasil Absen Masuk!' };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/attendance-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Absen Error:", error);
     return { success: false, message: 'Terjadi kesalahan sistem' };
   }
@@ -71,6 +75,8 @@ export async function upsertAttendanceAction(memberId: string, dateStr: string, 
     revalidatePath('/admin/absensi');
     return { success: true, message: 'Status berhasil disimpan' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/attendance-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error(error);
     return { success: false, message: 'Gagal update absensi' };
   }

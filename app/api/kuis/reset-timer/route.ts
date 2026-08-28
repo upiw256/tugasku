@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { PengerjaanKuis } from '@/models';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function PATCH(req: Request) {
   try {
@@ -25,6 +27,8 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, message: 'Waktu pengerjaan berhasil direset' });
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/reset-timer/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

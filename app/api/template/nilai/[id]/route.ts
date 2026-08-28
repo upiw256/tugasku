@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import ExcelJS from 'exceljs';
 import { connectDB } from '@/lib/db';
 import { Tugas, Member } from '@/models';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function GET(
   request: Request,
@@ -66,6 +68,8 @@ export async function GET(
       }
     });
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/template/nilai/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Error generating template:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { PengerjaanKuis, SoalPG } from '@/models';
+import { PengerjaanKuis, SoalPG, Member } from '@/models';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
 
 export async function POST(req: Request) {
   try {
@@ -63,6 +64,17 @@ export async function POST(req: Request) {
       },
       { upsert: true, new: true }
     );
+
+    // KETIKA BERHASIL SUBMIT:
+    const member = await Member.findById(member_id).lean();
+    if (member) {
+      await logAktivitasSiswa({
+        nama_siswa: member.nama_lengkap,
+        kelas: member.kelas,
+        aksi: `Menyelesaikan kuis: ${kuis.judul} (Nilai: ${nilai})`,
+        tipe: 'success'
+      });
+    }
 
     return NextResponse.json({ success: true, nilai, benar, status: 'SUBMITTED' });
   } catch (error: any) {

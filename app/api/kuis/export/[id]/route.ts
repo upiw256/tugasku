@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db';
 import { SoalPG, PengerjaanKuis, Member } from '@/models';
 import { auth } from '@/lib/auth';
 import ExcelJS from 'exceljs';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function GET(
   req: Request,
@@ -78,6 +80,8 @@ export async function GET(
       },
     });
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/export/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Export error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

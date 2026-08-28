@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function POST(req: Request) {
   try {
@@ -78,6 +80,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(questions);
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('AI Generate error:', error);
     return NextResponse.json({ error: 'Gagal membuat soal otomatis: ' + error.message }, { status: 500 });
   }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -21,6 +23,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(meta);
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/get-meta/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return NextResponse.json({ error: 'Failed to fetch meta' }, { status: 500 });
   }
 }

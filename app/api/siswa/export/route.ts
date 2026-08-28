@@ -3,6 +3,8 @@ import { Member, User } from "@/models";
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 // Kita buat interface sederhana agar TypeScript tidak protes soal tipe data 'm' dan 'u'
 interface MemberData {
@@ -124,6 +126,8 @@ export async function GET(request: Request) {
     });
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/siswa/export/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Export Error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }

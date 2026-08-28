@@ -44,6 +44,7 @@ export const viewport: Viewport = {
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import ClientLoggerInit from "@/components/ClientLoggerInit";
 
 export default function RootLayout({
   children,
@@ -61,6 +62,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <ClientLoggerInit />
           {children}
         </ThemeProvider>
       </body>

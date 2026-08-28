@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function POST(req: Request) {
   try {
@@ -25,6 +27,8 @@ export async function POST(req: Request) {
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch (err) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/upload-lokal/route.ts'}): ${err?.message || err}`, tipe: 'error' }).catch(() => {});
+
       // Folder mungkin sudah ada
     }
 
@@ -38,6 +42,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: fileUrl });
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/upload-lokal/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

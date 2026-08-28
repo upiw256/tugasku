@@ -1,6 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function clearAppCache() {
   try {
@@ -13,6 +15,8 @@ export async function clearAppCache() {
       message: "Cache memori berhasil disegarkan!" 
     };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/cache-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Gagal refresh cache:", error);
     return { 
       success: false, 

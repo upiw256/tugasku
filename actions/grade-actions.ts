@@ -4,6 +4,8 @@ import { connectDB } from '@/lib/db';
 import { Nilai, Member, Tugas, Kelompok } from '@/models';
 import { revalidatePath } from 'next/cache';
 import ExcelJS from 'exceljs';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function submitGradeAction(formData: FormData) {
   try {
@@ -46,6 +48,8 @@ export async function submitGradeAction(formData: FormData) {
     
     return { success: true, message: 'Nilai berhasil disimpan!' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/grade-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Grade error:", error);
     return { success: false, message: 'Gagal menyimpan nilai.' };
   }
@@ -59,6 +63,8 @@ export async function deleteGradeAction(gradeId: string, memberId: string) {
     revalidatePath(`/admin/siswa/${memberId}/nilai`);
     return { success: true, message: 'Nilai berhasil dihapus' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/grade-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return { success: false, message: 'Gagal menghapus nilai' };
   }
 }
@@ -111,6 +117,8 @@ export async function importOfflineGradesAction(tugasId: string, formData: FormD
     revalidatePath(`/admin/tugas/${tugasId}/pengumpulan`);
     return { success: true, message: `Sukses! Berhasil mengimpor ${count} nilai.` };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/grade-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Error import nilai:", error);
     return { success: false, message: 'Gagal mengimpor nilai. Cek format file.' };
   }

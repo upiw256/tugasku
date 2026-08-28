@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { PengerjaanKuis, SoalPG } from '@/models';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function POST(req: Request) {
   try {
@@ -58,6 +60,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(pengerjaan);
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/autosave/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -81,6 +85,8 @@ export async function GET(req: Request) {
       const pengerjaan = await PengerjaanKuis.findOne({ kuis_id, member_id });
       return NextResponse.json(pengerjaan || { jawaban: {} });
     } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/autosave/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

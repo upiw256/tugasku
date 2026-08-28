@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { PengerjaanKuis } from '@/models';
 import { auth } from '@/lib/auth';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function POST(req: Request) {
   try {
@@ -32,6 +34,8 @@ export async function POST(req: Request) {
       message: `Penalti ${penalti_detik} detik diterapkan` 
     });
   } catch (error: any) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/penalti/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -5,6 +5,8 @@ import { connectDB } from '@/lib/db';
 import { Pengumuman } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { pusherServer } from '@/lib/pusher';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function deleteAnnouncementAction(id: string) {
     try {
@@ -17,6 +19,8 @@ export async function deleteAnnouncementAction(id: string) {
         revalidatePath('/');
         return { success: true, message: 'Pengumuman dihapus.' };
     } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
         return { success: false, message: 'Gagal menghapus.' };
     }
 }
@@ -56,6 +60,8 @@ export async function createAnnouncementAction(formData: FormData) {
     return { success: true, message: 'Terposting!' };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return { success: false, message: 'Gagal.' };
   }
 }

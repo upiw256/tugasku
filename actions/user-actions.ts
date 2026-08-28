@@ -5,6 +5,8 @@ import { connectDB } from '@/lib/db';
 import { User } from '@/models';
 import md5 from 'md5'; // Pastikan sudah install md5
 import { revalidatePath } from 'next/cache';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 export async function changePasswordAction(formData: FormData) {
   try {
@@ -46,6 +48,8 @@ export async function changePasswordAction(formData: FormData) {
     return { success: true, message: 'Password berhasil diubah!' };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/user-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error(error);
     return { success: false, message: 'Terjadi kesalahan server.' };
   }

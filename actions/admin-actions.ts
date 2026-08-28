@@ -5,6 +5,8 @@ import { Member, User, Nilai } from '@/models';
 import ExcelJS from 'exceljs';
 import md5 from 'md5';
 import { revalidatePath } from 'next/cache';
+import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+
 
 // Interface untuk tipe data kembalian
 type ActionState = {
@@ -86,6 +88,8 @@ export async function importStudentsAction(formData: FormData): Promise<ActionSt
     return { success: true, message: `Sukses! Berhasil memproses ${count} data siswa.` };
 
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/admin-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Error import:", error);
     return { success: false, message: 'Gagal import data. Cek format excel Anda.' };
   }
@@ -112,6 +116,8 @@ export async function resetPasswordAction(memberId: string) {
 
     return { success: true, message: 'Password berhasil direset menjadi: 123456' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/admin-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error("Reset error:", error);
     return { success: false, message: 'Gagal mereset password.' };
   }
@@ -132,6 +138,8 @@ export async function deleteStudentAction(memberId: string) {
     revalidatePath('/admin/siswa');
     return { success: true, message: 'Data siswa berhasil dihapus' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/admin-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return { success: false, message: 'Gagal menghapus siswa' };
   }
 }
@@ -158,6 +166,8 @@ export async function updateStudentAction(memberId: string, formData: FormData) 
     revalidatePath('/admin/siswa');
     return { success: true, message: 'Data siswa berhasil diupdate' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/admin-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return { success: false, message: 'Gagal mengupdate data' };
   }
 }
@@ -197,6 +207,8 @@ export async function createStudentAction(formData: FormData) {
     revalidatePath('/admin/siswa');
     return { success: true, message: 'Berhasil menambah siswa baru!' };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/admin-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     console.error(error);
     return { success: false, message: 'Terjadi kesalahan server.' };
   }
@@ -212,6 +224,8 @@ export async function addActivityPoint(memberId: string, points: number = 5): Pr
     revalidatePath('/admin/leaderboard');
     return { success: true, message: `Berhasil menambah ${points} poin keaktifan!` };
   } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/admin-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+
     return { success: false, message: 'Gagal menambah poin keaktifan.' };
   }
 }
