@@ -126,7 +126,7 @@ export async function GET(request: Request) {
     });
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/siswa/export/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/siswa/export/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("Export Error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });

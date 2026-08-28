@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/mobile/login/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/mobile/login/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("Mobile Login Error:", error);
     return NextResponse.json(

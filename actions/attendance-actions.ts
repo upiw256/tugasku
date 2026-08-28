@@ -48,7 +48,7 @@ export async function doAttendanceAction() {
     return { success: true, message: 'Berhasil Absen Masuk!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/attendance-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/attendance-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("Absen Error:", error);
     return { success: false, message: 'Terjadi kesalahan sistem' };
@@ -75,7 +75,7 @@ export async function upsertAttendanceAction(memberId: string, dateStr: string, 
     revalidatePath('/admin/absensi');
     return { success: true, message: 'Status berhasil disimpan' };
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/attendance-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/attendance-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error(error);
     return { success: false, message: 'Gagal update absensi' };

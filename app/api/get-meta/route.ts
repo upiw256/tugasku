@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(meta);
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/get-meta/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/get-meta/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ error: 'Failed to fetch meta' }, { status: 500 });
   }

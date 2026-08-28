@@ -48,7 +48,7 @@ export async function resetDatabaseAction() {
       return { success: true, message: 'Database berhasil di-reset bersih!' };
   
     } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
       console.error(error);
       return { success: false, message: 'Gagal melakukan reset.' };
@@ -145,7 +145,7 @@ export async function restoreDatabaseAction(formData: FormData) {
     return { success: true, message: 'Data berhasil dipulihkan dari file backup!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("Restore Error:", error);
     return { success: false, message: 'Terjadi kesalahan sistem saat restore.' };

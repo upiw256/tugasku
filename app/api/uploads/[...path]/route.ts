@@ -38,7 +38,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/uploads/[...path]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/uploads/[...path]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return new NextResponse('Ups, ada yang salah', { status: 500 });
   }

@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const kuis = await SoalPG.find(query).sort({ tanggal_dibuat: -1 });
     return NextResponse.json(kuis);
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(newKuis, { status: 201 });
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -66,7 +66,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, data: updatedNilai });
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/nilai/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/nilai/[id]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("API Error:", error);
     return NextResponse.json({ error: 'Gagal update nilai' }, { status: 500 });

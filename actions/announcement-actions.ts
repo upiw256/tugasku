@@ -19,7 +19,7 @@ export async function deleteAnnouncementAction(id: string) {
         revalidatePath('/');
         return { success: true, message: 'Pengumuman dihapus.' };
     } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
         return { success: false, message: 'Gagal menghapus.' };
     }
@@ -60,7 +60,7 @@ export async function createAnnouncementAction(formData: FormData) {
     return { success: true, message: 'Terposting!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return { success: false, message: 'Gagal.' };
   }

@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: fileUrl });
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/upload-lokal/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/upload-lokal/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

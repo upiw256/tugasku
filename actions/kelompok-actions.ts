@@ -43,7 +43,7 @@ export async function createKelompokAction(formData: FormData) {
     revalidatePath('/admin/tugas-kelompok');
     return { success: true, message: 'Kelompok berhasil di-generate dan disimpan!' };
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/kelompok-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/kelompok-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Create Kelompok Error:', error);
     return { success: false, message: error.message || 'Gagal menyimpan kelompok' };
@@ -78,7 +78,7 @@ export async function moveMemberAction(memberId: string, fromGroupId: string, to
     
     return { success: true, message: 'Berhasil memindahkan anggota' };
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/kelompok-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/kelompok-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Move Member Error:', error);
     return { success: false, message: error.message || 'Gagal memindahkan anggota' };
@@ -99,7 +99,7 @@ export async function setKetuaAction(groupId: string, memberId: string) {
     
     return { success: true, message: 'Berhasil mengubah ketua' };
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/kelompok-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/kelompok-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Set Ketua Error:', error);
     return { success: false, message: error.message || 'Gagal mengubah ketua' };

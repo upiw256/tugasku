@@ -48,7 +48,7 @@ export async function changePasswordAction(formData: FormData) {
     return { success: true, message: 'Password berhasil diubah!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/user-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/user-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error(error);
     return { success: false, message: 'Terjadi kesalahan server.' };

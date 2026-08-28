@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ kela
     
     return NextResponse.json({ success: true, count: siswa.length, data: siswa });
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/siswa/[kelas]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/siswa/[kelas]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }

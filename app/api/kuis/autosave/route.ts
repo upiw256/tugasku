@@ -60,7 +60,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(pengerjaan);
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/autosave/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/autosave/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -85,7 +85,7 @@ export async function GET(req: Request) {
       const pengerjaan = await PengerjaanKuis.findOne({ kuis_id, member_id });
       return NextResponse.json(pengerjaan || { jawaban: {} });
     } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/autosave/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/autosave/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

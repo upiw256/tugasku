@@ -15,7 +15,7 @@ export async function clearAppCache() {
       message: "Cache memori berhasil disegarkan!" 
     };
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/cache-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/cache-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("Gagal refresh cache:", error);
     return { 

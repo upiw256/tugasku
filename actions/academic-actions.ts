@@ -37,7 +37,7 @@ export async function createTugasAction(formData: FormData) {
     return { success: true, message: 'Tugas berhasil dibuat!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/academic-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/academic-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return { success: false, message: 'Gagal membuat tugas.' };
   }
@@ -92,7 +92,7 @@ export async function updateTugasAction(formData: FormData) {
     return { success: true, message: 'Tugas berhasil diperbarui!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/academic-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/academic-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error("Error updateTugas:", error);
     return { success: false, message: 'Terjadi kesalahan saat mengupdate tugas.' };

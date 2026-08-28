@@ -53,7 +53,7 @@ export async function PUT(
 
     return NextResponse.json(updatedKuis);
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/[id]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -104,7 +104,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Kuis berhasil dihapus' });
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/soal-pg/[id]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

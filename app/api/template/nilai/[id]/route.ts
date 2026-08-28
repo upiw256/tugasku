@@ -68,7 +68,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/template/nilai/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/template/nilai/[id]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Error generating template:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

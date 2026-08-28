@@ -66,7 +66,7 @@ export async function createTugasKelompokAction(formData: FormData) {
     revalidatePath('/admin/tugas');
     return { success: true, message: 'Tugas kelompok berhasil dibuat' };
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/tugas-kelompok-actions.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/tugas-kelompok-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Create Tugas Kelompok Error:', error);
     return { success: false, message: error.message || 'Gagal menyimpan tugas kelompok' };

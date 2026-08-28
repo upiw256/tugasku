@@ -80,7 +80,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/export/[id]/route.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/kuis/export/[id]/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     console.error('Export error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

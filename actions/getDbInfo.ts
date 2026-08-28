@@ -19,7 +19,7 @@ export async function getDbInfo() {
       port: mongoose.connection.port
     };
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/getDbInfo.ts'}): ${error?.message || error}`, tipe: 'error' }).catch(() => {});
+    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/getDbInfo.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
     return { name: "Error", host: "-", port: "-" };
   }
