@@ -95,7 +95,7 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
                 Belum ada data kelas atau siswa.
             </div>
         ) : (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <LineChart
                 data={currentData}
                 margin={{ top: 20, right: 30, left: 0, bottom: 5 }}

@@ -50,7 +50,7 @@ export default function GradesChart({ data }: Props) {
              <p className="font-bold">Belum ada data nilai masuk.</p>
            </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart
               data={data}
               margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
