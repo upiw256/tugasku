@@ -1,11 +1,12 @@
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 // Tambahkan 'Pengumuman' di sini
-import { Absensi, Member, Nilai, Tugas, User, Pengumuman, PengerjaanKuis, SoalPG } from '@/models';
+import { Absensi, Member, Nilai, Tugas, User, Pengumuman, PengerjaanKuis, SoalPG, LogAktivitasSiswa } from '@/models';
 import { redirect } from 'next/navigation';
 // Import komponen Papan Pengumuman
 import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
 import AttendanceButton from '@/components/ui/AttendanceButton';
+import RealtimeLog from '@/components/ui/RealtimeLog';
 
 export default async function SiswaDashboard() {
   const session = await auth();
@@ -158,6 +159,18 @@ export default async function SiswaDashboard() {
   const sortedKelas = leaderboardData.filter(s => s.kelas === student.kelas);
   const kelasRank = sortedKelas.findIndex(s => s._id.toString() === student._id.toString()) + 1;
 
+  // --- 10. LOG AKTIVITAS SISWA ---
+  const initialLogsRaw = await LogAktivitasSiswa.find({ nama_siswa: student.nama_lengkap })
+    .sort({ waktu: -1 })
+    .limit(50)
+    .lean();
+    
+  const initialLogs = initialLogsRaw.map((log: any) => ({
+    ...log,
+    _id: log._id.toString(),
+    waktu: log.waktu.toISOString(),
+  }));
+
   return (
     <div className="space-y-8 max-w-6xl mx-auto p-4 md:p-6">
       
@@ -237,11 +250,14 @@ export default async function SiswaDashboard() {
         </div>
       </div>
 
-      {/* MAIN GRID LAYOUT */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* MAIN 2-COLUMN LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
-        {/* KOLOM KIRI (2/3): LIST TUGAS */}
-        <div className="lg:col-span-2 bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+        {/* === KOLOM KIRI (2/3) === */}
+        <div className="lg:col-span-2 flex flex-col gap-8">
+        
+        {/* 1. LIST TUGAS */}
+        <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
             <div className="p-5 border-b border-border-custom bg-foreground/5">
                 <h2 className="font-bold text-lg text-foreground">📋 Daftar Semua Tugas</h2>
             </div>
@@ -316,50 +332,61 @@ export default async function SiswaDashboard() {
             </div>
         </div>
 
-        {/* SECTION HASIL KUIS */}
-        <div className="lg:col-span-2 bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
-            <div className="p-5 border-b border-border-custom bg-foreground/5">
-                <h2 className="font-bold text-lg text-foreground">📊 Hasil Kuis & Latihan</h2>
-            </div>
-            
-            <div className="divide-y divide-border-custom max-h-[400px] overflow-y-auto">
-                {quizResults.length === 0 ? (
-                    <div className="p-8 text-center text-foreground/30 italic">
-                        Belum ada kuis yang dikerjakan.
-                    </div>
-                ) : (
-                    quizResults.map((result: any) => {
-                        const kuis = result.kuis_id as any;
-                        const date = result.selesai_mengerjakan ? new Date(result.selesai_mengerjakan) : null;
+            {/* 2. SECTION HASIL KUIS */}
+            <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden h-fit">
+                <div className="p-5 border-b border-border-custom bg-foreground/5">
+                    <h2 className="font-bold text-lg text-foreground">📊 Hasil Kuis & Latihan</h2>
+                </div>
+                
+                <div className="divide-y divide-border-custom max-h-[400px] overflow-y-auto">
+                    {quizResults.length === 0 ? (
+                        <div className="p-8 text-center text-foreground/30 italic">
+                            Belum ada kuis yang dikerjakan.
+                        </div>
+                    ) : (
+                        quizResults.map((result: any) => {
+                            const kuis = result.kuis_id as any;
+                            const date = result.selesai_mengerjakan ? new Date(result.selesai_mengerjakan) : null;
 
-                        return (
-                            <div key={result._id} className="p-5 hover:bg-foreground/5 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-foreground text-lg mb-1">
-                                        {kuis?.judul || 'Kuis Tidak Ditemukan'}
-                                    </h3>
-                                    <div className="text-xs text-foreground/30 font-medium">
-                                        📅 Selesai: {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                            return (
+                                <div key={result._id} className="p-5 hover:bg-foreground/5 transition flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-foreground text-lg mb-1">
+                                            {kuis?.judul || 'Kuis Tidak Ditemukan'}
+                                        </h3>
+                                        <div className="text-xs text-foreground/30 font-medium">
+                                            📅 Selesai: {date ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                                        </div>
+                                    </div>
+
+                                    <div className="text-right min-w-[80px]">
+                                        <p className="text-xs text-foreground/40 mb-1 font-bold">SKOR KUIS</p>
+                                        <span className={`text-2xl font-black ${result.nilai < 75 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                            {result.nilai}
+                                        </span>
                                     </div>
                                 </div>
-
-                                <div className="text-right min-w-[80px]">
-                                    <p className="text-xs text-foreground/40 mb-1 font-bold">SKOR KUIS</p>
-                                    <span className={`text-2xl font-black ${result.nilai < 75 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                        {result.nilai}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
+                            );
+                        })
+                    )}
+                </div>
             </div>
-        </div>
 
-        {/* KOLOM KANAN (1/3): PENGUMUMAN & INFO */}
-        <div className="space-y-6">
+            {/* 3. LOG AKTIVITAS (MONITOR) */}
+            <div className="h-[400px]">
+                <RealtimeLog 
+                    initialLogs={initialLogs} 
+                    studentNameFilter={student.nama_lengkap}
+                    role="siswa" 
+                />
+            </div>
+
+        </div> {/* END KOLOM KIRI */}
+
+        {/* === KOLOM KANAN (1/3) === */}
+        <div className="lg:col-span-1 flex flex-col gap-6">
             
-            {/* 1. PAPAN PENGUMUMAN (BARU) */}
+            {/* 1. PAPAN PENGUMUMAN */}
             <div className="h-[400px]">
                 <AnnouncementBoard 
                   role="siswa" 
@@ -394,9 +421,10 @@ export default async function SiswaDashboard() {
                 </div>
             </div>
 
-        </div>
+        </div> {/* END KOLOM KANAN */}
 
       </div>
+
     </div>
   );
 }

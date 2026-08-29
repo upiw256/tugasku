@@ -13,7 +13,15 @@ export interface LogItem {
   waktu: string;
 }
 
-export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] }) {
+export default function RealtimeLog({ 
+  initialLogs, 
+  studentNameFilter,
+  role = 'admin' 
+}: { 
+  initialLogs: LogItem[], 
+  studentNameFilter?: string,
+  role?: 'admin' | 'siswa' 
+}) {
   const [logs, setLogs] = useState<LogItem[]>(initialLogs);
   const [filter, setFilter] = useState<'Semua' | 'Siswa' | 'Sistem' | 'Console' | 'Client'>('Semua');
   const [typeFilter, setTypeFilter] = useState<'Semua' | 'success' | 'warning' | 'error'>('Semua');
@@ -36,6 +44,9 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
     const channel = pusherClient.subscribe('admin-logs');
 
     channel.bind('new-log', (newLog: LogItem) => {
+      // If filtering by student, only keep their logs
+      if (studentNameFilter && newLog.nama_siswa !== studentNameFilter) return;
+
       setLogs((prevLogs) => {
         const updatedLogs = [newLog, ...prevLogs];
         // Enforce maximum 500 items in UI state as well
@@ -101,19 +112,19 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
 
   return (
     <div className="bg-surface rounded-xl shadow-sm border border-border-custom overflow-hidden flex flex-col h-[400px]">
-      <div className="p-4 border-b border-border-custom bg-foreground/5 flex justify-between items-center z-10">
-        <h3 className="font-bold text-foreground flex items-center gap-2">
-          <span className="relative flex h-3 w-3">
+      <div className="p-4 border-b border-border-custom bg-foreground/5 flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center gap-3 z-10">
+        <h3 className="font-bold text-foreground flex items-center gap-2 whitespace-nowrap">
+          <span className="relative flex h-3 w-3 shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
           </span>
           Log Aktivitas Live
         </h3>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value as any)}
-            className="text-xs bg-background border border-border-custom rounded px-2 py-1 outline-none mr-2 font-medium"
+            className="text-xs bg-background border border-border-custom rounded px-2 py-1 outline-none font-medium flex-1 sm:flex-none min-w-[120px]"
           >
             <option value="Semua">Semua Kategori</option>
             <option value="Siswa">Siswa</option>
@@ -124,7 +135,7 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
           <select 
             value={typeFilter} 
             onChange={(e) => setTypeFilter(e.target.value as any)}
-            className="text-xs bg-background border border-border-custom rounded px-2 py-1 outline-none mr-2 font-medium"
+            className="text-xs bg-background border border-border-custom rounded px-2 py-1 outline-none font-medium flex-1 sm:flex-none min-w-[100px]"
           >
             <option value="Semua">Semua Tipe</option>
             <option value="success">Success</option>
@@ -132,15 +143,17 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
             <option value="error">Error</option>
           </select>
           <span className="text-xs font-bold bg-foreground/10 text-foreground/60 px-2 py-1 rounded border border-border-custom">
-            {filteredLogs.length} Log Terakhir
+            {filteredLogs.length} Log
           </span>
-          <button 
-            onClick={handleClearLogs}
-            disabled={isClearing}
-            className="text-xs bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 rounded px-2 py-1 font-bold outline-none transition-colors disabled:opacity-50"
-          >
-            {isClearing ? 'Membersihkan...' : 'Bersihkan'}
-          </button>
+          {role === 'admin' && (
+            <button 
+              onClick={handleClearLogs}
+              disabled={isClearing}
+              className="text-xs bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 rounded px-2 py-1 font-bold outline-none transition-colors disabled:opacity-50"
+            >
+              {isClearing ? 'Membersihkan...' : 'Bersihkan'}
+            </button>
+          )}
         </div>
       </div>
       
