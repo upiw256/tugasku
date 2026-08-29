@@ -23,11 +23,12 @@ export async function logAktivitasSiswa(data: LogData) {
     // Simpan ke DB
     const newLog = await LogAktivitasSiswa.create(logDataToSave);
 
-    // Batasi maksimum 500 log
-    const count = await LogAktivitasSiswa.countDocuments();
+    // Batasi maksimum 500 log per tipe
+    const currentTipe = logDataToSave.tipe;
+    const count = await LogAktivitasSiswa.countDocuments({ tipe: currentTipe });
     if (count > 500) {
-      // Hapus yang paling lama
-      const logsToDelete = await LogAktivitasSiswa.find()
+      // Hapus yang paling lama untuk tipe ini
+      const logsToDelete = await LogAktivitasSiswa.find({ tipe: currentTipe })
         .sort({ waktu: 1 })
         .limit(count - 500)
         .select('_id');

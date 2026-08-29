@@ -16,6 +16,7 @@ export interface LogItem {
 export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] }) {
   const [logs, setLogs] = useState<LogItem[]>(initialLogs);
   const [filter, setFilter] = useState<'Semua' | 'Siswa' | 'Sistem' | 'Console' | 'Client'>('Semua');
+  const [typeFilter, setTypeFilter] = useState<'Semua' | 'success' | 'warning' | 'error'>('Semua');
 
   useEffect(() => {
     // Subscribe to pusher channel
@@ -74,9 +75,10 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
   };
 
   const filteredLogs = logs.filter(log => {
-    if (filter === 'Semua') return true;
     const logKat = log.kategori || 'Siswa';
-    return logKat === filter;
+    const matchKategori = filter === 'Semua' || logKat === filter;
+    const matchTipe = typeFilter === 'Semua' || log.tipe === typeFilter;
+    return matchKategori && matchTipe;
   });
 
   return (
@@ -100,6 +102,16 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
             <option value="Sistem">Sistem</option>
             <option value="Console">Console (Docker)</option>
             <option value="Client">Client (Browser)</option>
+          </select>
+          <select 
+            value={typeFilter} 
+            onChange={(e) => setTypeFilter(e.target.value as any)}
+            className="text-xs bg-background border border-border-custom rounded px-2 py-1 outline-none mr-2 font-medium"
+          >
+            <option value="Semua">Semua Tipe</option>
+            <option value="success">Success</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
           </select>
           <span className="text-xs font-bold bg-foreground/10 text-foreground/60 px-2 py-1 rounded border border-border-custom">
             {filteredLogs.length} Log Terakhir
