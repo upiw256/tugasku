@@ -17,6 +17,19 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
   const [logs, setLogs] = useState<LogItem[]>(initialLogs);
   const [filter, setFilter] = useState<'Semua' | 'Siswa' | 'Sistem' | 'Console' | 'Client'>('Semua');
   const [typeFilter, setTypeFilter] = useState<'Semua' | 'success' | 'warning' | 'error'>('Semua');
+  const [isClearing, setIsClearing] = useState(false);
+
+  const handleClearLogs = async () => {
+    if (!confirm('Yakin ingin menghapus semua log?')) return;
+    setIsClearing(true);
+    try {
+      await fetch('/api/system/logs/clear', { method: 'POST' });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   useEffect(() => {
     // Subscribe to pusher channel
@@ -33,8 +46,13 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
       });
     });
 
+    channel.bind('clear-logs', () => {
+      setLogs([]);
+    });
+
     return () => {
       channel.unbind('new-log');
+      channel.unbind('clear-logs');
       pusherClient.unsubscribe('admin-logs');
     };
   }, []);
@@ -116,6 +134,13 @@ export default function RealtimeLog({ initialLogs }: { initialLogs: LogItem[] })
           <span className="text-xs font-bold bg-foreground/10 text-foreground/60 px-2 py-1 rounded border border-border-custom">
             {filteredLogs.length} Log Terakhir
           </span>
+          <button 
+            onClick={handleClearLogs}
+            disabled={isClearing}
+            className="text-xs bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 rounded px-2 py-1 font-bold outline-none transition-colors disabled:opacity-50"
+          >
+            {isClearing ? 'Membersihkan...' : 'Bersihkan'}
+          </button>
         </div>
       </div>
       
