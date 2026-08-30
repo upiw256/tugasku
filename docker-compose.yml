@@ -34,13 +34,30 @@ services:
     container_name: mongodb_container
     image: mongo:latest
     restart: always
-    # Mapping Port Database
-    # Kiri (27117): Akses dari Compass Laptop
-    # Kanan (27017): Port Asli Container (JANGAN UBAH YANG KANAN)
     ports:
       - "27117:27017"
     volumes:
       - mongodb_data:/data/db
+
+  mongo-logger:
+    container_name: mongo_logger
+    image: docker:cli
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - app
+      - mongo
+    environment:
+      - APP_URL=http://app:8020
+    command: >
+      sh -c '
+      apk add --no-cache curl &&
+      docker logs -f mongodb_container | while read line; do 
+        curl -s -X POST -H "Content-Type: application/json" -d "{\"action\": \"$$line\", \"tipe\": \"warning\", \"currentUrl\": \"Docker\", \"kategori\": \"Database\"}" $$APP_URL/api/client-log > /dev/null || true
+      done
+      '
+
   redis:
     container_name: redis_container
     image: redis:8.6.2-alpine

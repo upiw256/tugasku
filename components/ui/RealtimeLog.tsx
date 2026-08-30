@@ -7,7 +7,7 @@ export interface LogItem {
   _id: string;
   nama_siswa: string;
   kelas: string;
-  kategori?: 'Siswa' | 'Sistem' | 'Console' | 'Client';
+  kategori?: 'Siswa' | 'Sistem' | 'Console' | 'Client' | 'Database';
   aksi: string;
   tipe: 'success' | 'warning' | 'error';
   waktu: string;
@@ -23,9 +23,10 @@ export default function RealtimeLog({
   role?: 'admin' | 'siswa' 
 }) {
   const [logs, setLogs] = useState<LogItem[]>(initialLogs);
-  const [filter, setFilter] = useState<'Semua' | 'Siswa' | 'Sistem' | 'Console' | 'Client'>('Semua');
+  const [filter, setFilter] = useState<'Semua' | 'Siswa' | 'Sistem' | 'Console' | 'Client' | 'Database'>('Semua');
   const [typeFilter, setTypeFilter] = useState<'Semua' | 'success' | 'warning' | 'error'>('Semua');
   const [isClearing, setIsClearing] = useState(false);
+
 
   const handleClearLogs = async () => {
     if (!confirm('Yakin ingin menghapus semua log?')) return;
@@ -99,6 +100,7 @@ export default function RealtimeLog({
       case 'Console': return 'bg-gray-800 text-gray-200 border-gray-600';
       case 'Client': return 'bg-purple-500/20 text-purple-600 border-purple-500/30';
       case 'Sistem': return 'bg-rose-500/20 text-rose-600 border-rose-500/30';
+      case 'Database': return 'bg-teal-500/20 text-teal-600 border-teal-500/30';
       default: return 'bg-blue-500/20 text-blue-600 border-blue-500/30';
     }
   };
@@ -131,6 +133,7 @@ export default function RealtimeLog({
             <option value="Sistem">Sistem</option>
             <option value="Console">Console (Docker)</option>
             <option value="Client">Client (Browser)</option>
+            <option value="Database">Database</option>
           </select>
           <select 
             value={typeFilter} 
