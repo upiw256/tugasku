@@ -10,7 +10,6 @@ const withPWA = withPWAInit({
   workboxOptions: {
     skipWaiting: true,
     clientsClaim: true,
-    cleanUpOutdatedCaches: true,
   },
 });
 
