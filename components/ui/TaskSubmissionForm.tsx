@@ -31,21 +31,40 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Validasi HTML5 dasar
+    const form = e.currentTarget;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData(form);
+
+    try {
+      const res = await submitTaskAction(formData);
+      if (res.success) {
+        toast.success('Berhasil dikirim!');
+        setPreviewUrl(null);
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } else {
+        toast.error(res.message || 'Gagal mengirim tugas');
+      }
+    } catch (error: any) {
+      console.error("Submit error:", error);
+      toast.error(error?.message || "Terjadi kesalahan jaringan saat mengirim tugas.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <form 
-      action={async (formData) => {
-        setIsUploading(true);
-        const res = await submitTaskAction(formData);
-        if (res.success) {
-          alert('Berhasil dikirim!');
-          setPreviewUrl(null);
-          setSelectedFile(null);
-          if (fileInputRef.current) fileInputRef.current.value = '';
-        } else {
-          alert(res.message);
-        }
-        setIsUploading(false);
-      }} 
+      onSubmit={handleSubmit}
       className="space-y-4 p-4 bg-surface rounded-xl shadow-md border border-border-custom"
     >
       <input type="hidden" name="tugasId" value={tugasId} />
