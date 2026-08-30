@@ -87,7 +87,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             role: foundUser.role,
           }
         } catch (error) {
-          console.error("⚠️ Auth Error:", error)
+          console.warn("⚠️ Auth Failed:", error instanceof Error ? error.message : "Unknown error")
           return null
         }
       },

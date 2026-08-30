@@ -23,9 +23,35 @@ export async function register() {
       if (isInternalLogging) return;
       isInternalLogging = true;
       try {
-        const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-        // Filter noise: skip common Next.js internal compiler logs
-        if (message.includes('Fast Refresh') || message.includes('webpack') || message.includes('hot reload')) {
+        let message = args.map(a => {
+          if (a instanceof Error) {
+            return `[${a.name}] ${a.message}`; // Safely extract error message
+          }
+          if (typeof a === 'object') {
+            try {
+              return JSON.stringify(a) === '{}' && a.message ? `{} (msg: ${a.message})` : JSON.stringify(a);
+            } catch (e) {
+              return '[Circular]';
+            }
+          }
+          return String(a);
+        }).join(' ');
+
+        // Strip ANSI escape codes
+        message = message.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+
+        // Filter noise: skip common Next.js internal compiler logs and normal auth errors
+        if (
+          message.includes('Fast Refresh') || 
+          message.includes('webpack') || 
+          message.includes('hot reload') ||
+          message.includes('CredentialsSignin')
+        ) {
+           return;
+        }
+
+        // Skip raw minified stack trace dumps that offer no readable error message
+        if (message.trim().startsWith('at ') && message.includes('.next/server')) {
            return;
         }
 
