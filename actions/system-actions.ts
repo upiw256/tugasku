@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
-import { Absensi, Member, Nilai, Tugas, User } from '@/models';
+import { Absensi, Member, Nilai, Tugas, User, SystemSetting } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { decryptData } from '@/lib/crypto';
 import crypto from 'crypto';
@@ -50,6 +50,7 @@ export async function resetDatabaseAction() {
     } catch (error) {
     await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 
+
       console.error(error);
       return { success: false, message: 'Gagal melakukan reset.' };
     }
@@ -67,7 +68,6 @@ export async function restoreDatabaseAction(formData: FormData) {
     const file = formData.get('backupFile') as File;
     if (!file) return { success: false, message: 'File backup tidak ditemukan.' };
 
-    // 1. BACA & DEKRIPSI FILE
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
@@ -76,8 +76,7 @@ export async function restoreDatabaseAction(formData: FormData) {
       const decryptedString = decryptData(buffer);
       backupData = JSON.parse(decryptedString);
     } catch (err) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(err as any)?.message || String(err)}`, tipe: 'error' }).catch(() => {});
-
+      await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(err as any)?.message || String(err)}`, tipe: 'error' }).catch(() => {});
       return { success: false, message: 'Gagal membuka file. File rusak atau kunci enkripsi salah.' };
     }
 
@@ -87,19 +86,14 @@ export async function restoreDatabaseAction(formData: FormData) {
 
     await connectDB();
 
-    // ================= VALIDASI DUPLIKASI =================
-    // Kita ambil data database SAAT INI untuk dibandingkan
     const currentMembers = await Member.find({}).lean();
     const currentTugas = await Tugas.find({}).lean();
     const currentNilai = await Nilai.find({}).lean();
     const currentAbsensi = await Absensi.find({}).lean();
-    // Ambil user siswa saja (karena admin tidak kita restore)
     const currentSiswaUsers = await User.find({ role: { $ne: 'admin' } }).lean();
 
-    // Siapkan data backup yang relevan (buang admin dari backup user jika ada)
     const backupSiswaUsers = backupData.users.filter((u: any) => u.role !== 'admin');
 
-    // Buat Hash dari kedua kubu
     const currentHash = createDataHash({
         m: currentMembers,
         t: currentTugas,
@@ -116,25 +110,19 @@ export async function restoreDatabaseAction(formData: FormData) {
         u: backupSiswaUsers
     });
 
-    // BANDINGKAN!
     if (currentHash === backupHash) {
         return { 
-            success: false, // Kita return false agar UI tidak reload
+            success: false,
             message: '⚠️ Data backup SAMA PERSIS dengan database saat ini. Tidak ada perubahan yang dilakukan.' 
         };
     }
-    // ======================================================
 
-
-    // --- PROSES RESTORE (Jika Data Berbeda) ---
-    // Bersihkan Data Lama
     await Absensi.deleteMany({});
     await Nilai.deleteMany({});
     await Tugas.deleteMany({});
     await Member.deleteMany({});
     await User.deleteMany({ role: { $ne: 'admin' } });
 
-    // Masukkan Data Baru
     if (backupData.members.length) await Member.insertMany(backupData.members);
     if (backupData.tugas.length) await Tugas.insertMany(backupData.tugas);
     if (backupData.nilai.length) await Nilai.insertMany(backupData.nilai);
@@ -146,8 +134,55 @@ export async function restoreDatabaseAction(formData: FormData) {
 
   } catch (error) {
     await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/system-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
-
-    console.error("Restore Error:", error);
     return { success: false, message: 'Terjadi kesalahan sistem saat restore.' };
+  }
+}
+
+// --- AI MODEL SETTINGS ---
+export async function getAIModelSettings() {
+  try {
+    await connectDB();
+    const textModelSetting = await SystemSetting.findOne({ key: 'ai_text_model' }).lean() as any;
+    const visionModelSetting = await SystemSetting.findOne({ key: 'ai_vision_model' }).lean() as any;
+    
+    return {
+      success: true,
+      data: {
+        ai_text_model: textModelSetting?.value || 'groq/compound',
+        ai_vision_model: visionModelSetting?.value || 'llama-3.2-11b-vision-preview'
+      }
+    };
+  } catch (error) {
+    console.error("Error getting AI model settings:", error);
+    return { success: false, data: { ai_text_model: 'groq/compound', ai_vision_model: 'llama-3.2-11b-vision-preview' } };
+  }
+}
+
+export async function updateAIModelSettings(textModel: string, visionModel: string) {
+  try {
+    const session = await auth();
+    if (!session || session.user.role !== 'admin') {
+      return { success: false, message: 'Akses ditolak!' };
+    }
+
+    await connectDB();
+    
+    await SystemSetting.findOneAndUpdate(
+      { key: 'ai_text_model' },
+      { value: textModel || 'groq/compound', updated_at: new Date() },
+      { upsert: true, new: true }
+    );
+
+    await SystemSetting.findOneAndUpdate(
+      { key: 'ai_vision_model' },
+      { value: visionModel || 'llama-3.2-11b-vision-preview', updated_at: new Date() },
+      { upsert: true, new: true }
+    );
+
+    revalidatePath('/admin/settings'); // Or wherever settings is
+    return { success: true, message: 'Pengaturan Model AI berhasil disimpan!' };
+  } catch (error) {
+    console.error("Error updating AI model settings:", error);
+    return { success: false, message: 'Gagal menyimpan pengaturan Model AI.' };
   }
 }

@@ -1,18 +1,60 @@
 'use client'
 
-import { resetDatabaseAction, restoreDatabaseAction } from '@/actions/system-actions';
-import { useState } from 'react';
+import { resetDatabaseAction, restoreDatabaseAction, getAIModelSettings, updateAIModelSettings } from '@/actions/system-actions';
+import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2'; 
 
 export default function AdminSystemSettings() {
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState('');
 
+  // Form State untuk AI Models
+  const [aiTextModel, setAiTextModel] = useState('');
+  const [aiVisionModel, setAiVisionModel] = useState('');
+
+  // Fetch initial AI Settings
+  useEffect(() => {
+    const fetchAiSettings = async () => {
+      const res = await getAIModelSettings();
+      if (res.success && res.data) {
+        setAiTextModel(res.data.ai_text_model);
+        setAiVisionModel(res.data.ai_vision_model);
+      }
+    };
+    fetchAiSettings();
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFileName(e.target.files[0].name);
     } else {
       setFileName('');
+    }
+  };
+
+  // --- HANDLER AI SETTINGS ---
+  const handleAiSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const res = await updateAIModelSettings(aiTextModel, aiVisionModel);
+    setLoading(false);
+
+    if (res.success) {
+      Swal.fire({
+        title: 'Berhasil!',
+        text: res.message,
+        icon: 'success',
+        background: 'var(--surface)',
+        color: 'var(--foreground)'
+      });
+    } else {
+      Swal.fire({
+        title: 'Gagal',
+        text: res.message,
+        icon: 'error',
+        background: 'var(--surface)',
+        color: 'var(--foreground)'
+      });
     }
   };
 
@@ -128,6 +170,44 @@ export default function AdminSystemSettings() {
   return (
     <div className="space-y-6">
       
+      {/* KARTU PENGATURAN AI */}
+      <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
+        <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border-custom pb-2 flex items-center gap-2">
+          <span>🧠</span> Konfigurasi Model AI
+        </h2>
+        <form onSubmit={handleAiSettingsSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-foreground mb-1">Model Teks Groq (Pilihan Ganda)</label>
+            <input 
+              type="text" 
+              value={aiTextModel} 
+              onChange={(e) => setAiTextModel(e.target.value)} 
+              className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="Contoh: groq/compound, llama3-8b-8192..." 
+            />
+            <p className="text-xs text-foreground/50 mt-1">Digunakan saat membuat soal kuis secara general.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-foreground mb-1">Model Vision Groq</label>
+            <input 
+              type="text" 
+              value={aiVisionModel} 
+              onChange={(e) => setAiVisionModel(e.target.value)} 
+              className="w-full px-4 py-2 border border-border-custom bg-surface text-foreground rounded-lg outline-none focus:ring-2 focus:ring-blue-500" 
+              placeholder="Contoh: llama-3.2-11b-vision-preview" 
+            />
+             <p className="text-xs text-foreground/50 mt-1">Digunakan untuk memahami gambar di soal kuis.</p>
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="px-6 py-2 rounded-lg font-bold text-white bg-blue-600 hover:bg-blue-700 transition"
+          >
+            {loading ? 'Menyimpan...' : 'Simpan Pengaturan AI'}
+          </button>
+        </form>
+      </div>
+
       {/* KARTU BACKUP & RESTORE */}
       <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
         <h2 className="text-lg font-bold text-foreground mb-4 border-b border-border-custom pb-2 flex items-center gap-2">

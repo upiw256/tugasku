@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
-
+import { SystemSetting } from '@/models';
+import { connectDB } from '@/lib/db';
 
 export async function POST(req: Request) {
   try {
@@ -23,6 +24,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Topik wajib diisi' }, { status: 400 });
     }
 
+    await connectDB();
+    const modelSetting = await SystemSetting.findOne({ key: 'ai_text_model' }).lean() as any;
+    const textModel = modelSetting?.value || 'groq/compound';
+
     const prompt = `Buatlah ${jumlahSoal} soal pilihan ganda tentang "${topik}" dalam format JSON murni. 
     Setiap soal harus memiliki field: 
     - id (string unik)
@@ -39,7 +44,7 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: textModel,
         messages: [
           { role: "system", content: "You are a teacher assistant that output valid JSON arrays of multiple choice questions." },
           { role: "user", content: prompt }

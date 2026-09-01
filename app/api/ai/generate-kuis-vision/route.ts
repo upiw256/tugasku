@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { SystemSetting } from '@/models';
+import { connectDB } from '@/lib/db';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
-
 
 export async function POST(req: Request) {
   try {
@@ -25,6 +26,13 @@ export async function POST(req: Request) {
     if (!topik) {
       return NextResponse.json({ error: 'Topik wajib diisi' }, { status: 400 });
     }
+
+    await connectDB();
+    const textModelSetting = await SystemSetting.findOne({ key: 'ai_text_model' }).lean() as any;
+    const visionModelSetting = await SystemSetting.findOne({ key: 'ai_vision_model' }).lean() as any;
+    
+    const textModel = textModelSetting?.value || 'groq/compound';
+    const visionModel = visionModelSetting?.value || 'llama-3.2-11b-vision-preview';
 
     // Instruksi sistem untuk model LLaMA Vision
     const prompt = `Buatlah ${jumlahSoal} soal pilihan ganda tentang "${topik}" (berdasarkan gambar terlampir jika ada). 
@@ -75,7 +83,7 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: imageBase64 ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
+        model: imageBase64 ? visionModel : textModel,
         messages: messages,
         temperature: 0.5,
         stream: false,

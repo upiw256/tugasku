@@ -208,3 +208,12 @@ export const PengerjaanKuis = models.PengerjaanKuis || model('PengerjaanKuis', P
 export const LogKuis = models.LogKuis || model('LogKuis', logKuisSchema);
 export const MateriComment = models.MateriComment || model('MateriComment', MateriCommentSchema);
 export const LogAktivitasSiswa = models.LogAktivitasSiswa || model('LogAktivitasSiswa', LogAktivitasSiswaSchema);
+
+// Schema untuk System Settings (Global Configs)
+const SystemSettingSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  value: { type: mongoose.Schema.Types.Mixed, required: true },
+  updated_at: { type: Date, default: Date.now }
+});
+
+export const SystemSetting = models.SystemSetting || model('SystemSetting', SystemSettingSchema);
