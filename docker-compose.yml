@@ -12,7 +12,7 @@ services:
         - NEXT_PUBLIC_CLOUDINARY_API_KEY=${NEXT_PUBLIC_CLOUDINARY_API_KEY}
     restart: always
     
-    # Mapping Port Aplikasi (Kiri: Laptop, Kanan: Docker)
+    # Mapping Port Aplikasi (Kiri: Laptop/Host, Kanan: Docker)
     ports:
       - "8020:8020"
     
@@ -24,20 +24,49 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/tugasku
       - REDIS_URL=redis://redis:6379
       - AUTH_TRUST_HOST=true
-      # Variabel lainnya (NEXTAUTH_URL, AUTH_SECRET, dll) diambil dari .env.local
+      - NODE_ENV=production
     depends_on:
       - mongo
+      - redis
     volumes:
       - ./public/uploads:/app/public/uploads
+    deploy:
+      resources:
+        limits:
+          cpus: "3.0"         # Maksimal 3 dari 4 Core agar sistem host tidak freeze
+          memory: 2.5G        # Batas atas RAM Next.js
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mongo:
     container_name: mongodb_container
     image: mongo:latest
     restart: always
+    # Batasi cache WiredTiger agar tidak menghabiskan RAM VM
+    command: mongod --wiredTigerCacheSizeGB 1.0
     ports:
       - "27117:27017"
     volumes:
       - mongodb_data:/data/db
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 1.8G        # RAM MongoDB dibatasi aman (1GB cache + 800MB overhead/koneksi)
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mongo-logger:
     container_name: mongo_logger
@@ -57,16 +86,41 @@ services:
         curl -s -X POST -H "Content-Type: application/json" -d "{\"action\": \"$$line\", \"tipe\": \"warning\", \"currentUrl\": \"Docker\", \"kategori\": \"Database\"}" $$APP_URL/api/client-log > /dev/null || true
       done
       '
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
 
   redis:
     container_name: redis_container
     image: redis:8.6.2-alpine
     restart: always
+    # Konfigurasi max memory & eviction policy (LRU) agar RAM terkontrol
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --save 60 1 --loglevel warning
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 600M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   mongodb_data:
-  redis_data: # Tambahkan volume untuk redis
+  redis_data:
