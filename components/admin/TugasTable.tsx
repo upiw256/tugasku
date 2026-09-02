@@ -108,7 +108,7 @@ export default function TugasTable({ tasks }: { tasks: Task[] }) {
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
                     {t.deadline ? (
-                      <span className={`text-[10px] font-black px-2 py-1 rounded border uppercase tracking-widest
+                      <span suppressHydrationWarning className={`text-[10px] font-black px-2 py-1 rounded border uppercase tracking-widest
                         ${new Date(t.deadline) < new Date() ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-green-500/10 text-green-500 border-green-500/20'}
                       `}>
                         {new Date(t.deadline).toLocaleDateString('id-ID', {
@@ -146,7 +146,7 @@ export default function TugasTable({ tasks }: { tasks: Task[] }) {
                           <div className="grid grid-cols-2 gap-4 border-b border-border-custom pb-4 text-center">
                              <div>
                                 <p className="text-[10px] font-black uppercase text-foreground/30 mb-1 tracking-widest">Deadline</p>
-                                <p className={`text-xs font-black ${new Date(t.deadline) < new Date() ? 'text-red-500' : 'text-green-500'}`}>
+                                <p suppressHydrationWarning className={`text-xs font-black ${new Date(t.deadline) < new Date() ? 'text-red-500' : 'text-green-500'}`}>
                                    {t.deadline ? new Date(t.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tidak ada'}
                                 </p>
                              </div>

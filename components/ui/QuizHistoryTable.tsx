@@ -65,7 +65,7 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
                         Detail
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-right text-foreground/30 text-xs">
+                    <td suppressHydrationWarning className="px-6 py-4 text-right text-foreground/30 text-xs">
                       {new Date(h.updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
                     </td>
                   </tr>

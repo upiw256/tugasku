@@ -110,7 +110,7 @@ export default function DiskusiMateriSiswa({ materiId, fileUrl, kelas }: { mater
                     <p className="text-sm whitespace-pre-wrap">{c.komentar}</p>
                   </div>
                 </div>
-                <span className="text-[10px] text-foreground/40 mt-1 px-1">
+                <span suppressHydrationWarning className="text-[10px] text-foreground/40 mt-1 px-1">
                   {new Date(c.waktu).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
