@@ -11,7 +11,11 @@ export async function POST(req: Request) {
     await LogAktivitasSiswa.deleteMany({});
     
     // Trigger pusher ke channel admin-logs dengan event 'clear-logs'
-    await pusherServer.trigger('admin-logs', 'clear-logs', { success: true });
+    try {
+      await pusherServer.trigger('admin-logs', 'clear-logs', { success: true });
+    } catch (pusherErr) {
+      console.warn('[Pusher Warning] Gagal trigger clear-logs:', pusherErr);
+    }
     
     return NextResponse.json({ success: true, message: 'Semua log berhasil dihapus' });
   } catch (error: any) {
