@@ -14,7 +14,7 @@ import {
 import { GuruMap, GuruScheduleSearchResult, JadwalItem } from '@/types/jadwal';
 
 /**
- * Server action untuk mengambil data guru
+ * Server action untuk mengambil data guru (dapat diakses Admin, Guru, dan Siswa)
  */
 export async function getGuruListAction(): Promise<{
   success: boolean;
@@ -23,7 +23,7 @@ export async function getGuruListAction(): Promise<{
 }> {
   try {
     const session = await auth();
-    if (!session || (session.user.role !== 'admin' && session.user.role !== 'guru')) {
+    if (!session) {
       return { success: false, data: {}, message: 'Unauthorized' };
     }
 
@@ -36,7 +36,53 @@ export async function getGuruListAction(): Promise<{
 }
 
 /**
- * Server action untuk mengambil jadwal kelas spesifik
+ * Server action khusus Siswa: mengambil jadwal sesuai dengan kelasnya dari MongoDB.
+ * Otomatis mengonversi format MongoDB "X 1" ke format API "X-1".
+ */
+export async function getJadwalSiswaAction(): Promise<{
+  success: boolean;
+  data: JadwalItem[];
+  kelasDb: string;
+  kelasApi: string;
+  message?: string;
+}> {
+  try {
+    const session = await auth();
+    if (!session || session.user.role !== 'siswa') {
+      return { success: false, data: [], kelasDb: '', kelasApi: '', message: 'Unauthorized' };
+    }
+
+    const { connectDB } = await import('@/lib/db');
+    const { User, Member } = await import('@/models');
+    await connectDB();
+
+    const userDoc = await User.findOne({ user: session.user.email });
+    if (!userDoc?.member_id) {
+      return { success: false, data: [], kelasDb: '', kelasApi: '', message: 'Profil siswa tidak ditemukan' };
+    }
+
+    const memberDoc = await Member.findById(userDoc.member_id);
+    if (!memberDoc?.kelas) {
+      return { success: false, data: [], kelasDb: '', kelasApi: '', message: 'Data kelas siswa belum diatur di sistem' };
+    }
+
+    const kelasDb = memberDoc.kelas; // Misal: "X 1"
+    const data = await getJadwalKelas(kelasDb); // Otomatis dikonversi ke "X-1" oleh normalizeKelasToApi
+
+    return { 
+      success: true, 
+      data, 
+      kelasDb, 
+      kelasApi: memberDoc.kelas.trim().replace(/\s+/g, '-') 
+    };
+  } catch (error: any) {
+    console.error('Error in getJadwalSiswaAction:', error);
+    return { success: false, data: [], kelasDb: '', kelasApi: '', message: error?.message || 'Gagal mengambil jadwal siswa' };
+  }
+}
+
+/**
+ * Server action untuk mengambil jadwal kelas spesifik (Admin/Guru)
  */
 export async function getJadwalKelasAction(kelas: string): Promise<{
   success: boolean;

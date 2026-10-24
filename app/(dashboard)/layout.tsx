@@ -40,7 +40,7 @@ export default async function DashboardLayout({
   const isStaff = session.user.role === 'admin' || session.user.role === 'guru';
 
   return (
-    <div className="flex min-h-screen bg-background font-sans">
+    <div className="flex min-h-screen bg-background font-sans w-full max-w-full overflow-x-hidden">
       {/* Notifikasi Real-time untuk Admin/Guru */}
       {isStaff && <AdminRealtimeNotifier />}
       
@@ -48,11 +48,11 @@ export default async function DashboardLayout({
       <Sidebar user={userForSidebar} />
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full max-w-full overflow-x-hidden">
         
         {/* Konten Utama */}
         {/* pt-16 ditambahkan agar konten tidak tertutup header di tampilan mobile */}
-        <main className="p-4 md:p-6 pt-20 md:pt-6 bg-background">
+        <main className="p-3 sm:p-4 md:p-6 pt-16 sm:pt-20 md:pt-6 bg-background w-full min-w-0 max-w-full">
           <PageTransition>
             {children}
           </PageTransition>

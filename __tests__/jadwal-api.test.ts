@@ -3,6 +3,9 @@ import {
   parseJadwalItem, 
   naturalSortKelas, 
   getSubjectTheme,
+  normalizeKelasToApi,
+  normalizeKelasToDb,
+  getCurrentSchoolDay,
   getGuruList,
   getJadwalKelas,
   getJadwalHari,
@@ -16,6 +19,25 @@ describe('Jadwal Utilities & API Tests', () => {
     '32A': { nama: 'Lukman Firmansyah, S.Kom', mapel: 'Informatika' },
     '48B': { nama: 'Ida Farida, S.Pd.', mapel: 'PKWU' },
   };
+
+  test('normalizeKelasToApi converts MongoDB format (space) to API format (hyphen)', () => {
+    expect(normalizeKelasToApi('X 1')).toBe('X-1');
+    expect(normalizeKelasToApi('XI 4')).toBe('XI-4');
+    expect(normalizeKelasToApi('XII 12')).toBe('XII-12');
+    expect(normalizeKelasToApi('X-1')).toBe('X-1'); // Already hyphenated
+  });
+
+  test('normalizeKelasToDb converts API format (hyphen) to MongoDB format (space)', () => {
+    expect(normalizeKelasToDb('X-1')).toBe('X 1');
+    expect(normalizeKelasToDb('XI-4')).toBe('XI 4');
+    expect(normalizeKelasToDb('XII-12')).toBe('XII 12');
+    expect(normalizeKelasToDb('X 1')).toBe('X 1'); // Already spaced
+  });
+
+  test('getCurrentSchoolDay returns a valid school day string', () => {
+    const day = getCurrentSchoolDay();
+    expect(['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT']).toContain(day);
+  });
 
   test('naturalSortKelas sorts classes properly', () => {
     const raw = ['X-10', 'X-2', 'X-1', 'XI-12', 'XI-1', 'XII-3', 'XII-10'];
@@ -110,6 +132,25 @@ describe('Jadwal Utilities & API Tests', () => {
       const result = await getJadwalKelas('X-1');
       expect(result.length).toBe(1);
       expect(result[0].kelas).toBe('X-1');
+    });
+
+    test('getJadwalKelas converts MongoDB format ("X 1") to API format ("X-1")', async () => {
+      const mockSchedule = [
+        { jam_ke_clean: 1, hari: 'SENIN', waktu: '07.10 - 07.50', kelas: 'X-1', list_kode_guru: ['48B'] }
+      ];
+      const mockFetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockSchedule,
+      } as any);
+      global.fetch = mockFetch;
+
+      const result = await getJadwalKelas('X 1');
+      expect(result.length).toBe(1);
+      // Memastikan URL yang dipanggil fetch memuat X-1, bukan X%201
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/jadwal/kelas/X-1'),
+        expect.anything()
+      );
     });
 
     test('getJadwalHari fetches schedule for specific day', async () => {

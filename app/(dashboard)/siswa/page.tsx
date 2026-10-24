@@ -7,6 +7,9 @@ import { redirect } from 'next/navigation';
 import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
 import AttendanceButton from '@/components/ui/AttendanceButton';
 import RealtimeLog from '@/components/ui/RealtimeLog';
+import { getGuruList, getJadwalKelas } from '@/lib/jadwal-api';
+import { GuruMap, JadwalItem } from '@/types/jadwal';
+import JadwalHariIniWidget from '@/components/siswa/JadwalHariIniWidget';
 
 export default async function SiswaDashboard() {
   const session = await auth();
@@ -170,6 +173,20 @@ export default async function SiswaDashboard() {
     _id: log._id.toString(),
     waktu: log.waktu.toISOString(),
   }));
+
+  // 11. AMBIL JADWAL KELAS SISWA (Otomatis menyesuaikan "X 1" -> "X-1")
+  let guruMap: GuruMap = {};
+  let classSchedule: JadwalItem[] = [];
+  try {
+    const [gMap, cSched] = await Promise.all([
+      getGuruList(),
+      getJadwalKelas(student.kelas),
+    ]);
+    guruMap = gMap || {};
+    classSchedule = cSched || [];
+  } catch (err) {
+    console.error('Error fetching student schedule:', err);
+  }
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto p-4 md:p-6">
@@ -386,7 +403,14 @@ export default async function SiswaDashboard() {
         {/* === KOLOM KANAN (1/3) === */}
         <div className="lg:col-span-1 flex flex-col gap-6">
             
-            {/* 1. PAPAN PENGUMUMAN */}
+            {/* 1. JADWAL PELAJARAN HARI INI */}
+            <JadwalHariIniWidget
+              schedule={classSchedule}
+              guruMap={guruMap}
+              kelasDb={student.kelas}
+            />
+
+            {/* 2. PAPAN PENGUMUMAN */}
             <div className="h-[400px]">
                 <AnnouncementBoard 
                   role="siswa" 

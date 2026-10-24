@@ -268,11 +268,46 @@ export function parseJadwalItem(item: JadwalItem, guruMap: GuruMap): FormattedJa
 
 /**
  * Natural sort untuk nama kelas: misal X-1, X-2, ... X-10, X-11, XI-1, XII-1
+ * Mendukung format strip ('X-1') maupun format spasi MongoDB ('X 1').
  */
 export function naturalSortKelas(classes: string[]): string[] {
   return [...classes].sort((a, b) => {
     return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
   });
+}
+
+/**
+ * Konversi nama kelas dari format MongoDB ("X 1", "XI 4", "XII 12")
+ * ke format REST API FastAPI ("X-1", "XI-4", "XII-12").
+ */
+export function normalizeKelasToApi(kelas: string): string {
+  if (!kelas) return '';
+  return kelas.trim().replace(/\s+/g, '-');
+}
+
+/**
+ * Konversi nama kelas dari format REST API FastAPI ("X-1", "XI-4", "XII-12")
+ * ke format MongoDB ("X 1", "XI 4", "XII 12").
+ */
+export function normalizeKelasToDb(kelas: string): string {
+  if (!kelas) return '';
+  return kelas.trim().replace(/-/g, ' ');
+}
+
+/**
+ * Mengambil nama hari sekolah aktif saat ini ('SENIN' s/d 'JUMAT').
+ * Jika diakses pada Sabtu atau Minggu, mengembalikan 'SENIN' sebagai hari belajar berikutnya.
+ */
+export function getCurrentSchoolDay(): HariType {
+  const dayIndex = new Date().getDay(); // 0 = Minggu, 1 = Senin, ..., 5 = Jumat, 6 = Sabtu
+  const map: Record<number, HariType> = {
+    1: 'SENIN',
+    2: 'SELASA',
+    3: 'RABU',
+    4: 'KAMIS',
+    5: 'JUMAT',
+  };
+  return map[dayIndex] || 'SENIN';
 }
 
 // ==========================================
@@ -323,11 +358,13 @@ export async function getGuruByKode(kodeGuru: string): Promise<GuruDetail | null
 
 /**
  * Ambil semua data jadwal atau filter per kelas: GET /api/jadwal
+ * Otomatis menyesuaikan jika kelas dalam format MongoDB ("X 1") menjadi format API ("X-1").
  */
 export async function getAllJadwal(kelasFilter?: string): Promise<JadwalItem[]> {
   try {
-    const url = kelasFilter 
-      ? `${JADWAL_API_BASE_URL}/api/jadwal?kelas=${encodeURIComponent(kelasFilter)}`
+    const apiKelas = kelasFilter ? normalizeKelasToApi(kelasFilter) : undefined;
+    const url = apiKelas 
+      ? `${JADWAL_API_BASE_URL}/api/jadwal?kelas=${encodeURIComponent(apiKelas)}`
       : `${JADWAL_API_BASE_URL}/api/jadwal`;
     const res = await fetch(url, FETCH_CONFIG);
     if (!res.ok) {
@@ -343,10 +380,12 @@ export async function getAllJadwal(kelasFilter?: string): Promise<JadwalItem[]> 
 
 /**
  * Ambil jadwal khusus untuk satu kelas: GET /api/jadwal/kelas/{kelas}
+ * Otomatis menyesuaikan jika kelas dalam format MongoDB ("X 1") menjadi format API ("X-1").
  */
 export async function getJadwalKelas(kelas: string): Promise<JadwalItem[]> {
   try {
-    const res = await fetch(`${JADWAL_API_BASE_URL}/api/jadwal/kelas/${encodeURIComponent(kelas)}`, FETCH_CONFIG);
+    const apiKelas = normalizeKelasToApi(kelas);
+    const res = await fetch(`${JADWAL_API_BASE_URL}/api/jadwal/kelas/${encodeURIComponent(apiKelas)}`, FETCH_CONFIG);
     if (!res.ok) {
       if (res.status === 404) return [];
       throw new Error(`HTTP ${res.status}`);

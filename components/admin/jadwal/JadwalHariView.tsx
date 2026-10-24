@@ -26,7 +26,7 @@ export default function JadwalHariView({
   const todayDayName = useMemo(() => {
     const dayIndex = new Date().getDay(); // 0 = Minggu, 1 = Senin, ..., 5 = Jumat
     const map = ['', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', ''];
-    return map[dayIndex] as HariType || null;
+    return (map[dayIndex] as HariType) || null;
   }, []);
 
   // Fetch jadwal saat activeDay berubah
@@ -126,39 +126,39 @@ export default function JadwalHariView({
   }, [filteredItems]);
 
   return (
-    <div className="space-y-6">
-      {/* 1. NAVIGASI PILIH HARI */}
-      <div className="bg-surface p-5 rounded-2xl border border-border-custom shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-custom pb-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* 1. NAVIGASI PILIH HARI (RESPONSIF) */}
+      <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-custom shadow-sm space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-custom pb-3 sm:pb-4">
           <div>
-            <h2 className="text-base font-bold text-foreground">Pilih Hari Pembelajaran</h2>
-            <p className="text-xs text-foreground/50">Pantau persebaran jam pelajaran di seluruh kelas pada hari tertentu</p>
+            <h2 className="text-sm sm:text-base font-bold text-foreground">Pilih Hari Pembelajaran</h2>
+            <p className="text-[11px] sm:text-xs text-foreground/50">Pantau persebaran jam pelajaran di seluruh kelas pada hari tertentu</p>
           </div>
 
           {/* Toggle View Mode */}
-          <div className="flex items-center gap-1 bg-foreground/5 p-1 rounded-xl shrink-0 border border-border-custom/40">
+          <div className="flex items-center gap-1 bg-foreground/5 p-1 rounded-xl shrink-0 border border-border-custom/40 w-full sm:w-auto">
             <button
               onClick={() => setViewMode('per_jam')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 viewMode === 'per_jam'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-foreground/70 hover:text-foreground hover:bg-foreground/5'
               }`}
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Per Jam / Timeline</span>
+              <span>Per Jam</span>
             </button>
             <button
               onClick={() => setViewMode('per_kelas')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 viewMode === 'per_kelas'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-foreground/70 hover:text-foreground hover:bg-foreground/5'
               }`}
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
               <span>Per Kelas</span>
@@ -166,8 +166,8 @@ export default function JadwalHariView({
           </div>
         </div>
 
-        {/* Tombol Hari */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        {/* 5 Tombol Hari Sejajar */}
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5 pt-1">
           {HARI_LIST.map(hari => {
             const isSelected = activeDay === hari;
             const isToday = todayDayName === hari;
@@ -175,16 +175,16 @@ export default function JadwalHariView({
               <button
                 key={hari}
                 onClick={() => setActiveDay(hari)}
-                className={`py-3 px-4 rounded-xl text-xs font-extrabold transition-all border flex flex-col items-center justify-center gap-1 ${
+                className={`py-2 sm:py-3 px-1 sm:px-4 rounded-xl text-xs font-extrabold transition-all border flex flex-col items-center justify-center gap-0.5 sm:gap-1 text-center ${
                   isSelected
                     ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/25 scale-[1.02]'
                     : 'bg-surface text-foreground hover:bg-foreground/5 border-border-custom hover:border-blue-400'
                 }`}
               >
-                <span className="text-sm tracking-wide">{hari}</span>
+                <span className="text-[11px] sm:text-sm tracking-tight sm:tracking-wide">{hari}</span>
                 {isToday && (
                   <span
-                    className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-bold ${
+                    className={`text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.2 rounded-full uppercase tracking-wider font-bold ${
                       isSelected ? 'bg-white/20 text-white' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                     }`}
                   >
@@ -198,26 +198,26 @@ export default function JadwalHariView({
       </div>
 
       {/* 2. FILTER & PENCARIAN */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-4 rounded-2xl border border-border-custom shadow-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-surface p-3.5 sm:p-4 rounded-2xl border border-border-custom shadow-sm">
         {/* Filter Tingkat */}
-        <div className="flex items-center gap-1 bg-foreground/5 p-1 rounded-xl self-start sm:self-auto border border-border-custom/40">
+        <div className="flex items-center gap-1 bg-foreground/5 p-1 rounded-xl self-start sm:self-auto border border-border-custom/40 w-full sm:w-auto overflow-x-auto scrollbar-none">
           {(['ALL', 'X', 'XI', 'XII'] as const).map(tingkat => (
             <button
               key={tingkat}
               onClick={() => setTingkatFilter(tingkat)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-all text-center whitespace-nowrap ${
                 tingkatFilter === tingkat
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-foreground/70 hover:text-foreground hover:bg-foreground/5'
               }`}
             >
-              {tingkat === 'ALL' ? 'Semua Tingkat' : `Kelas ${tingkat}`}
+              {tingkat === 'ALL' ? 'Semua' : `Kelas ${tingkat}`}
             </button>
           ))}
         </div>
 
         {/* Input Pencarian */}
-        <div className="relative">
+        <div className="relative flex-1 sm:flex-initial">
           <svg
             className="w-4 h-4 text-foreground/40 absolute left-3 top-1/2 -translate-y-1/2"
             fill="none"
@@ -238,33 +238,31 @@ export default function JadwalHariView({
 
       {/* 3. HASIL JADWAL */}
       {isLoading ? (
-        <div className="bg-surface rounded-2xl border border-border-custom p-16 flex flex-col items-center justify-center text-center space-y-3">
+        <div className="bg-surface rounded-2xl border border-border-custom p-12 sm:p-16 flex flex-col items-center justify-center text-center space-y-3">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm font-semibold text-foreground">Mengambil jadwal hari {activeDay}...</p>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="bg-surface rounded-2xl border border-border-custom p-12 text-center space-y-2">
-          <h4 className="font-bold text-foreground">Tidak Ada Jadwal</h4>
+        <div className="bg-surface rounded-2xl border border-border-custom p-10 sm:p-12 text-center space-y-2">
+          <h4 className="font-bold text-foreground text-sm sm:text-base">Tidak Ada Jadwal</h4>
           <p className="text-xs text-foreground/50">
             Tidak ada mata pelajaran yang sesuai filter pada hari {activeDay}.
           </p>
         </div>
       ) : viewMode === 'per_jam' ? (
         /* TAMPILAN TIMELINE PER JAM PELAJARAN */
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {itemsByPeriod.map((period, pIdx) => {
-            const isSpecial = period.jam === 0 || period.jam === 99;
-
             return (
               <div
                 key={pIdx}
                 className="bg-surface rounded-2xl border border-border-custom shadow-sm overflow-hidden"
               >
                 {/* Header Sesi */}
-                <div className="p-4 bg-foreground/[0.03] border-b border-border-custom flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 bg-foreground/[0.03] border-b border-border-custom flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <span
-                      className={`px-3 py-1 rounded-xl text-xs font-extrabold ${
+                      className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl text-xs font-extrabold ${
                         period.jam === 0
                           ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-400/40'
                           : period.jam === 99
@@ -278,13 +276,13 @@ export default function JadwalHariView({
                       ⏱ {period.waktu} WIB
                     </span>
                   </div>
-                  <span className="text-xs font-bold text-foreground/50">
-                    {period.items.length} Kelas Terjadwal
+                  <span className="text-[11px] sm:text-xs font-bold text-foreground/50">
+                    {period.items.length} Kelas
                   </span>
                 </div>
 
                 {/* Grid Kelas dalam Sesi Ini */}
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
                   {period.items.map((item, idx) => {
                     const isUpacara = item.tipe === 'upacara';
                     const isIstirahat = item.tipe === 'istirahat';
@@ -293,7 +291,7 @@ export default function JadwalHariView({
                       return (
                         <div
                           key={idx}
-                          className="p-3 rounded-xl bg-foreground/[0.03] border border-border-custom flex items-center justify-between"
+                          className="p-2.5 sm:p-3 rounded-xl bg-foreground/[0.03] border border-border-custom flex items-center justify-between"
                         >
                           <span className="font-extrabold text-xs text-foreground bg-foreground/10 px-2 py-0.5 rounded-lg">
                             {item.kelas}
@@ -312,7 +310,7 @@ export default function JadwalHariView({
                           item.colorClass?.bg || 'bg-surface'
                         } ${item.colorClass?.border || 'border-border-custom'}`}
                       >
-                        <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center justify-between mb-1">
                           <span className="font-extrabold text-xs text-foreground bg-foreground/10 px-2 py-0.5 rounded-lg">
                             {item.kelas}
                           </span>
@@ -325,7 +323,7 @@ export default function JadwalHariView({
                         <h5 className="font-extrabold text-xs text-foreground line-clamp-1">
                           {item.mapel}
                         </h5>
-                        <p className="text-[11px] text-foreground/70 mt-1 truncate" title={item.nama_guru}>
+                        <p className="text-[11px] text-foreground/70 mt-0.5 truncate" title={item.nama_guru}>
                           {item.nama_guru}
                         </p>
                       </div>
@@ -338,25 +336,25 @@ export default function JadwalHariView({
         </div>
       ) : (
         /* TAMPILAN PER KELAS */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {itemsByClass.map((classGroup, cIdx) => (
             <div
               key={cIdx}
               className="bg-surface rounded-2xl border border-border-custom shadow-sm overflow-hidden flex flex-col"
             >
-              <div className="p-3.5 bg-foreground/[0.03] border-b border-border-custom flex items-center justify-between">
+              <div className="p-3 sm:p-3.5 bg-foreground/[0.03] border-b border-border-custom flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center">
                     {classGroup.kelas}
                   </span>
-                  <h4 className="font-bold text-foreground text-sm">Kelas {classGroup.kelas}</h4>
+                  <h4 className="font-bold text-foreground text-xs sm:text-sm">Kelas {classGroup.kelas}</h4>
                 </div>
                 <span className="text-xs text-foreground/50 font-medium">
                   {classGroup.items.length} sesi
                 </span>
               </div>
 
-              <div className="p-3 space-y-2 flex-1 max-h-96 overflow-y-auto">
+              <div className="p-2.5 sm:p-3 space-y-2 flex-1 max-h-96 overflow-y-auto">
                 {classGroup.items.map((item, idx) => (
                   <div
                     key={idx}

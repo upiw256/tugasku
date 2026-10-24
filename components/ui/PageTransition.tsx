@@ -23,7 +23,7 @@ export default function PageTransition({ children }: { children: React.ReactNode
   }, [pathname]);
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full min-w-0 max-w-full">
       {children}
     </div>
   );
