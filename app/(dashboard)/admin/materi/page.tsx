@@ -92,7 +92,7 @@ export default async function AdminMateriPage() {
                           {m.downloadsCount} Kali
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs text-foreground/40">
+                      <td suppressHydrationWarning className="px-6 py-4 text-xs text-foreground/40">
                         {new Date(m.tanggal_upload).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
                       </td>
                       <td className="px-6 py-4 text-right">

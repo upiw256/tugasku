@@ -180,7 +180,7 @@ export default function RealtimeLog({
                       {log.kategori || 'Siswa'}
                     </span>
                   </p>
-                  <span className="text-[10px] opacity-70 whitespace-nowrap">
+                  <span suppressHydrationWarning className="text-[10px] opacity-70 whitespace-nowrap">
                     {new Date(log.waktu).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
                 </div>

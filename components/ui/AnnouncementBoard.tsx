@@ -235,7 +235,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
                 {/* Header Item */}
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-bold text-foreground text-sm leading-tight pr-4">{item.judul}</h4>
-                  <span className="text-[10px] font-bold text-foreground/30 bg-foreground/5 px-1.5 py-0.5 rounded border border-border-custom whitespace-nowrap">
+                  <span suppressHydrationWarning className="text-[10px] font-bold text-foreground/30 bg-foreground/5 px-1.5 py-0.5 rounded border border-border-custom whitespace-nowrap">
                     {new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                   </span>
                 </div>

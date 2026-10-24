@@ -35,7 +35,7 @@ export default function AttendanceButton({ sudahAbsen, waktu }: { sudahAbsen: bo
       <div className="bg-green-50 border border-green-200 p-4 rounded-xl text-center shadow-inner">
         <div className="text-4xl mb-2 animate-bounce">✅</div>
         <h3 className="text-green-800 font-bold text-lg">Sudah Absen Hari Ini</h3>
-        <p className="text-green-600 font-mono">
+        <p suppressHydrationWarning className="text-green-600 font-mono">
           {new Date(waktu!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
         </p>
       </div>

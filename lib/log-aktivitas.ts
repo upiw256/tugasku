@@ -49,7 +49,11 @@ export async function logAktivitasSiswa(data: LogData) {
       waktu: newLog.waktu.toISOString(),
     };
     
-    await pusherServer.trigger('admin-logs', 'new-log', logDataPayload);
+    try {
+      await pusherServer.trigger('admin-logs', 'new-log', logDataPayload);
+    } catch (pusherError) {
+      console.warn('[Pusher Warning] Gagal trigger realtime update (log tetap tersimpan di database):', pusherError);
+    }
   } catch (error) {
     console.error('Failed to save log aktivitas:', error);
   }

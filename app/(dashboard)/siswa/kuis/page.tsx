@@ -121,7 +121,7 @@ export default async function SiswaKuisPage() {
                         <p className="font-bold text-foreground">{kuis.judul}</p>
                         <p className="text-xs text-foreground/40 line-clamp-1">{kuis.deskripsi || 'Kuis online'}</p>
                       </td>
-                      <td className="px-6 py-4 text-xs text-foreground/30 font-medium">
+                      <td suppressHydrationWarning className="px-6 py-4 text-xs text-foreground/30 font-medium">
                         <div>Mulai: {startTime.toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</div>
                         <div>Selesai: {endTime.toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</div>
                       </td>
