@@ -25,7 +25,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**" } 
     ]
-  }
+  },
+  // Rewrite /uploads/* ke /api/uploads/* agar file yang diupload
+  // setelah build bisa langsung diakses tanpa rebuild
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: '/api/uploads/:path*',
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);
