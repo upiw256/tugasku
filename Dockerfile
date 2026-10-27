@@ -1,10 +1,10 @@
-FROM oven/bun:latest AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 
 # --- deps ---
 FROM base AS deps
-COPY package.json bun.lock ./
-RUN bun install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # --- build ---
 FROM base AS builder
@@ -27,18 +27,18 @@ ENV NEXT_PUBLIC_CLOUDINARY_API_KEY=$NEXT_PUBLIC_CLOUDINARY_API_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_DISABLE_TURBOPACK=1
 
-RUN bun run build
+RUN npm run build
 
 # --- runner ---
-FROM oven/bun:latest AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 # ENV NODE_ENV=production
 ENV PORT=8020
 ENV HOSTNAME=0.0.0.0
 
-RUN groupadd --gid 1001 nodejs \
- && useradd --uid 1001 --gid nodejs --shell /bin/sh --create-home nextjs
+RUN addgroup --system --gid 1001 nodejs \
+ && adduser --system --uid 1001 --ingroup nodejs nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -53,5 +53,4 @@ RUN mkdir -p public/uploads \
 USER nextjs
 EXPOSE 8020
 
-CMD ["bun", "server.js"]
-
+CMD ["node", "server.js"]
