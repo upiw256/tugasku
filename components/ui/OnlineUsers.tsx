@@ -21,10 +21,17 @@ const roleColors: Record<string, string> = {
   siswa: 'bg-blue-500',
 };
 
+const roleBadgeStyles: Record<string, string> = {
+  admin: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30',
+  guru: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+  siswa: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+};
+
 function getInitials(name: string) {
   if (!name) return '?';
   return name
     .split(' ')
+    .filter(Boolean)
     .slice(0, 2)
     .map((w) => w[0])
     .join('')
@@ -34,9 +41,10 @@ function getInitials(name: string) {
 export default function OnlineUsers({ room, currentUserName }: OnlineUsersProps) {
   const [users, setUsers] = useState<OnlineUser[]>([]);
   const [isReady, setIsReady] = useState(false);
-  const [showTooltip, setShowTooltip] = useState<string | null>(null);
+  const [showMore, setShowMore] = useState(false);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const roomRef = useRef(room);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const sendPresence = useCallback(async (action: 'join' | 'leave' | 'heartbeat') => {
     try {
@@ -66,16 +74,15 @@ export default function OnlineUsers({ room, currentUserName }: OnlineUsersProps)
   useEffect(() => {
     roomRef.current = room;
 
-    // URUTAN KRITIS:
     // 1. Subscribe Pusher DULU supaya event join tidak terlewat
-    const channelName = `presence-${room}`;
+    const channelName = `room-${room}`;
     const channel = pusherClient.subscribe(channelName);
     channel.bind('presence-update', (data: { users: OnlineUser[] }) => {
       setUsers(data.users || []);
       setIsReady(true);
     });
 
-    // 2. Baru join + fetch (await join dulu baru fetch sebagai fallback)
+    // 2. Join dan fetch list user online
     const init = async () => {
       await sendPresence('join');
       await fetchUsers();
@@ -88,7 +95,7 @@ export default function OnlineUsers({ room, currentUserName }: OnlineUsersProps)
       sendPresence('heartbeat');
     }, 28_000);
 
-    // 4. Leave saat halaman ditutup
+    // 4. Leave saat window/tab ditutup atau hidden
     const handleLeave = () => sendPresence('leave');
     window.addEventListener('beforeunload', handleLeave);
 
@@ -108,87 +115,143 @@ export default function OnlineUsers({ room, currentUserName }: OnlineUsersProps)
     };
   }, [room, sendPresence, fetchUsers]);
 
-  // Loading state - selalu tampilkan widget (jangan null)
+  // Tutup dropdown jika klik di luar
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowMore(false);
+      }
+    }
+    if (showMore) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMore]);
+
+  // Loading state
   if (!isReady) {
     return (
-      <div className="flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span>
-        <span className="text-[11px] text-foreground/40">menghubungkan...</span>
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-foreground/5 text-foreground/40 text-xs">
+        <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+        <span className="text-[11px]">Menghubungkan...</span>
       </div>
     );
   }
 
-  const MAX_VISIBLE = 5;
+  const MAX_VISIBLE = 4;
   const visible = users.slice(0, MAX_VISIBLE);
   const overflow = users.length - MAX_VISIBLE;
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-foreground/50 font-medium hidden sm:block">Online:</span>
-
-      {users.length > 0 && (
-        <div className="flex items-center">
-          {visible.map((user, i) => {
-            const isMe = user.nama === currentUserName;
-            const color = roleColors[user.role] || 'bg-gray-500';
-            const initials = getInitials(user.nama);
-
-            return (
-              <div
-                key={user.id}
-                className="relative"
-                style={{ marginLeft: i > 0 ? '-8px' : 0, zIndex: visible.length - i }}
-                onMouseEnter={() => setShowTooltip(user.id)}
-                onMouseLeave={() => setShowTooltip(null)}
-              >
-                <div
-                  className={[
-                    'w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold',
-                    'border-2 border-surface cursor-pointer select-none transition-transform hover:scale-110',
-                    color,
-                    isMe ? 'ring-2 ring-offset-1 ring-white/60' : '',
-                  ].join(' ')}
-                  title={`${user.nama} (${user.role})`}
-                >
-                  {initials}
-                </div>
-
-                {/* Green dot */}
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-surface block"></span>
-
-                {/* Tooltip */}
-                {showTooltip === user.id && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-[100] pointer-events-none">
-                    <div className="bg-foreground text-background text-[11px] font-semibold rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">
-                      {user.nama}
-                      <span className="ml-1 opacity-60">
-                        ({user.role}{isMe ? ' · kamu' : ''})
-                      </span>
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-foreground" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {overflow > 0 && (
-            <div
-              className="w-7 h-7 rounded-full bg-foreground/15 text-foreground text-[10px] font-bold flex items-center justify-center border-2 border-surface cursor-default select-none"
-              style={{ marginLeft: '-8px' }}
-              title={`${overflow} orang lainnya`}
-            >
-              +{overflow}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="flex items-center gap-1">
-        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-        <span className="text-[11px] text-foreground/50">
-          {users.length === 0 ? 'hanya kamu' : `${users.length} online`}
+    <div className="flex flex-wrap items-center gap-2">
+      {/* Badge Total Online */}
+      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
         </span>
+        <span className="text-[11px] whitespace-nowrap">
+          {users.length === 0 ? '1 Online' : `${users.length} Online`}
+        </span>
+      </div>
+
+      {/* Daftar Nama Pengguna Online */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {visible.map((user) => {
+          const isMe = user.nama === currentUserName;
+          const color = roleColors[user.role] || 'bg-gray-500';
+          const roleBadge = roleBadgeStyles[user.role] || 'bg-gray-500/15 text-gray-500 border-gray-500/30';
+          const initials = getInitials(user.nama);
+
+          return (
+            <div
+              key={user.id}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border transition-all ${
+                isMe
+                  ? 'bg-primary-500/10 border-primary-500/40 text-foreground font-semibold shadow-xs ring-1 ring-primary-500/20'
+                  : 'bg-foreground/5 border-border-custom text-foreground font-medium hover:bg-foreground/10'
+              }`}
+              title={`${user.nama} (${user.role})${isMe ? ' - Anda' : ''}`}
+            >
+              {/* Avatar inisial dengan warna role */}
+              <span
+                className={`w-4 h-4 rounded-full ${color} text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0 select-none`}
+              >
+                {initials}
+              </span>
+
+              {/* Nama yang login tertulis langsung */}
+              <span className="truncate max-w-[110px] sm:max-w-[150px] text-foreground">
+                {user.nama}
+              </span>
+
+              {/* Role badge */}
+              <span
+                className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider border ${roleBadge}`}
+              >
+                {user.role}
+              </span>
+
+              {isMe && (
+                <span className="text-[10px] text-primary-500 font-bold flex-shrink-0">(Anda)</span>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Jika lebih dari MAX_VISIBLE, tampilkan tombol overflow */}
+        {overflow > 0 && (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setShowMore(!showMore)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-foreground/10 hover:bg-foreground/15 text-foreground border border-border-custom cursor-pointer transition"
+            >
+              +{overflow} lainnya
+            </button>
+
+            {showMore && (
+              <div className="absolute right-0 top-full mt-2 z-50 bg-surface border border-border-custom shadow-xl rounded-xl p-3 min-w-[220px] max-w-[280px] flex flex-col gap-2">
+                <div className="text-[11px] font-bold text-foreground/50 pb-1.5 border-b border-border-custom flex items-center justify-between">
+                  <span>Pengguna Lainnya</span>
+                  <span className="text-[10px] bg-foreground/10 px-1.5 py-0.5 rounded-full">{overflow}</span>
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+                  {users.slice(MAX_VISIBLE).map((u) => {
+                    const isMe = u.nama === currentUserName;
+                    const uColor = roleColors[u.role] || 'bg-gray-500';
+                    const uBadge = roleBadgeStyles[u.role] || 'bg-gray-500/15 text-gray-500 border-gray-500/30';
+                    return (
+                      <div
+                        key={u.id}
+                        className="flex items-center justify-between gap-2 text-xs py-1 px-1.5 rounded-lg hover:bg-foreground/5"
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className={`w-4 h-4 rounded-full ${uColor} text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0`}
+                          >
+                            {getInitials(u.nama)}
+                          </span>
+                          <span className="font-medium text-foreground truncate">
+                            {u.nama}
+                          </span>
+                          {isMe && <span className="text-[10px] text-primary-500 font-bold">(Anda)</span>}
+                        </div>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider border flex-shrink-0 ${uBadge}`}
+                        >
+                          {u.role}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

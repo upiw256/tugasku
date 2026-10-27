@@ -99,7 +99,7 @@ export default async function DetilMateriAdminPage(props: { params: Promise<{ id
         <DiskusiMateriAdmin 
             materiId={materi._id.toString()} 
             availableClasses={availableClasses} 
-            currentUserName={session.user.name || session.user.email || undefined}
+            currentUserName={session.user.name || 'Admin'}
           />
         </div>
 

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { connectDB } from '@/lib/db';
+import { User, Member } from '@/models';
 import { redisConnection } from '@/lib/redis';
 import { pusherServer } from '@/lib/pusher';
 
@@ -50,16 +52,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'room dan action diperlukan' }, { status: 400 });
     }
 
-    // Gunakan email sebagai userId (selalu ada, unik)
+    // Gunakan email/id sebagai userId (selalu ada, unik)
     const userId = (session.user as any).id || session.user.email!;
-    const userName = session.user.name || session.user.email || 'Unknown';
+    let userName = session.user.name;
     const userRole = (session.user as any).role || 'siswa';
+
+    // Pastikan nama user akurat (nama lengkap siswa atau Admin)
+    if (!userName || userName === 'siswa' || userName === 'admin' || userName === session.user.email) {
+      try {
+        await connectDB();
+        if (userRole === 'siswa') {
+          const dbUser = await User.findOne({ user: session.user.email });
+          if (dbUser && dbUser.member_id) {
+            const student = await Member.findById(dbUser.member_id).lean();
+            if (student && student.nama_lengkap) {
+              userName = student.nama_lengkap;
+            }
+          }
+        } else if (userRole === 'admin') {
+          userName = 'Admin';
+        } else if (userRole === 'guru') {
+          userName = 'Guru';
+        }
+      } catch {
+        // fallback
+      }
+    }
+
+    if (!userName) {
+      userName = userRole === 'admin' ? 'Admin' : (session.user.email || 'Pengguna');
+    }
 
     console.log(`[presence] action=${action} user=${userName} role=${userRole} room=${room}`);
 
     const key = `presence:${room}`;
     const expireKey = `presence-expire:${room}`;
-    const pusherChannel = `presence-${room}`;
+    const pusherChannel = `room-${room}`;
 
     if (action === 'join' || action === 'heartbeat') {
       const userData = JSON.stringify({

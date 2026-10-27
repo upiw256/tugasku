@@ -60,7 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // LOGIC DATABASE
           // Schema Anda kolomnya 'user', tapi input form 'username'
           // ============================================================
-          const foundUser = await User.findOne({ user: usernameInput })
+          const foundUser = await User.findOne({ user: usernameInput }).populate('member_id')
 
           if (!foundUser) {
             console.log("❌ User tidak ditemukan di database.")
@@ -79,10 +79,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           console.log("✅ Login Berhasil:", foundUser.user)
 
+          // Ambil nama lengkap dari member jika siswa, atau fallback ke username/Admin
+          let displayName = (foundUser as any).nama_lengkap;
+          if (!displayName && foundUser.member_id && typeof foundUser.member_id === 'object') {
+            displayName = (foundUser.member_id as any).nama_lengkap;
+          }
+          if (!displayName) {
+            displayName = foundUser.role === 'admin' ? 'Admin' : foundUser.user;
+          }
+
           // Return data user ke Token
           return {
             id: foundUser._id.toString(),
-            name: foundUser.nama_lengkap || foundUser.role, 
+            name: displayName, 
             email: foundUser.user, // Simpan username di field email session
             role: foundUser.role,
           }
@@ -98,6 +107,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role
         token.id = user.id
+        if (user.name) token.name = user.name
+        if (user.email) token.email = user.email
       }
       return token
     },
@@ -105,8 +116,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.role = token.role as string
         session.user.id = token.id as string
+        if (token.name) session.user.name = token.name as string
         // Pastikan email di session terisi username dari database
-        session.user.email = token.email as string 
+        session.user.email = (token.email || token.sub) as string 
       }
       return session
     },
