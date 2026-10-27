@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { trackMateriDownload, getDiskusiMateri, postKomentarDiskusi } from '@/actions/materi-discussion';
+import OnlineUsers from '@/components/ui/OnlineUsers';
 
-export default function DiskusiMateriSiswa({ materiId, fileUrl, kelas }: { materiId: string, fileUrl: string, kelas: string }) {
+export default function DiskusiMateriSiswa({ materiId, fileUrl, kelas, currentUserName }: { materiId: string, fileUrl: string, kelas: string, currentUserName?: string }) {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isPosting, setIsPosting] = useState(false);
@@ -83,9 +84,12 @@ export default function DiskusiMateriSiswa({ materiId, fileUrl, kelas }: { mater
 
       {/* Area Diskusi */}
       <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom flex flex-col h-[500px]">
-        <h3 className="font-bold text-foreground text-lg mb-4 pb-4 border-b border-border-custom flex items-center gap-2">
-          <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-          Live Discussion
+        <h3 className="font-bold text-foreground text-lg mb-4 pb-4 border-b border-border-custom flex flex-wrap items-center justify-between gap-3">
+          <span className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            Live Discussion
+          </span>
+          <OnlineUsers room={`materi-${materiId}`} currentUserName={currentUserName} />
         </h3>
         
         <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">

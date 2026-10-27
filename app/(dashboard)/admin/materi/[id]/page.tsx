@@ -96,9 +96,10 @@ export default async function DetilMateriAdminPage(props: { params: Promise<{ id
 
         {/* Kolom Kanan: Area Diskusi */}
         <div className="lg:col-span-2">
-          <DiskusiMateriAdmin 
+        <DiskusiMateriAdmin 
             materiId={materi._id.toString()} 
             availableClasses={availableClasses} 
+            currentUserName={session.user.name || session.user.email || undefined}
           />
         </div>
 

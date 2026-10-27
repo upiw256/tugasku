@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getDiskusiMateri, postKomentarDiskusi, deleteKomentarDiskusi, clearDiskusiMateri } from '@/actions/materi-discussion';
+import OnlineUsers from '@/components/ui/OnlineUsers';
 
-export default function DiskusiMateriAdmin({ materiId, availableClasses }: { materiId: string, availableClasses: string[] }) {
+export default function DiskusiMateriAdmin({ materiId, availableClasses, currentUserName }: { materiId: string, availableClasses: string[], currentUserName?: string }) {
   const [selectedClass, setSelectedClass] = useState(availableClasses[0] || '');
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -82,10 +83,13 @@ export default function DiskusiMateriAdmin({ materiId, availableClasses }: { mat
   return (
     <div className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom flex flex-col h-[600px]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-border-custom">
-        <h3 className="font-bold text-foreground text-lg flex items-center gap-2">
-          <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-          Live Discussion
-        </h3>
+        <div className="flex items-center gap-3">
+          <h3 className="font-bold text-foreground text-lg flex items-center gap-2">
+            <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            Live Discussion
+          </h3>
+          <OnlineUsers room={`materi-${materiId}`} currentUserName={currentUserName} />
+        </div>
         
         <div className="flex items-center gap-3">
           {availableClasses.length > 1 && (

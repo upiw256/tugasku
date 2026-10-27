@@ -63,6 +63,7 @@ export default async function DetilMateriSiswa(props: { params: Promise<{ id: st
           materiId={materi._id.toString()} 
           fileUrl={materi.file_url} 
           kelas={student.kelas} 
+          currentUserName={session.user.name || session.user.email || undefined}
         />
       </div>
     </div>
