@@ -7,14 +7,18 @@ const createJestConfig = nextJest({
 })
 
 // Konfigurasi Custom Jest
-const config: Config = {
+const customConfig: Config = {
   coverageProvider: 'v8',
-  testEnvironment: 'node', // Kita tes Server Action (Node.js environment)
+  testEnvironment: 'node',
   moduleNameMapper: {
-    // Mapping alias @/ ke folder root
     '^@/(.*)$': '<rootDir>/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 }
 
-export default createJestConfig(config)
+export default async function () {
+  const configFn = createJestConfig(customConfig);
+  const finalConfig = await configFn();
+  finalConfig.transformIgnorePatterns = ['/node_modules/(?!(jose)/)'];
+  return finalConfig;
+}

@@ -30,6 +30,34 @@ export default async function SettingsPage() {
                     <li><strong className="text-foreground">Role:</strong> <span className="uppercase font-bold text-blue-500">{session.user.role}</span></li>
                 </ul>
             </div>
+
+            {/* Akses Cepat API Keys & Docs (Khusus Admin) */}
+            {session.user.role === 'admin' && (
+              <div className="bg-surface p-6 rounded-xl border border-border-custom shadow-xs space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🔑</span>
+                  <div>
+                    <h3 className="font-bold text-foreground text-sm">REST API & Integrasi Mobile</h3>
+                    <p className="text-xs text-foreground/60">Kelola kunci akses API untuk aplikasi mobile dan bot</p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <a
+                    href="/admin/api-keys"
+                    className="flex-1 text-center px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+                  >
+                    Kelola API Keys ➔
+                  </a>
+                  <a
+                    href="/docs"
+                    target="_blank"
+                    className="flex-1 text-center px-4 py-2 text-xs font-bold text-foreground/80 bg-foreground/5 hover:bg-foreground/10 border border-border-custom rounded-lg transition"
+                  >
+                    Swagger UI Docs ↗
+                  </a>
+                </div>
+              </div>
+            )}
         </div>
 
         {/* KHUSUS ADMIN (Backup/Restore/Reset) */}

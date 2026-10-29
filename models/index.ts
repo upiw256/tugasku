@@ -217,3 +217,19 @@ const SystemSettingSchema = new mongoose.Schema({
 });
 
 export const SystemSetting = models.SystemSetting || model('SystemSetting', SystemSettingSchema);
+
+// Schema untuk API Key (REST API Client Identification & Security)
+const ApiKeySchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true, index: true },
+  name: { type: String, required: true },
+  owner: { type: String, required: true },
+  permissions: { type: [String], default: ['read', 'write'] }, // 'read', 'write', 'admin'
+  rate_limit: { type: Number, default: 100 }, // requests per minute
+  is_active: { type: Boolean, default: true, index: true },
+  allowed_ips: { type: [String], default: ['*'] },
+  created_at: { type: Date, default: Date.now },
+  last_used_at: { type: Date },
+  expires_at: { type: Date, default: null }
+});
+
+export const ApiKey = models.ApiKey || model('ApiKey', ApiKeySchema);
