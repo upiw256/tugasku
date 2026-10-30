@@ -2,7 +2,7 @@
 
 import { createAnnouncementAction, deleteAnnouncementAction } from '@/actions/announcement-actions';
 import { sendBrowserNotification } from '@/lib/notificationHelper';
-import { pusherClient } from '@/lib/pusher'; // Pastikan path ini sesuai dengan file lib/pusher.ts Anda
+import { pusherClient } from '@/lib/pusher';
 import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 
@@ -37,21 +37,20 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
     // Subscribe ke channel 'sekolah-channel'
     const channel = pusherClient.subscribe('sekolah-channel');
 
-    // Dengarkan event 'info-baru'
-    channel.bind('info-baru', (data: any) => {
-      // a. Masukkan data baru ke posisi paling atas (index 0)
+    // a. Dengarkan event 'info-baru' (Pengumuman baru dibuat)
+    const handleNewAnnouncement = (data: any) => {
       setAnnouncements((prev) => {
-        // Cek duplikasi agar aman (opsional)
-        if (prev.find(item => item._id === data._id)) return prev;
+        const itemId = data._id || data.id;
+        if (prev.find(item => (item._id || item.id) === itemId)) return prev;
         return [data, ...prev];
       });
 
-      // b. Munculkan Notifikasi Browser (Khusus Siswa & Jika Diizinkan)
+      // Munculkan Notifikasi Browser (Khusus Siswa & Jika Diizinkan)
       if (role === 'siswa' && Notification.permission === "granted") {
         sendBrowserNotification("📢 Info Baru Tiba!", data.judul);
       }
 
-      // c. Feedback Visual (Toast) untuk user yang sedang aktif melihat layar
+      // Feedback Visual (Toast) untuk user yang sedang aktif melihat layar
       const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -64,10 +63,32 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         title: 'Papan pengumuman diperbarui',
         text: data.judul
       });
-    });
+    };
 
-    // Cleanup: Unsubscribe saat komponen di-unmount agar tidak membebani memori
+    // b. Dengarkan event 'hapus-info' (Pengumuman dihapus)
+    const handleDeleteAnnouncement = (data: { id: string }) => {
+      setAnnouncements((prev) =>
+        prev.filter(item => (item._id || item.id) !== data.id)
+      );
+    };
+
+    // c. Dengarkan event 'update-info' (Pengumuman diperbarui)
+    const handleUpdateAnnouncement = (data: any) => {
+      const targetId = data._id || data.id;
+      setAnnouncements((prev) =>
+        prev.map(item => ((item._id || item.id) === targetId ? { ...item, ...data } : item))
+      );
+    };
+
+    channel.bind('info-baru', handleNewAnnouncement);
+    channel.bind('hapus-info', handleDeleteAnnouncement);
+    channel.bind('update-info', handleUpdateAnnouncement);
+
+    // Cleanup: Unbind dan unsubscribe saat komponen di-unmount agar tidak membebani memori
     return () => {
+      channel.unbind('info-baru', handleNewAnnouncement);
+      channel.unbind('hapus-info', handleDeleteAnnouncement);
+      channel.unbind('update-info', handleUpdateAnnouncement);
       pusherClient.unsubscribe('sekolah-channel');
     };
   }, [role]);
@@ -138,7 +159,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
 
     // Hapus Optimistik (Update UI dulu biar terasa cepat)
     const prevData = [...announcements];
-    setAnnouncements(prev => prev.filter(item => item._id !== id));
+    setAnnouncements(prev => prev.filter(item => (item._id || item.id) !== id));
 
     const res = await deleteAnnouncementAction(id);
     
@@ -146,9 +167,6 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         // Jika gagal di server, kembalikan UI seperti semula (Rollback)
         setAnnouncements(prevData);
         Swal.fire('Gagal', 'Gagal menghapus data', 'error');
-    } else {
-        // Jika delete realtime belum diimplementasi, kita refresh data server background
-        // atau biarkan saja karena sudah dihapus di UI lokal
     }
   };
 
@@ -227,46 +245,49 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
                 <p className="text-sm font-medium">Belum ada pengumuman.</p>
             </div>
           ) : (
-            announcements.map((item) => (
-              <div key={item._id} className={`group relative p-4 rounded-lg border-l-[6px] shadow-sm bg-surface border-y border-r border-border-custom transition hover:shadow-md
-                ${item.prioritas === 'Penting' ? 'border-l-red-500 bg-red-500/5' : 
-                  item.prioritas === 'Libur' ? 'border-l-green-500 bg-green-500/5' : 'border-l-blue-400 bg-blue-500/5'}`
-              }>
-                {/* Header Item */}
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold text-foreground text-sm leading-tight pr-4">{item.judul}</h4>
-                  <span suppressHydrationWarning className="text-[10px] font-bold text-foreground/30 bg-foreground/5 px-1.5 py-0.5 rounded border border-border-custom whitespace-nowrap">
-                    {new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                  </span>
-                </div>
+            announcements.map((item) => {
+              const itemId = item._id || item.id;
+              return (
+                <div key={itemId} className={`group relative p-4 rounded-lg border-l-[6px] shadow-sm bg-surface border-y border-r border-border-custom transition hover:shadow-md
+                  ${item.prioritas === 'Penting' ? 'border-l-red-500 bg-red-500/5' : 
+                    item.prioritas === 'Libur' ? 'border-l-green-500 bg-green-500/5' : 'border-l-blue-400 bg-blue-500/5'}`
+                }>
+                  {/* Header Item */}
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-bold text-foreground text-sm leading-tight pr-4">{item.judul}</h4>
+                    <span suppressHydrationWarning className="text-[10px] font-bold text-foreground/30 bg-foreground/5 px-1.5 py-0.5 rounded border border-border-custom whitespace-nowrap">
+                      {new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
 
-                {/* Konten Item */}
-                <p className="text-sm text-foreground/60 whitespace-pre-line leading-relaxed mb-3">
-                    {item.konten}
-                </p>
-                
-                {/* Footer Item (Badge & Delete) */}
-                <div className="flex justify-between items-center mt-2 border-t border-border-custom pt-2">
-                   <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase tracking-wider
-                     ${item.prioritas === 'Penting' ? 'bg-red-500/10 text-red-500' : 
-                       item.prioritas === 'Libur' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`
-                   }>
-                     {item.prioritas}
-                   </span>
-                   
-                   {/* Tombol Hapus (Hanya Admin) */}
-                   {role === 'admin' && (
-                     <button 
-                        onClick={() => handleDelete(item._id)} 
-                        title="Hapus Pengumuman"
-                        className="text-foreground/20 hover:text-red-500 hover:bg-red-500/10 p-1 rounded transition opacity-0 group-hover:opacity-100 focus:opacity-100"
-                     >
-                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                     </button>
-                   )}
+                  {/* Konten Item */}
+                  <p className="text-sm text-foreground/60 whitespace-pre-line leading-relaxed mb-3">
+                      {item.konten}
+                  </p>
+                  
+                  {/* Footer Item (Badge & Delete) */}
+                  <div className="flex justify-between items-center mt-2 border-t border-border-custom pt-2">
+                     <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase tracking-wider
+                       ${item.prioritas === 'Penting' ? 'bg-red-500/10 text-red-500' : 
+                         item.prioritas === 'Libur' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`
+                     }>
+                       {item.prioritas}
+                     </span>
+                     
+                     {/* Tombol Hapus (Hanya Admin) */}
+                     {role === 'admin' && (
+                       <button 
+                          onClick={() => handleDelete(itemId)} 
+                          title="Hapus Pengumuman"
+                          className="text-foreground/20 hover:text-red-500 hover:bg-red-500/10 p-1 rounded transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                       >
+                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                       </button>
+                     )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

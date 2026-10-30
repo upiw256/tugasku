@@ -4,6 +4,7 @@ import { apiSuccess, apiError } from '@/lib/api/response';
 import { UpdatePengumumanSchema } from '@/lib/api/validation';
 import { connectDB } from '@/lib/db';
 import { Pengumuman } from '@/models';
+import { pusherServer } from '@/lib/pusher';
 
 // GET /api/v1/pengumuman/[id]
 export const GET = createApiHandler(
@@ -45,6 +46,21 @@ export const PUT = createApiHandler(
       return apiError('Pengumuman tidak ditemukan', 'NOT_FOUND', 404);
     }
 
+    // Trigger Pusher event update-info
+    try {
+      await pusherServer.trigger('sekolah-channel', 'update-info', {
+        _id: (updated as any)._id.toString(),
+        id: (updated as any)._id.toString(),
+        judul: (updated as any).judul,
+        konten: (updated as any).konten,
+        prioritas: (updated as any).prioritas,
+        dibuat_oleh: (updated as any).dibuat_oleh,
+        tanggal: (updated as any).tanggal,
+      });
+    } catch (pusherErr) {
+      console.warn('[Pusher Warning] Gagal trigger update-info:', pusherErr);
+    }
+
     return apiSuccess({
       id: (updated as any)._id.toString(),
       judul: (updated as any).judul,
@@ -69,6 +85,13 @@ export const DELETE = createApiHandler(
     const deleted = await Pengumuman.findByIdAndDelete(id);
     if (!deleted) {
       return apiError('Pengumuman tidak ditemukan', 'NOT_FOUND', 404);
+    }
+
+    // Trigger Pusher event hapus-info
+    try {
+      await pusherServer.trigger('sekolah-channel', 'hapus-info', { id });
+    } catch (pusherErr) {
+      console.warn('[Pusher Warning] Gagal trigger hapus-info:', pusherErr);
     }
 
     return apiSuccess({ id }, 'Pengumuman berhasil dihapus');

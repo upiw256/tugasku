@@ -64,14 +64,16 @@ export const POST = createApiHandler(
     // Realtime trigger
     try {
       await pusherServer.trigger('sekolah-channel', 'info-baru', {
-        _id: newInfo._id,
+        _id: newInfo._id.toString(),
+        id: newInfo._id.toString(),
         judul: newInfo.judul,
         konten: newInfo.konten,
         prioritas: newInfo.prioritas,
+        dibuat_oleh: newInfo.dibuat_oleh,
         tanggal: newInfo.tanggal,
       });
-    } catch {
-      // Pusher trigger failure shouldn't fail HTTP request
+    } catch (pusherErr) {
+      console.warn('[Pusher Warning] Gagal trigger info-baru API:', pusherErr);
     }
 
     return apiSuccess({

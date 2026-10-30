@@ -7,7 +7,6 @@ import { revalidatePath } from 'next/cache';
 import { pusherServer } from '@/lib/pusher';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
 
-
 export async function deleteAnnouncementAction(id: string) {
     try {
         const session = await auth();
@@ -16,11 +15,17 @@ export async function deleteAnnouncementAction(id: string) {
         await connectDB();
         await Pengumuman.findByIdAndDelete(id);
         
+        // --- REALTIME TRIGGER DELETE ---
+        try {
+          await pusherServer.trigger('sekolah-channel', 'hapus-info', { id });
+        } catch (pusherErr) {
+          console.warn('[Pusher Warning] Gagal trigger hapus-info:', pusherErr);
+        }
+
         revalidatePath('/');
         return { success: true, message: 'Pengumuman dihapus.' };
     } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
-
+        await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
         return { success: false, message: 'Gagal menghapus.' };
     }
 }
@@ -48,13 +53,19 @@ export async function createAnnouncementAction(formData: FormData) {
 
     // --- REALTIME TRIGGER ---
     // Kirim sinyal ke channel 'sekolah-channel' dengan event 'info-baru'
-    await pusherServer.trigger('sekolah-channel', 'info-baru', {
-      _id: newInfo._id,
-      judul: newInfo.judul,
-      konten: newInfo.konten,
-      prioritas: newInfo.prioritas,
-      tanggal: newInfo.tanggal
-    });
+    try {
+      await pusherServer.trigger('sekolah-channel', 'info-baru', {
+        _id: newInfo._id.toString(),
+        id: newInfo._id.toString(),
+        judul: newInfo.judul,
+        konten: newInfo.konten,
+        prioritas: newInfo.prioritas,
+        dibuat_oleh: newInfo.dibuat_oleh,
+        tanggal: newInfo.tanggal
+      });
+    } catch (pusherErr) {
+      console.warn('[Pusher Warning] Gagal trigger info-baru:', pusherErr);
+    }
 
     revalidatePath('/');
     return { success: true, message: 'Terposting!' };
