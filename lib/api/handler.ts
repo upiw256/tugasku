@@ -51,7 +51,7 @@ export function createApiHandler(
     rateLimit,
   } = options;
 
-  return async function (req: NextRequest, rawContext?: { params: Promise<any> | any }): Promise<NextResponse> {
+  return async function (req: NextRequest, rawContext: any = {}): Promise<NextResponse> {
     // 1. Handle CORS Preflight
     if (req.method === 'OPTIONS') {
       return new NextResponse(null, {
