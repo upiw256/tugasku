@@ -22,10 +22,11 @@ export async function deleteAnnouncementAction(id: string) {
           console.warn('[Pusher Warning] Gagal trigger hapus-info:', pusherErr);
         }
 
-        revalidatePath('/');
+        revalidatePath('/admin');
+        revalidatePath('/siswa');
         return { success: true, message: 'Pengumuman dihapus.' };
     } catch (error) {
-        await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
+        await logAktivitasSiswa({ aksi: `System Error (actions/announcement-actions.ts): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
         return { success: false, message: 'Gagal menghapus.' };
     }
 }
@@ -44,12 +45,14 @@ export async function createAnnouncementAction(formData: FormData) {
     await connectDB();
 
     const newInfo = await Pengumuman.create({
-      judul,
-      konten,
-      prioritas,
+      judul: String(judul).trim(),
+      konten: String(konten).trim(),
+      prioritas: prioritas ? String(prioritas) : 'Info',
       dibuat_oleh: session.user.email,
       tanggal: new Date()
     });
+
+    const isoDate = newInfo.tanggal instanceof Date ? newInfo.tanggal.toISOString() : new Date().toISOString();
 
     // --- REALTIME TRIGGER ---
     // Kirim sinyal ke channel 'sekolah-channel' dengan event 'info-baru'
@@ -61,18 +64,18 @@ export async function createAnnouncementAction(formData: FormData) {
         konten: newInfo.konten,
         prioritas: newInfo.prioritas,
         dibuat_oleh: newInfo.dibuat_oleh,
-        tanggal: newInfo.tanggal
+        tanggal: isoDate
       });
     } catch (pusherErr) {
       console.warn('[Pusher Warning] Gagal trigger info-baru:', pusherErr);
     }
 
-    revalidatePath('/');
+    revalidatePath('/admin');
+    revalidatePath('/siswa');
     return { success: true, message: 'Terposting!' };
 
   } catch (error) {
-    await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/actions/announcement-actions.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
-
+    await logAktivitasSiswa({ aksi: `System Error (actions/announcement-actions.ts): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
     return { success: false, message: 'Gagal.' };
   }
 }

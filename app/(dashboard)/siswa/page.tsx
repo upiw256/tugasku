@@ -89,9 +89,13 @@ export default async function SiswaDashboard() {
     .lean();
 
   const announcements = dataPengumuman.map((item: any) => ({
-    ...item,
-    _id: item._id.toString(),
-    tanggal: item.tanggal.toISOString(),
+    _id: item._id ? item._id.toString() : '',
+    id: item._id ? item._id.toString() : '',
+    judul: item.judul || '',
+    konten: item.konten || '',
+    prioritas: item.prioritas || 'Info',
+    dibuat_oleh: item.dibuat_oleh || '',
+    tanggal: item.tanggal ? (typeof item.tanggal === 'string' ? item.tanggal : new Date(item.tanggal).toISOString()) : new Date().toISOString(),
   }));
 
   // --- 9. LOGIKA PERINGKAT (GLOBAL & KELAS) PAKE AGREGASI EFISIEN ---
@@ -171,7 +175,7 @@ export default async function SiswaDashboard() {
   const initialLogs = initialLogsRaw.map((log: any) => ({
     ...log,
     _id: log._id.toString(),
-    waktu: log.waktu.toISOString(),
+    waktu: log.waktu ? (typeof log.waktu === 'string' ? log.waktu : new Date(log.waktu).toISOString()) : new Date().toISOString(),
   }));
 
   // 11. AMBIL JADWAL KELAS SISWA (Otomatis menyesuaikan "X 1" -> "X-1")

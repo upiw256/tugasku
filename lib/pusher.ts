@@ -2,20 +2,19 @@ import PusherServer from 'pusher';
 import PusherClient from 'pusher-js';
 
 // Instance SERVER (Backend)
-// Menggunakan variabel tanpa NEXT_PUBLIC (Server-only)
 export const pusherServer = new PusherServer({
-  appId: process.env.PUSHER_APP_ID!,
-  key: process.env.PUSHER_KEY!,
-  secret: process.env.PUSHER_SECRET!,
-  cluster: process.env.PUSHER_CLUSTER!,
+  appId: process.env.PUSHER_APP_ID || '',
+  key: process.env.PUSHER_KEY || process.env.NEXT_PUBLIC_PUSHER_KEY || '',
+  secret: process.env.PUSHER_SECRET || '',
+  cluster: process.env.PUSHER_CLUSTER || process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'ap1',
   useTLS: true,
 });
 
 // Instance CLIENT (Frontend/Browser)
-// WAJIB menggunakan NEXT_PUBLIC_ agar browser bisa membacanya
-export const pusherClient = new PusherClient(
-  process.env.NEXT_PUBLIC_PUSHER_KEY!, 
-  {
-    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-  }
-);
+// Diberikan fallback agar tidak melempar uncaught exception jika env belum terbaca saat build/deploy
+const clientKey = process.env.NEXT_PUBLIC_PUSHER_KEY || process.env.PUSHER_KEY || 'dummy_key';
+const clientCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || process.env.PUSHER_CLUSTER || 'ap1';
+
+export const pusherClient = new PusherClient(clientKey, {
+  cluster: clientCluster,
+});

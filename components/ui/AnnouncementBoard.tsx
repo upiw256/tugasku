@@ -16,7 +16,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
   const [permission, setPermission] = useState('default');
   
   // State lokal untuk menampung data (agar bisa diupdate realtime)
-  const [announcements, setAnnouncements] = useState(initialData);
+  const [announcements, setAnnouncements] = useState<any[]>(initialData || []);
   
   // Ref untuk form agar bisa di-reset setelah posting
   const formRef = useRef<HTMLFormElement>(null);
@@ -24,78 +24,107 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
   // --- 1. SETUP DATA & IZIN ---
   useEffect(() => {
     // Sinkronisasi data awal jika props berubah
-    setAnnouncements(initialData);
+    if (Array.isArray(initialData)) {
+      setAnnouncements(initialData);
+    }
 
-    // Cek status izin notifikasi saat komponen dimuat
-    if ("Notification" in window) {
+    // Cek status izin notifikasi saat komponen dimuat di browser
+    if (typeof window !== 'undefined' && "Notification" in window) {
       setPermission(Notification.permission);
     }
   }, [initialData]);
 
   // --- 2. LOGIKA REALTIME (PUSHER) ---
   useEffect(() => {
-    // Subscribe ke channel 'sekolah-channel'
-    const channel = pusherClient.subscribe('sekolah-channel');
+    try {
+      // Subscribe ke channel 'sekolah-channel'
+      const channel = pusherClient.subscribe('sekolah-channel');
 
-    // a. Dengarkan event 'info-baru' (Pengumuman baru dibuat)
-    const handleNewAnnouncement = (data: any) => {
-      setAnnouncements((prev) => {
-        const itemId = data._id || data.id;
-        if (prev.find(item => (item._id || item.id) === itemId)) return prev;
-        return [data, ...prev];
-      });
+      // a. Dengarkan event 'info-baru' (Pengumuman baru dibuat)
+      const handleNewAnnouncement = (data: any) => {
+        try {
+          if (!data) return;
+          const itemId = data._id || data.id;
 
-      // Munculkan Notifikasi Browser (Khusus Siswa & Jika Diizinkan)
-      if (role === 'siswa' && Notification.permission === "granted") {
-        sendBrowserNotification("📢 Info Baru Tiba!", data.judul);
-      }
+          setAnnouncements((prev) => {
+            if (itemId && prev.find(item => (item._id || item.id) === itemId)) return prev;
+            return [data, ...prev];
+          });
 
-      // Feedback Visual (Toast) untuk user yang sedang aktif melihat layar
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      });
-      Toast.fire({
-        icon: 'info',
-        title: 'Papan pengumuman diperbarui',
-        text: data.judul
-      });
-    };
+          // Munculkan Notifikasi Browser (Khusus Siswa & Jika Diizinkan)
+          if (role === 'siswa' && typeof window !== 'undefined' && "Notification" in window && Notification.permission === "granted") {
+            sendBrowserNotification("📢 Info Baru Tiba!", data.judul || 'Pengumuman Baru');
+          }
 
-    // b. Dengarkan event 'hapus-info' (Pengumuman dihapus)
-    const handleDeleteAnnouncement = (data: { id: string }) => {
-      setAnnouncements((prev) =>
-        prev.filter(item => (item._id || item.id) !== data.id)
-      );
-    };
+          // Feedback Visual (Toast) untuk siswa
+          if (role === 'siswa') {
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+            });
+            Toast.fire({
+              icon: 'info',
+              title: 'Papan pengumuman diperbarui',
+              text: data.judul || 'Pengumuman baru masuk'
+            });
+          }
+        } catch (eventErr) {
+          console.error('[Pusher Callback Error] info-baru:', eventErr);
+        }
+      };
 
-    // c. Dengarkan event 'update-info' (Pengumuman diperbarui)
-    const handleUpdateAnnouncement = (data: any) => {
-      const targetId = data._id || data.id;
-      setAnnouncements((prev) =>
-        prev.map(item => ((item._id || item.id) === targetId ? { ...item, ...data } : item))
-      );
-    };
+      // b. Dengarkan event 'hapus-info' (Pengumuman dihapus)
+      const handleDeleteAnnouncement = (data: { id: string }) => {
+        try {
+          if (!data?.id) return;
+          setAnnouncements((prev) =>
+            prev.filter(item => (item._id || item.id) !== data.id)
+          );
+        } catch (eventErr) {
+          console.error('[Pusher Callback Error] hapus-info:', eventErr);
+        }
+      };
 
-    channel.bind('info-baru', handleNewAnnouncement);
-    channel.bind('hapus-info', handleDeleteAnnouncement);
-    channel.bind('update-info', handleUpdateAnnouncement);
+      // c. Dengarkan event 'update-info' (Pengumuman diperbarui)
+      const handleUpdateAnnouncement = (data: any) => {
+        try {
+          if (!data) return;
+          const targetId = data._id || data.id;
+          if (!targetId) return;
+          setAnnouncements((prev) =>
+            prev.map(item => ((item._id || item.id) === targetId ? { ...item, ...data } : item))
+          );
+        } catch (eventErr) {
+          console.error('[Pusher Callback Error] update-info:', eventErr);
+        }
+      };
 
-    // Cleanup: Unbind dan unsubscribe saat komponen di-unmount agar tidak membebani memori
-    return () => {
-      channel.unbind('info-baru', handleNewAnnouncement);
-      channel.unbind('hapus-info', handleDeleteAnnouncement);
-      channel.unbind('update-info', handleUpdateAnnouncement);
-      pusherClient.unsubscribe('sekolah-channel');
-    };
+      channel.bind('info-baru', handleNewAnnouncement);
+      channel.bind('hapus-info', handleDeleteAnnouncement);
+      channel.bind('update-info', handleUpdateAnnouncement);
+
+      // Cleanup: Unbind dan unsubscribe saat komponen di-unmount agar tidak membebani memori
+      return () => {
+        try {
+          channel.unbind('info-baru', handleNewAnnouncement);
+          channel.unbind('hapus-info', handleDeleteAnnouncement);
+          channel.unbind('update-info', handleUpdateAnnouncement);
+          pusherClient.unsubscribe('sekolah-channel');
+        } catch (cleanupErr) {
+          console.error('[Pusher Cleanup Error]:', cleanupErr);
+        }
+      };
+    } catch (pusherSubscribeErr) {
+      console.warn('[Pusher Subscribe Warning]:', pusherSubscribeErr);
+    }
   }, [role]);
 
   // --- 3. HANDLER: Request Izin Notifikasi ---
   const requestPermission = () => {
-    if (!("Notification" in window)) {
+    if (typeof window === 'undefined' || !("Notification" in window)) {
       Swal.fire('Error', 'Browser ini tidak mendukung notifikasi desktop.', 'error');
       return;
     }
@@ -118,29 +147,35 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
     });
   };
 
-  // --- 4. HANDLER ADMIN: Posting ---
-  const handlePost = async (formData: FormData) => {
+  // --- 4. HANDLER ADMIN: Posting (Submit yang aman) ---
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     setLoading(true);
-    const res = await createAnnouncementAction(formData);
-    setLoading(false);
 
-    if (res.success) {
-      // Reset form manual
-      formRef.current?.reset();
-      
-      Swal.fire({ 
-        toast: true, 
-        position: 'top-end', 
-        icon: 'success', 
-        title: 'Terposting & Terkirim!', 
-        timer: 1500, 
-        showConfirmButton: false 
-      });
-      
-      // KITA TIDAK PERLU RELOAD WINDOW DI SINI
-      // Karena Pusher akan otomatis mengupdate UI (Realtime)
-    } else {
-      Swal.fire('Gagal', res.message, 'error');
+    try {
+      const res = await createAnnouncementAction(formData);
+
+      if (res?.success) {
+        // Reset form manual
+        formRef.current?.reset();
+        
+        Swal.fire({ 
+          toast: true, 
+          position: 'top-end', 
+          icon: 'success', 
+          title: 'Terposting & Terkirim!', 
+          timer: 1500, 
+          showConfirmButton: false 
+        });
+      } else {
+        Swal.fire('Gagal', res?.message || 'Gagal memposting pengumuman.', 'error');
+      }
+    } catch (err: any) {
+      console.error('Error submitting announcement:', err);
+      Swal.fire('Error', err?.message || 'Terjadi kesalahan sistem saat memposting.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,12 +196,27 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
     const prevData = [...announcements];
     setAnnouncements(prev => prev.filter(item => (item._id || item.id) !== id));
 
-    const res = await deleteAnnouncementAction(id);
-    
-    if (!res.success) {
-        // Jika gagal di server, kembalikan UI seperti semula (Rollback)
+    try {
+      const res = await deleteAnnouncementAction(id);
+      if (!res?.success) {
         setAnnouncements(prevData);
-        Swal.fire('Gagal', 'Gagal menghapus data', 'error');
+        Swal.fire('Gagal', res?.message || 'Gagal menghapus data', 'error');
+      }
+    } catch (err) {
+      setAnnouncements(prevData);
+      Swal.fire('Gagal', 'Terjadi kesalahan saat menghapus', 'error');
+    }
+  };
+
+  // Helper aman format tanggal
+  const formatDate = (dateVal: any) => {
+    try {
+      if (!dateVal) return '-';
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return '-';
+      return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    } catch {
+      return '-';
     }
   };
 
@@ -188,7 +238,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
             </button>
         )}
         
-        {/* BADGE JUMLAH INFO (Jika tidak butuh tombol izin) */}
+        {/* BADGE JUMLAH INFO */}
         {(role !== 'siswa' || permission === 'granted' || permission === 'denied') && (
              <span className="text-xs bg-blue-500/50 backdrop-blur-sm border border-blue-400 px-2 py-1 rounded-full">
                 {announcements.length} Info
@@ -202,7 +252,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         {role === 'admin' && (
           <div className="mb-6 p-4 bg-foreground/5 rounded-lg border border-border-custom shadow-inner">
             <h3 className="text-xs uppercase tracking-wider font-bold text-foreground/40 mb-3">Buat Pengumuman Baru</h3>
-            <form ref={formRef} action={handlePost} className="space-y-3">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-3">
               <input 
                 name="judul" 
                 required 
@@ -218,7 +268,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
               ></textarea>
               
               <div className="flex justify-between items-center pt-1">
-                 <select name="prioritas" className="text-sm border border-border-custom rounded px-2 py-1.5 bg-surface text-foreground font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                 <select name="prioritas" defaultValue="Info" className="text-sm border border-border-custom rounded px-2 py-1.5 bg-surface text-foreground font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
                     <option value="Info">ℹ️ Info Biasa</option>
                     <option value="Penting">⚠️ Penting</option>
                     <option value="Libur">🏖️ Libur</option>
@@ -245,8 +295,8 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
                 <p className="text-sm font-medium">Belum ada pengumuman.</p>
             </div>
           ) : (
-            announcements.map((item) => {
-              const itemId = item._id || item.id;
+            announcements.map((item, idx) => {
+              const itemId = item._id || item.id || `announcement-${idx}`;
               return (
                 <div key={itemId} className={`group relative p-4 rounded-lg border-l-[6px] shadow-sm bg-surface border-y border-r border-border-custom transition hover:shadow-md
                   ${item.prioritas === 'Penting' ? 'border-l-red-500 bg-red-500/5' : 
@@ -254,15 +304,15 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
                 }>
                   {/* Header Item */}
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-foreground text-sm leading-tight pr-4">{item.judul}</h4>
+                    <h4 className="font-bold text-foreground text-sm leading-tight pr-4">{item.judul || 'Tanpa Judul'}</h4>
                     <span suppressHydrationWarning className="text-[10px] font-bold text-foreground/30 bg-foreground/5 px-1.5 py-0.5 rounded border border-border-custom whitespace-nowrap">
-                      {new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                      {formatDate(item.tanggal)}
                     </span>
                   </div>
 
                   {/* Konten Item */}
                   <p className="text-sm text-foreground/60 whitespace-pre-line leading-relaxed mb-3">
-                      {item.konten}
+                      {item.konten || ''}
                   </p>
                   
                   {/* Footer Item (Badge & Delete) */}
@@ -271,7 +321,7 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
                        ${item.prioritas === 'Penting' ? 'bg-red-500/10 text-red-500' : 
                          item.prioritas === 'Libur' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`
                      }>
-                       {item.prioritas}
+                       {item.prioritas || 'Info'}
                      </span>
                      
                      {/* Tombol Hapus (Hanya Admin) */}
