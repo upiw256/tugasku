@@ -5,6 +5,7 @@ import { CreateMateriSchema } from '@/lib/api/validation';
 import { connectDB } from '@/lib/db';
 import { Materi } from '@/models';
 import { pusherServer } from '@/lib/pusher';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 // GET /api/v1/materi
 export const GET = createApiHandler(
@@ -88,6 +89,13 @@ export const POST = createApiHandler(
       diunggah_oleh: ctx.user?.email || 'admin@sekolah.com',
       tanggal_upload: new Date(),
       downloads: [],
+    });
+
+    await sendNewItemPush({
+      id: newMateri._id.toString(),
+      type: 'materi',
+      title: newMateri.judul,
+      classes: listKelas,
     });
 
     try {

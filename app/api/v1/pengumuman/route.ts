@@ -5,6 +5,7 @@ import { CreatePengumumanSchema } from '@/lib/api/validation';
 import { connectDB } from '@/lib/db';
 import { Pengumuman } from '@/models';
 import { pusherServer } from '@/lib/pusher';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 // GET /api/v1/pengumuman (API Key only is sufficient)
 export const GET = createApiHandler(
@@ -59,6 +60,12 @@ export const POST = createApiHandler(
       prioritas: data.prioritas || 'Info',
       dibuat_oleh: ctx.user?.email || 'admin@sekolah.com',
       tanggal: new Date(),
+    });
+
+    await sendNewItemPush({
+      id: newInfo._id.toString(),
+      type: 'pengumuman',
+      title: newInfo.judul,
     });
 
     // Realtime trigger

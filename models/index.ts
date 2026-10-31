@@ -17,6 +17,14 @@ const UserSchema = new Schema({
   member_id: { type: Schema.Types.ObjectId, ref: 'Member' }, // Nyambung ke Member
 }, { timestamps: false });
 
+const ExpoPushTokenSchema = new Schema({
+  token: { type: String, required: true, unique: true, index: true },
+  user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  platform: { type: String, enum: ['android', 'ios'], required: true },
+  is_active: { type: Boolean, default: true, index: true },
+  updated_at: { type: Date, default: Date.now },
+}, { timestamps: false });
+
 // 3. Schema untuk Tugas
 const TugasSchema = new Schema({
   judul: { type: String, required: true },
@@ -196,6 +204,7 @@ const LogAktivitasSiswaSchema = new mongoose.Schema({
 // Definisi model yang bersih untuk Next.js
 export const Member = models.Member || model('Member', MemberSchema);
 export const User = models.User || model('User', UserSchema);
+export const ExpoPushToken = models.ExpoPushToken || model('ExpoPushToken', ExpoPushTokenSchema);
 export const Tugas = models.Tugas || model('Tugas', TugasSchema);
 export const Nilai = models.Nilai || model('Nilai', NilaiSchema);
 export const Absensi = models.Absensi || model('Absensi', AbsensiSchema);

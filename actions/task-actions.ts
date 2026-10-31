@@ -5,6 +5,7 @@ import { Tugas, Nilai } from '@/models';
 import ExcelJS from 'exceljs';
 import { revalidatePath } from 'next/cache';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 
 export async function importTasksAction(formData: FormData) {
@@ -116,12 +117,14 @@ export async function createTaskAction(formData: FormData) {
       : [kelasRaw.trim()];
 
     // 2. Simpan ke Database
-    await Tugas.create({
+    const newTask = await Tugas.create({
       judul,
       deskripsi,
       deadline: new Date(deadlineString),
       kelas: listKelas
     });
+
+    await sendNewItemPush({ id: newTask._id.toString(), type: 'tugas', title: newTask.judul, classes: listKelas });
 
     revalidatePath('/admin/tugas');
     return { success: true, message: 'Berhasil membuat tugas baru!' };
@@ -160,6 +163,8 @@ export async function createTaskKelompokAction(formData: FormData) {
       tipe_pengumpulan,
       tipe_tugas: 'kelompok'
     });
+
+    await sendNewItemPush({ id: newTugas._id.toString(), type: 'tugas', title: newTugas.judul, classes: listKelas });
 
     // Ambil semua kelompok yang ada di kelas-kelas tersebut
     // Kita anggap Kelompok sudah direfactor importnya jika butuh.

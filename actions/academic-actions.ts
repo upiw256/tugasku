@@ -7,6 +7,7 @@ import { Tugas } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { LogTugas } from '@/models';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 
 export async function createTugasAction(formData: FormData) {
@@ -24,13 +25,18 @@ export async function createTugasAction(formData: FormData) {
 
     await connectDB();
 
-    await Tugas.create({
+    const newTask = await Tugas.create({
       judul,
       deskripsi,
       deadline: new Date(deadline as string),
       kelas,
       tipe_pengumpulan // Simpan ke DB
     });
+
+    const targetClasses = Array.isArray(kelas)
+      ? kelas.map(String)
+      : String(kelas ?? '').split(',').map((item) => item.trim()).filter(Boolean);
+    await sendNewItemPush({ id: newTask._id.toString(), type: 'tugas', title: String(judul), classes: targetClasses });
 
     revalidatePath('/admin/tugas');
     revalidatePath('/siswa/tugas');

@@ -4,6 +4,7 @@ import { Materi } from '@/models';
 import { auth } from '@/lib/auth';
 import { pusherServer } from '@/lib/pusher';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 
 export async function GET(req: Request) {
@@ -48,6 +49,13 @@ export async function POST(req: Request) {
       kelas,
       diunggah_oleh: session.user.email, // Menggunakan username/email dari session
       tanggal_upload: new Date()
+    });
+
+    await sendNewItemPush({
+      id: newMateri._id.toString(),
+      type: 'materi',
+      title: newMateri.judul,
+      classes: Array.isArray(kelas) ? kelas.map(String) : [String(kelas)],
     });
 
     // Trigger Pusher

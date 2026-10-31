@@ -6,6 +6,7 @@ import { Pengumuman } from '@/models';
 import { revalidatePath } from 'next/cache';
 import { pusherServer } from '@/lib/pusher';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 export async function deleteAnnouncementAction(id: string) {
     try {
@@ -51,6 +52,8 @@ export async function createAnnouncementAction(formData: FormData) {
       dibuat_oleh: session.user.email,
       tanggal: new Date()
     });
+
+    await sendNewItemPush({ id: newInfo._id.toString(), type: 'pengumuman', title: newInfo.judul });
 
     const isoDate = newInfo.tanggal instanceof Date ? newInfo.tanggal.toISOString() : new Date().toISOString();
 

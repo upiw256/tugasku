@@ -4,6 +4,7 @@ import { apiPaginated, apiSuccess } from '@/lib/api/response';
 import { CreateTugasSchema } from '@/lib/api/validation';
 import { connectDB } from '@/lib/db';
 import { Tugas, Kelompok, Nilai } from '@/models';
+import { sendNewItemPush } from '@/lib/push-notifications';
 
 // GET /api/v1/tugas
 export const GET = createApiHandler(
@@ -105,6 +106,13 @@ export const POST = createApiHandler(
       tipe_pengumpulan: data.tipe_pengumpulan || 'online',
       tipe_tugas: data.tipe_tugas || 'individu',
       dibuat_pada: new Date(),
+    });
+
+    await sendNewItemPush({
+      id: newTask._id.toString(),
+      type: 'tugas',
+      title: newTask.judul,
+      classes: listKelas,
     });
 
     // If group task, auto-populate Nilai placeholders for members of existing groups
