@@ -1,13 +1,21 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { pusherClient } from '@/lib/pusher';
 
 interface OnlineUser {
   id: string;
   nama: string;
   role: string;
-  joinedAt: number;
+}
+
+interface PresenceMember {
+  id?: string | number;
+  info?: { nama?: string; nama_lengkap?: string; name?: string; role?: string };
+}
+
+interface PresenceMembers {
+  each?: (callback: (member: PresenceMember) => void) => void;
 }
 
 interface OnlineUsersProps {
@@ -42,78 +50,41 @@ export default function OnlineUsers({ room, currentUserName }: OnlineUsersProps)
   const [users, setUsers] = useState<OnlineUser[]>([]);
   const [isReady, setIsReady] = useState(false);
   const [showMore, setShowMore] = useState(false);
-  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
-  const roomRef = useRef(room);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const sendPresence = useCallback(async (action: 'join' | 'leave' | 'heartbeat') => {
-    try {
-      await fetch('/api/presence', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room: roomRef.current, action }),
-        keepalive: action === 'leave',
-      });
-    } catch {
-      // abaikan
-    }
-  }, []);
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/presence?room=${roomRef.current}`);
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data.users || []);
-      }
-    } catch {
-      // abaikan
-    }
-  }, []);
-
   useEffect(() => {
-    roomRef.current = room;
-
-    // 1. Subscribe Pusher DULU supaya event join tidak terlewat
-    const channelName = `room-${room}`;
+    const channelName = `presence-${room}`;
     const channel = pusherClient.subscribe(channelName);
-    channel.bind('presence-update', (data: { users: OnlineUser[] }) => {
-      setUsers(data.users || []);
+    const toOnlineUser = (member: PresenceMember): OnlineUser => ({
+      id: String(member?.id ?? ''),
+      nama: String(member?.info?.nama ?? member?.info?.nama_lengkap ?? member?.info?.name ?? 'Pengguna'),
+      role: String(member?.info?.role ?? 'siswa'),
+    });
+    const syncMembers = (members: PresenceMembers) => {
+      const nextUsers: OnlineUser[] = [];
+      members?.each?.((member) => nextUsers.push(toOnlineUser(member)));
+      setUsers(nextUsers);
+      setIsReady(true);
+    };
+    channel.bind('pusher:subscription_succeeded', syncMembers);
+    channel.bind('pusher:member_added', (member: PresenceMember) => {
+      const user = toOnlineUser(member);
+      if (!user.id) return;
+      setUsers((current) => current.some((item) => item.id === user.id) ? current : [...current, user]);
+    });
+    channel.bind('pusher:member_removed', (member: PresenceMember) => {
+      setUsers((current) => current.filter((user) => user.id !== String(member?.id ?? '')));
+    });
+    channel.bind('pusher:subscription_error', () => {
+      setUsers([]);
       setIsReady(true);
     });
 
-    // 2. Join dan fetch list user online
-    const init = async () => {
-      await sendPresence('join');
-      await fetchUsers();
-      setIsReady(true);
-    };
-    init();
-
-    // 3. Heartbeat setiap 28 detik (TTL Redis = 35 detik)
-    heartbeatRef.current = setInterval(() => {
-      sendPresence('heartbeat');
-    }, 28_000);
-
-    // 4. Leave saat window/tab ditutup atau hidden
-    const handleLeave = () => sendPresence('leave');
-    window.addEventListener('beforeunload', handleLeave);
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') sendPresence('leave');
-      else sendPresence('join');
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-
     return () => {
-      sendPresence('leave');
-      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       channel.unbind_all();
       pusherClient.unsubscribe(channelName);
-      window.removeEventListener('beforeunload', handleLeave);
-      document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [room, sendPresence, fetchUsers]);
+  }, [room]);
 
   // Tutup dropdown jika klik di luar
   useEffect(() => {
@@ -153,7 +124,7 @@ export default function OnlineUsers({ room, currentUserName }: OnlineUsersProps)
           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
         </span>
         <span className="text-[11px] whitespace-nowrap">
-          {users.length === 0 ? '1 Online' : `${users.length} Online`}
+          {`${users.length} Online`}
         </span>
       </div>
 

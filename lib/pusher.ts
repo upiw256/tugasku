@@ -17,4 +17,8 @@ const clientCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || process.env.PUSH
 
 export const pusherClient = new PusherClient(clientKey, {
   cluster: clientCluster,
+  channelAuthorization: {
+    endpoint: '/api/pusher/auth',
+    transport: 'ajax',
+  },
 });
