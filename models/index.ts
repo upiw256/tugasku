@@ -122,6 +122,7 @@ const MateriSchema = new mongoose.Schema({
 const MateriCommentSchema = new mongoose.Schema({
   materi_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Materi', required: true },
   user_email: { type: String, required: true },
+  user_id: { type: String },
   nama_pengirim: { type: String, required: true },
   role_pengirim: { type: String, required: true }, // 'admin' atau 'siswa'
   kelas_siswa: { type: String }, // Agar bisa filter per diskusi kelas jika dibutuhkan

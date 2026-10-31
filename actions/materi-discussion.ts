@@ -125,9 +125,10 @@ export async function postKomentarDiskusi(materiId: string, komentar: string) {
     
     let namaPengirim = 'User';
     let kelasSiswa = '';
+    const dbUser = await User.findOne({ user: userEmail });
+    const userId = dbUser?._id?.toString() || userEmail;
 
     if (role === 'siswa') {
-      const dbUser = await User.findOne({ user: userEmail });
       if (dbUser && dbUser.member_id) {
         const student = await Member.findById(dbUser.member_id);
         if (student) {
@@ -145,6 +146,7 @@ export async function postKomentarDiskusi(materiId: string, komentar: string) {
 
     const newComment = await MateriComment.create({
       materi_id: materiId,
+      user_id: userId,
       user_email: userEmail,
       nama_pengirim: namaPengirim,
       role_pengirim: role,
@@ -152,6 +154,28 @@ export async function postKomentarDiskusi(materiId: string, komentar: string) {
       komentar: komentar,
     });
 
+    const createdAt = newComment.dibuat_pada.toISOString();
+    const commentPayload = {
+      id: newComment._id.toString(),
+      materi_id: String(newComment.materi_id),
+      user_id: userId,
+      nama: newComment.nama_pengirim,
+      role: newComment.role_pengirim,
+      isi: newComment.komentar,
+      created_at: createdAt,
+      nama_pengirim: newComment.nama_pengirim,
+      role_pengirim: newComment.role_pengirim,
+      kelas_siswa: newComment.kelas_siswa,
+      komentar: newComment.komentar,
+      dibuat_pada: createdAt,
+    };
+
+    try {
+      await pusherServer.trigger('materi-' + materiId, 'komentar-baru', commentPayload);
+      await pusherServer.trigger('materi-' + materiId, 'new-comment', commentPayload);
+    } catch {
+      // Pusher broadcast is best-effort; the comment is already stored.
+    }
     return { 
       success: true, 
       data: {
@@ -180,7 +204,16 @@ export async function deleteKomentarDiskusi(commentId: string) {
     }
 
     await connectDB();
-    await MateriComment.findByIdAndDelete(commentId);
+    const comment = await MateriComment.findByIdAndDelete(commentId);
+    if (comment) {
+      try {
+        await pusherServer.trigger('materi-' + comment.materi_id, 'delete-comment', {
+          id: comment._id.toString(),
+        });
+      } catch {
+        // Pusher broadcast is best-effort.
+      }
+    }
     
     return { success: true };
   } catch (error) {
