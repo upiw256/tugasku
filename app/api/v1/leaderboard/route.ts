@@ -12,16 +12,19 @@ export const GET = createApiHandler(
     const searchParams = req.nextUrl.searchParams;
 
     const kelas = searchParams.get('kelas');
+    const scope = searchParams.get('scope') || 'kelas';
     const sortBy = searchParams.get('sort_by') || 'total_score'; // 'total_score' | 'poin_keaktifan'
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50')));
 
     const filter: any = {};
     if (ctx.user?.role === 'siswa') {
-      // Siswa default melihat kelasnya sendiri jika tidak ditentukan
-      if (kelas) {
-        filter.kelas = kelas;
-      } else if (ctx.user.kelas && ctx.user.kelas !== '-') {
-        filter.kelas = ctx.user.kelas;
+      // Siswa default melihat kelasnya sendiri; global hanya dibuka jika diminta eksplisit.
+      if (scope !== 'global') {
+        if (kelas) {
+          filter.kelas = kelas;
+        } else if (ctx.user.kelas && ctx.user.kelas !== '-') {
+          filter.kelas = ctx.user.kelas;
+        }
       }
     } else if (kelas) {
       filter.kelas = kelas;
@@ -109,7 +112,7 @@ export const GET = createApiHandler(
     const formatted = studentStats.map((item, idx) => ({
       rank: idx + 1,
       id: item._id.toString(),
-      nis: item.nis,
+      ...(scope === 'global' && ctx.user?.role === 'siswa' ? {} : { nis: item.nis }),
       nama: item.nama,
       kelas: item.kelas,
       poin_keaktifan: item.poin_keaktifan || 0,
