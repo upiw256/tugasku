@@ -494,7 +494,7 @@ export async function GET() {
           summary: 'Peringkat Siswa, Poin Keaktifan, & Rata-rata Nilai',
           parameters: [
             { name: 'kelas', in: 'query', schema: { type: 'string' }, description: 'Filter kelas tertentu' },
-            { name: 'sort_by', in: 'query', schema: { type: 'string', enum: ['total_score', 'poin_keaktifan'] }, description: 'Urutkan berdasarkan total skor atau poin keaktifan' },
+            { name: 'sort_by', in: 'query', schema: { type: 'string', enum: ['average_score', 'total_score', 'poin_keaktifan'] }, description: 'Urutkan berdasarkan rata-rata nilai, total skor, atau poin keaktifan' },
             { name: 'limit', in: 'query', schema: { type: 'integer', default: 50 }, description: 'Jumlah data per halaman' },
           ],
           responses: { '200': { description: 'Leaderboard dan poin keaktifan siswa' } },

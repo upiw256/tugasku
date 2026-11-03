@@ -13,10 +13,10 @@ export const GET = createApiHandler(
 
     const kelas = searchParams.get('kelas');
     const scope = searchParams.get('scope') || 'kelas';
-    const sortBy = searchParams.get('sort_by') || 'total_score'; // 'total_score' | 'poin_keaktifan'
+    const sortBy = searchParams.get('sort_by') || 'average_score'; // 'average_score' | 'total_score' | 'poin_keaktifan'
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50')));
 
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
     if (ctx.user?.role === 'siswa') {
       // Siswa default melihat kelasnya sendiri; global hanya dibuka jika diminta eksplisit.
       if (scope !== 'global') {
@@ -30,10 +30,12 @@ export const GET = createApiHandler(
       filter.kelas = kelas;
     }
 
-    const sortStage: any =
+    const sortStage: Record<string, 1 | -1> =
       sortBy === 'poin_keaktifan'
-        ? { poin_keaktifan: -1, totalScore: -1 }
-        : { totalScore: -1, poin_keaktifan: -1 };
+        ? { poin_keaktifan: -1, averageScore: -1 }
+        : sortBy === 'total_score'
+          ? { totalScore: -1, poin_keaktifan: -1 }
+          : { averageScore: -1, poin_keaktifan: -1 };
 
     const studentStats = await Member.aggregate([
       { $match: filter },
@@ -60,6 +62,32 @@ export const GET = createApiHandler(
           nis: 1,
           poin_keaktifan: { $ifNull: ['$poin_keaktifan', 0] },
           totalTugas: { $ifNull: [{ $avg: '$tugas_data.nilai' }, 0] },
+          submittedQuizScores: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$kuis_data',
+                  as: 'kuis',
+                  cond: { $eq: ['$$kuis.status', 'SUBMITTED'] },
+                },
+              },
+              as: 'kuis',
+              in: '$$kuis.nilai',
+            },
+          },
+          taskScores: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$tugas_data',
+                  as: 'tugas',
+                  cond: { $ne: ['$$tugas.nilai', null] },
+                },
+              },
+              as: 'tugas',
+              in: '$$tugas.nilai',
+            },
+          },
           totalKuis: {
             $ifNull: [
               {
@@ -91,6 +119,7 @@ export const GET = createApiHandler(
           poin_keaktifan: 1,
           avg_tugas: { $round: ['$totalTugas', 2] },
           avg_kuis: { $round: ['$totalKuis', 2] },
+          activityScores: { $concatArrays: ['$taskScores', '$submittedQuizScores'] },
           totalScore: {
             $round: [
               {
@@ -103,6 +132,12 @@ export const GET = createApiHandler(
               2,
             ],
           },
+        },
+      },
+      {
+        $addFields: {
+          averageScore: { $ifNull: [{ $avg: '$activityScores' }, 0] },
+          activityCount: { $size: '$activityScores' },
         },
       },
       { $sort: sortStage },
@@ -119,6 +154,8 @@ export const GET = createApiHandler(
       avg_tugas: item.avg_tugas || 0,
       avg_kuis: item.avg_kuis || 0,
       total_score: item.totalScore || 0,
+      average_score: Math.round((item.averageScore || 0) * 100) / 100,
+      activity_count: item.activityCount || 0,
       is_current_user: ctx.user?.member_id === item._id.toString(),
     }));
 
