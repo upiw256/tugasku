@@ -246,7 +246,7 @@ export default function Sidebar({ user }: { user: any }) {
       {/* --- MOBILE HEADER (Tema Adaptif) --- */}
       <div className="md:hidden fixed top-0 left-0 w-full bg-surface border-b border-border-custom z-30 px-4 py-3 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
-            <div className="bg-blue-600 text-white p-1 rounded-md font-bold text-sm leading-none">TK</div>
+            <img src="/icon-192x192.png" alt="" className="w-7 h-7 rounded-md" />
             <span className="font-bold text-foreground text-lg">TugasKu</span>
         </div>
         <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-foreground/70 hover:bg-foreground/5 rounded-md">
@@ -268,7 +268,7 @@ export default function Sidebar({ user }: { user: any }) {
         <div className={`h-16 flex items-center justify-between px-4 border-b border-slate-800 shrink-0 ${isCollapsed ? 'justify-center' : ''}`}>
           {!isCollapsed && (
             <div className="flex items-center gap-2 overflow-hidden">
-                <div className="bg-blue-600 text-white p-1.5 rounded-lg font-bold text-lg shadow-sm shadow-blue-500/20">TK</div>
+                <img src="/icon-192x192.png" alt="" className="w-9 h-9 rounded-lg shadow-sm shadow-blue-500/20" />
                 <span className="text-xl font-bold text-white tracking-tight truncate">TugasKu</span>
             </div>
           )}

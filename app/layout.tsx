@@ -32,6 +32,13 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Aplikasi Tugas",
   description: "Untuk Mengatur tugas, dan absensi siswa, sehingga diakhir sudha ada rekapannya",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/icon-192x192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
