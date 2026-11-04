@@ -2,15 +2,12 @@
 
 import { useState, useRef } from "react";
 import { submitTaskAction } from "@/actions/submission-actions";
-import { Mascot } from "@/components/ui/Mascot";
-
-type Feedback = { type: "success" | "error" | "warning"; title: string; message: string };
+import { toast } from "react-hot-toast";
 
 export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +16,7 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
       const isImage = file.type.startsWith('image/');
       const isPdf = file.type === 'application/pdf';
       if (!isImage && !isPdf) {
-        setFeedback({ type: "warning", title: "Format file belum sesuai", message: "Pilih file gambar atau PDF untuk mengirim tugas." });
+        toast.error("Format file belum sesuai. Pilih file gambar atau PDF untuk mengirim tugas.");
         setSelectedFile(null);
         setPreviewUrl(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -40,7 +37,7 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
     
     const form = e.currentTarget;
     if (!selectedFile) {
-      setFeedback({ type: "warning", title: "File tugas masih kosong", message: "Pilih foto atau PDF tugas terlebih dahulu, lalu coba kirim lagi." });
+      toast.error("File tugas masih kosong. Pilih foto atau PDF terlebih dahulu, lalu coba kirim lagi.");
       return;
     }
 
@@ -50,16 +47,16 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
     try {
       const res = await submitTaskAction(formData);
       if (res.success) {
-        setFeedback({ type: "success", title: "Tugas berhasil dikirim!", message: "Terima kasih, tugasmu sudah diterima." });
+        toast.success("Tugas berhasil dikirim! Terima kasih, tugasmu sudah diterima.");
         setPreviewUrl(null);
         setSelectedFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
       } else {
-        setFeedback({ type: "error", title: "Tugas gagal dikirim", message: res.message || "Coba periksa koneksi dan kirim kembali." });
+        toast.error(`Tugas gagal dikirim. ${res.message || "Coba periksa koneksi dan kirim kembali."}`);
       }
     } catch (error: any) {
       console.error("Submit error:", error);
-      setFeedback({ type: "error", title: "Tugas gagal dikirim", message: error?.message || "Terjadi kesalahan jaringan. Periksa koneksi lalu coba lagi." });
+      toast.error(`Tugas gagal dikirim. ${error?.message || "Terjadi kesalahan jaringan. Periksa koneksi lalu coba lagi."}`);
     } finally {
       setIsUploading(false);
     }
@@ -135,18 +132,6 @@ export default function TaskSubmissionForm({ tugasId }: { tugasId: string }) {
         {isUploading ? "Sedang Mengirim..." : "Kirim Tugas"}
       </button>
 
-      {feedback && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFeedback(null); }}>
-          <section role="alertdialog" aria-modal="true" aria-labelledby="task-feedback-title" aria-describedby="task-feedback-message" className="w-full max-w-sm rounded-2xl border border-border-custom bg-surface px-6 py-5 text-center shadow-2xl">
-            <Mascot mood={feedback.type} className="mx-auto h-32 w-36" />
-            <h2 id="task-feedback-title" className="mt-2 text-lg font-bold text-foreground">{feedback.title}</h2>
-            <p id="task-feedback-message" className="mt-2 text-sm leading-relaxed text-foreground/70">{feedback.message}</p>
-            <button type="button" autoFocus onClick={() => setFeedback(null)} className="mt-5 w-full rounded-lg bg-primary-600 px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700">
-              Mengerti
-            </button>
-          </section>
-        </div>
-      )}
     </form>
   );
 }
