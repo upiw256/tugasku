@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Toaster } from "react-hot-toast";
+import { resolveValue, Toaster } from "react-hot-toast";
 import Swal from "sweetalert2";
 import { Mascot } from "@/components/ui/Mascot";
 
@@ -59,7 +59,7 @@ export default function ClientFeedbackProvider() {
       {(toast) => (
         <div className={`flex max-w-sm items-center gap-3 rounded-xl border border-border-custom bg-surface px-4 py-3 shadow-xl ${toast.visible ? "animate-in fade-in slide-in-from-top-2" : "animate-out fade-out"}`}>
           <Mascot mood={toast.type === "success" ? "success" : toast.type === "error" ? "error" : "neutral"} className="h-12 w-12 shrink-0" />
-          <div className="text-sm font-medium text-foreground">{toast.message}</div>
+          <div className="text-sm font-medium text-foreground">{resolveValue(toast.message, toast)}</div>
         </div>
       )}
     </Toaster>
