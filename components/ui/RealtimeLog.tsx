@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { pusherClient } from '@/lib/pusher';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export interface LogItem {
   _id: string;
@@ -163,7 +164,7 @@ export default function RealtimeLog({
       <div className="overflow-y-auto p-4 flex-1 space-y-3 custom-scrollbar">
         {filteredLogs.length === 0 ? (
           <div className="flex items-center justify-center h-full text-foreground/40 text-sm font-medium">
-            Belum ada log aktivitas...
+            <MascotEmptyState title="Belum ada log aktivitas." className="py-1" />
           </div>
         ) : (
           filteredLogs.map((log) => (

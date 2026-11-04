@@ -5,6 +5,7 @@ import Link from 'next/link';
 import GivePointButton from '@/components/admin/GivePointButton';
 import DeleteStudentButton from '@/components/ui/DeleteStudentButton';
 import ResetPasswordButton from '@/components/ui/ResetPasswordButton';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface Student {
   _id: string;
@@ -164,8 +165,8 @@ export default function SiswaTable({ students }: { students: Student[] }) {
           ))}
           {students.length === 0 && (
             <tr>
-              <td colSpan={4} className="p-12 text-center text-foreground/20 font-medium italic">
-                Tidak ada data siswa ditemukan.
+              <td colSpan={4} className="px-2 py-1">
+                <MascotEmptyState title="Tidak ada data siswa ditemukan." className="py-1" />
               </td>
             </tr>
           )}

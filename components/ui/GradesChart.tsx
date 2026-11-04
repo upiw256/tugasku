@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface ClassGradeStats {
   kelas: string;
@@ -46,8 +47,8 @@ export default function GradesChart({ data }: Props) {
       <div className="w-full h-[300px]">
         {data.length === 0 ? (
            <div className="h-full flex flex-col items-center justify-center text-foreground/20 italic gap-2 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
+             <MascotEmptyState title="Belum ada data nilai masuk." className="py-1" />
              <span className="text-2xl grayscale">📉</span>
-             <p className="font-bold">Belum ada data nilai masuk.</p>
            </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>

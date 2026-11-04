@@ -8,6 +8,7 @@ import GradesChart from '@/components/ui/GradesChart';
 import AnnouncementBoard from '@/components/ui/AnnouncementBoard';
 import RealtimeLog from '@/components/ui/RealtimeLog';
 import { LogAktivitasSiswa } from '@/models';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -231,8 +232,8 @@ export default async function AdminDashboardPage() {
               <tbody className="divide-y divide-border-custom">
                 {recentSubmissions.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-foreground/20">
-                      Belum ada data pengumpulan tugas.
+                    <td colSpan={4} className="px-2 py-1">
+                      <MascotEmptyState title="Belum ada data pengumpulan tugas." className="py-1" />
                     </td>
                   </tr>
                 ) : (

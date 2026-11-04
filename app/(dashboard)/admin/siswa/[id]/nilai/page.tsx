@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { submitGradeAction } from '@/actions/grade-actions';
 import GradeHistoryRow from '@/components/ui/GradeHistoryRow'; // Import Komponen Baru
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function InputNilaiPage({ 
   params,
@@ -78,6 +79,7 @@ export default async function InputNilaiPage({
           
           {tasksToGrade.length === 0 ? (
             <div className="text-center py-8 bg-foreground/5 rounded border border-dashed border-border-custom text-foreground/40 text-sm">
+              <MascotEmptyState title={`Semua tugas di kelas ${student.kelas} sudah dinilai!`} message="Gunakan tabel di samping untuk mengedit nilai." className="py-1" />
               <span className="opacity-100">🎉 Semua tugas di kelas <b className="text-foreground">{student.kelas}</b> sudah dinilai!</span>
               <br/>
               <span className="text-xs text-foreground/20">Gunakan tabel di samping untuk mengedit nilai.</span>
@@ -147,9 +149,7 @@ export default async function InputNilaiPage({
             <tbody className="divide-y divide-border-custom">
               {existingGrades.length === 0 ? (
                  <tr>
-                   <td colSpan={2} className="p-4 text-center text-foreground/20 italic">
-                     Belum ada nilai yang dimasukkan.
-                   </td>
+                   <td colSpan={2} className="px-2 py-1"><MascotEmptyState title="Belum ada nilai yang dimasukkan." /></td>
                  </tr>
               ) : (
                 existingGrades.map((g: any) => (

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { GuruMap, GuruScheduleSearchResult } from '@/types/jadwal';
 import { HARI_LIST, parseJadwalItem, getSubjectTheme } from '@/lib/jadwal-api';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface JadwalGuruViewProps {
   guruMap: GuruMap;
@@ -260,7 +261,7 @@ export default function JadwalGuruView({
 
                 <div className="p-2.5 sm:p-3 space-y-2 flex-1 max-h-[420px] sm:max-h-[500px] overflow-y-auto">
                   {sessions.length === 0 ? (
-                    <p className="text-xs text-foreground/30 text-center py-6">Tidak ada jam mengajar</p>
+                    <MascotEmptyState title="Tidak ada jam mengajar." className="py-1" />
                   ) : (
                     sessions.map((sesi, idx) => (
                       <div

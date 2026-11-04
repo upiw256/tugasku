@@ -4,6 +4,7 @@ import { updateTugasAction } from '@/actions/academic-actions'; // Gunakan Actio
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
+import { Mascot } from '@/components/ui/Mascot';
 
 interface Props {
   initialData: any;       // Data tugas dari DB
@@ -177,7 +178,7 @@ export default function EditTaskForm({ initialData, classOptions }: Props) {
           {isOpen && (
             <div className="absolute z-10 w-full mt-1 bg-surface border border-border-custom rounded-lg shadow-xl max-h-60 overflow-y-auto">
               {classOptions.length === 0 ? (
-                <div className="p-3 text-sm text-foreground/50 text-center">Data kelas kosong.</div>
+                <div className="flex items-center justify-center gap-2 p-3 text-sm text-foreground/50 text-center"><Mascot mood="empty" className="h-9 w-9" />Data kelas kosong.</div>
               ) : (
                 classOptions.map((cls) => {
                   const isSelected = selectedClasses.includes(cls);

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { moveMemberAction, setKetuaAction } from '@/actions/kelompok-actions';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface Student {
   _id: string;
@@ -111,8 +112,7 @@ export default function DragDropGroupList({ initialList }: { initialList: Group[
   if (kelompokList.length === 0) {
     return (
       <div className="col-span-full py-12 text-center bg-foreground/5 border border-dashed border-border-custom rounded-xl">
-        <p className="text-foreground/60 font-medium">Belum ada kelompok yang dibentuk untuk kelas ini.</p>
-        <p className="text-foreground/40 text-sm mt-1">Klik tombol Generate Kelompok untuk memulai pembentukan.</p>
+        <MascotEmptyState title="Belum ada kelompok yang dibentuk untuk kelas ini." message="Klik tombol Generate Kelompok untuk memulai pembentukan." className="py-1" />
       </div>
     );
   }

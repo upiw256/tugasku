@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import StaggerList from '@/components/ui/StaggerList';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function LeaderboardPage({ 
   searchParams 
@@ -215,8 +216,8 @@ export default async function LeaderboardPage({
         })}
 
         {leaderboard.length === 0 && (
-            <div className="bg-surface p-20 text-center rounded-2xl border border-dashed border-border-custom text-foreground/40 italic">
-                Belum ada data skor untuk ditampilkan.
+            <div className="bg-surface p-5 text-center rounded-2xl border border-dashed border-border-custom text-foreground/40 italic">
+                <MascotEmptyState title="Belum ada data skor untuk ditampilkan." className="py-1" />
             </div>
         )}
       </StaggerList>

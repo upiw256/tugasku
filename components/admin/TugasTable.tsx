@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import DeleteTaskButton from '@/components/ui/DeleteTaskButton';
 import ToggleStatusButton from '@/components/admin/ToggleStatusButton';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface Task {
   _id: string;
@@ -189,8 +190,8 @@ export default function TugasTable({ tasks }: { tasks: Task[] }) {
           })}
           {tasks.length === 0 && (
             <tr>
-              <td colSpan={5} className="p-12 text-center text-foreground/20 font-medium italic">
-                Belum ada tugas dibuat.
+              <td colSpan={5} className="px-2 py-1">
+                <MascotEmptyState title="Belum ada tugas dibuat." className="py-1" />
               </td>
             </tr>
           )}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getDiskusiMateri, postKomentarDiskusi, deleteKomentarDiskusi, clearDiskusiMateri } from '@/actions/materi-discussion';
 import OnlineUsers from '@/components/ui/OnlineUsers';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default function DiskusiMateriAdmin({ materiId, availableClasses, currentUserName }: { materiId: string, availableClasses: string[], currentUserName?: string }) {
   const [selectedClass, setSelectedClass] = useState(availableClasses[0] || '');
@@ -122,7 +123,7 @@ export default function DiskusiMateriAdmin({ materiId, availableClasses, current
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
         {comments.length === 0 ? (
           <div className="h-full flex items-center justify-center text-foreground/40 text-sm">
-            Belum ada diskusi di kelas {selectedClass}.
+            <MascotEmptyState title="Belum ada diskusi" message={`Belum ada komentar di kelas ${selectedClass}.`} className="py-1" />
           </div>
         ) : (
           comments.map((c: any) => (

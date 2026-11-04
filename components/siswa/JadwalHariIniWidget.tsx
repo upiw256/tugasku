@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { JadwalItem, GuruMap } from '@/types/jadwal';
 import { getCurrentSchoolDay, parseJadwalItem } from '@/lib/jadwal-api';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface JadwalHariIniWidgetProps {
   schedule: JadwalItem[];
@@ -56,9 +57,7 @@ export default function JadwalHariIniWidget({ schedule, guruMap, kelasDb }: Jadw
       {/* List Sesi Hari Ini */}
       <div className="p-2.5 sm:p-3 divide-y divide-border-custom/50 max-h-80 overflow-y-auto space-y-1.5 sm:space-y-2">
         {todayItems.length === 0 ? (
-          <p className="text-xs text-foreground/40 text-center py-6">
-            Tidak ada jadwal pelajaran pada hari {currentDay}.
-          </p>
+          <MascotEmptyState title={`Tidak ada jadwal pelajaran pada hari ${currentDay}.`} className="py-1" />
         ) : (
           todayItems.map((item, idx) => {
             const isUpacara = item.tipe === 'upacara';

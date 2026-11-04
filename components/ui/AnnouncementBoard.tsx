@@ -5,6 +5,7 @@ import { sendBrowserNotification } from '@/lib/notificationHelper';
 import { pusherClient } from '@/lib/pusher';
 import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface Props {
   role: string;     // 'admin' atau 'siswa'
@@ -291,8 +292,8 @@ export default function AnnouncementBoard({ role, initialData }: Props) {
         <div className="space-y-4 pb-4">
           {announcements.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-foreground/20 border-2 border-dashed border-border-custom rounded-lg bg-foreground/5">
+                <MascotEmptyState title="Belum ada pengumuman." className="py-2" />
                 <span className="text-2xl mb-2 grayscale opacity-50">📭</span>
-                <p className="text-sm font-medium">Belum ada pengumuman.</p>
             </div>
           ) : (
             announcements.map((item, idx) => {

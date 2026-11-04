@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 import {
   ApiKeyItem,
   MasterKeyInfo,
@@ -345,11 +346,7 @@ export default function ApiKeyManager() {
           </div>
         ) : filteredKeys.length === 0 ? (
           <div className="p-12 text-center space-y-3">
-            <div className="text-4xl text-foreground/20">🗝️</div>
-            <h3 className="text-base font-bold text-foreground">Belum ada API Key kustom</h3>
-            <p className="text-xs text-foreground/60 max-w-md mx-auto">
-              Buat API Key baru agar aplikasi klien (misal: Aplikasi Mobile Siswa atau Bot) dapat berinteraksi secara aman dengan REST API TugasKu.
-            </p>
+            <MascotEmptyState title="Belum ada API Key kustom" message="Buat API Key baru agar aplikasi klien dapat terhubung dengan REST API TugasKu." className="py-1" />
             <button
               onClick={() => setIsCreateOpen(true)}
               className="mt-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"

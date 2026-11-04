@@ -4,6 +4,7 @@ import { SoalPG, Member, PengerjaanKuis, User } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +70,7 @@ export default async function SiswaKuisPage() {
             <tbody className="divide-y divide-border-custom">
               {quizzes.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-foreground/20 font-medium italic">Belum ada kuis untuk kelas {student.kelas}.</td>
+                  <td colSpan={4} className="px-6 py-2"><MascotEmptyState title={`Belum ada kuis untuk kelas ${student.kelas}.`} /></td>
                 </tr>
               ) : (
                 quizzes.map((kuis: any) => {

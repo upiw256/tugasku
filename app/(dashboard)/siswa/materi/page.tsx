@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Materi, Member, User } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function SiswaMateriPage() {
   const session = await auth();
@@ -41,9 +42,8 @@ export default async function SiswaMateriPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {materi.length === 0 ? (
-          <div className="md:col-span-2 bg-surface p-12 rounded-xl text-center border border-dashed border-border-custom">
-            <span className="text-5xl border border-border-custom p-4 rounded-full inline-block mb-4">📚</span>
-            <p className="text-foreground/40 font-medium">Belum ada materi untuk kelas {student.kelas}.</p>
+          <div className="md:col-span-2 bg-surface p-3 rounded-xl text-center border border-dashed border-border-custom">
+            <MascotEmptyState title={`Belum ada materi untuk kelas ${student.kelas}.`} className="py-2" />
           </div>
         ) : (
           materi.map((m: any) => (

@@ -16,6 +16,7 @@ import { redirect } from "next/navigation";
 // Import komponen Papan Pengumuman
 import AnnouncementBoard from "@/components/ui/AnnouncementBoard";
 import AttendanceButton from "@/components/ui/AttendanceButton";
+import { MascotEmptyState } from "@/components/ui/Mascot";
 import RealtimeLog from "@/components/ui/RealtimeLog";
 import { getGuruList, getJadwalKelas } from "@/lib/jadwal-api";
 import { GuruMap, JadwalItem } from "@/types/jadwal";
@@ -386,7 +387,7 @@ export default async function SiswaDashboard() {
             <div className="divide-y divide-border-custom max-h-[600px] overflow-y-auto">
               {tasks.length === 0 ? (
                 <div className="p-8 text-center text-foreground/30 italic">
-                  Belum ada tugas.
+                  <MascotEmptyState title="Belum ada tugas." className="py-1" />
                 </div>
               ) : (
                 tasks.map((task: any) => {
@@ -485,7 +486,7 @@ export default async function SiswaDashboard() {
             <div className="divide-y divide-border-custom max-h-[400px] overflow-y-auto">
               {quizResults.length === 0 ? (
                 <div className="p-8 text-center text-foreground/30 italic">
-                  Belum ada kuis yang dikerjakan.
+                  <MascotEmptyState title="Belum ada kuis yang dikerjakan." className="py-1" />
                 </div>
               ) : (
                 quizResults.map((result: any) => {

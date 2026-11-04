@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { JadwalItem, GuruMap } from '@/types/jadwal';
 import { HARI_LIST, HariType, parseJadwalItem, naturalSortKelas } from '@/lib/jadwal-api';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface JadwalHariViewProps {
   initialDay?: HariType;
@@ -244,10 +245,7 @@ export default function JadwalHariView({
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="bg-surface rounded-2xl border border-border-custom p-10 sm:p-12 text-center space-y-2">
-          <h4 className="font-bold text-foreground text-sm sm:text-base">Tidak Ada Jadwal</h4>
-          <p className="text-xs text-foreground/50">
-            Tidak ada mata pelajaran yang sesuai filter pada hari {activeDay}.
-          </p>
+          <MascotEmptyState title="Tidak ada jadwal" message={`Tidak ada mata pelajaran yang sesuai filter pada hari ${activeDay}.`} className="py-1" />
         </div>
       ) : viewMode === 'per_jam' ? (
         /* TAMPILAN TIMELINE PER JAM PELAJARAN */

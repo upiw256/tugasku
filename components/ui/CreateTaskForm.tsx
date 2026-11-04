@@ -3,6 +3,7 @@
 import { createTaskAction } from '@/actions/task-actions';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Mascot } from '@/components/ui/Mascot';
 
 export default function CreateTaskForm({ availableClasses }: { availableClasses: string[] }) {
   const router = useRouter();
@@ -144,7 +145,7 @@ export default function CreateTaskForm({ availableClasses }: { availableClasses:
           {isOpen && (
             <div className="absolute z-10 w-full mt-1 bg-surface border border-border-custom rounded-lg shadow-2xl max-h-60 overflow-y-auto">
               {availableClasses.length === 0 ? (
-                <div className="p-3 text-sm text-foreground/30 text-center">Data kelas kosong.</div>
+                <div className="flex items-center justify-center gap-2 p-3 text-sm text-foreground/50 text-center"><Mascot mood="empty" className="h-9 w-9" />Data kelas kosong.</div>
               ) : (
                 availableClasses.map((cls) => {
                   const isSelected = selectedClasses.includes(cls);

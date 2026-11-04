@@ -4,6 +4,7 @@ import { Tugas, Nilai, Member, User } from "@/models";
 import TaskSubmissionForm from "@/components/ui/TaskSubmissionForm";
 import { redirect } from "next/navigation";
 import ImagePreview from "@/components/ui/ImagePreview";
+import { MascotEmptyState } from "@/components/ui/Mascot";
 import {
   findSubmissionForTask,
   normalizeSubmissionRecord,
@@ -75,11 +76,8 @@ export default async function HalamanTugasSiswa() {
       {/* GRID TUGAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
         {tasks.length === 0 ? (
-          <div className="col-span-full py-16 text-center text-foreground/20 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
-            <span className="text-4xl block mb-2">🎉</span>
-            <p className="text-lg font-medium text-foreground/40">
-              Hore! Tidak ada tugas saat ini.
-            </p>
+          <div className="col-span-full py-4 text-center text-foreground/20 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
+            <MascotEmptyState title="Hore! Tidak ada tugas saat ini." className="py-2" />
           </div>
         ) : (
           tasks.map((task: any) => {

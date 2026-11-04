@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 import {
   LineChart,
   Line,
@@ -92,7 +93,7 @@ export default function AttendanceChart({ dataByClass, allClasses }: Props) {
       <div className="w-full h-[300px]">
         {allClasses.length === 0 ? (
             <div className="h-full flex items-center justify-center text-gray-400">
-                Belum ada data kelas atau siswa.
+                <MascotEmptyState title="Belum ada data kelas atau siswa." className="py-1" />
             </div>
         ) : (
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>

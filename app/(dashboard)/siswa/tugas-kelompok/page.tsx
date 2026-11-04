@@ -4,6 +4,7 @@ import { Tugas, Nilai, Member, User, Kelompok } from '@/models';
 import { redirect } from 'next/navigation';
 import TaskSubmissionForm from '@/components/ui/TaskSubmissionForm';
 import ImagePreview from '@/components/ui/ImagePreview';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 const getSafeFileUrl = (url: string) => {
   if (!url) return '';
@@ -104,14 +105,8 @@ export default async function HalamanTugasKelompok() {
       </header>
 
       {tugasWithKelompok.length === 0 ? (
-        <div className="py-16 text-center text-foreground/20 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
-          <span className="text-4xl block mb-2">👥</span>
-          <p className="text-lg font-medium text-foreground/40">Tidak ada tugas kelompok saat ini.</p>
-          <p className="text-sm text-foreground/20 mt-1">
-            {tugasKelompokList.length === 0
-              ? 'Belum ada tugas kelompok yang dibuat untuk kelas kamu.'
-              : `Ada ${tugasKelompokList.length} tugas kelompok namun kamu belum terdaftar di kelompok manapun. Hubungi Admin.`}
-          </p>
+        <div className="py-4 text-center text-foreground/20 bg-foreground/5 rounded-xl border-2 border-dashed border-border-custom">
+          <MascotEmptyState title="Tidak ada tugas kelompok saat ini." message={tugasKelompokList.length === 0 ? 'Belum ada tugas kelompok untuk kelas kamu.' : 'Kamu belum terdaftar di kelompok mana pun. Hubungi Admin.'} className="py-2" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2">

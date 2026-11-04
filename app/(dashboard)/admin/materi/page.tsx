@@ -4,6 +4,7 @@ import { Member, Materi } from '@/models';
 import { redirect } from 'next/navigation';
 import FormUploadMateri from '@/components/admin/FormUploadMateri';
 import Link from 'next/link';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function AdminMateriPage() {
   const session = await auth();
@@ -68,7 +69,7 @@ export default async function AdminMateriPage() {
               <tbody className="divide-y divide-border-custom">
                 {existingMateri.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-foreground/20">Belum ada materi yang diunggah.</td>
+                    <td colSpan={6} className="px-2 py-1"><MascotEmptyState title="Belum ada materi yang diunggah." /></td>
                   </tr>
                 ) : (
                   existingMateri.map((m: any) => (

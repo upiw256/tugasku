@@ -4,6 +4,7 @@ import { Member, Tugas, Nilai } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function RekapNilaiPage({ 
   searchParams 
@@ -105,7 +106,7 @@ export default async function RekapNilaiPage({
         {!selectedKelas ? (
             <div className="p-10 text-center text-foreground/40">Silakan pilih kelas terlebih dahulu.</div>
         ) : students.length === 0 ? (
-            <div className="p-10 text-center text-foreground/40">Tidak ada siswa di kelas ini.</div>
+            <MascotEmptyState title="Tidak ada siswa di kelas ini." className="rounded-xl border border-dashed border-border-custom bg-surface" />
         ) : (
             <table className="w-full text-sm text-left whitespace-nowrap">
                 <thead className="bg-foreground/5 text-foreground/70 uppercase font-bold border-b border-border-custom">

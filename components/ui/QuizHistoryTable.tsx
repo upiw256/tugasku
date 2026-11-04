@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface QuizHistoryTableProps {
   history: any[];
@@ -38,7 +39,7 @@ export default function QuizHistoryTable({ history }: QuizHistoryTableProps) {
             <tbody className="divide-y divide-border-custom">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-foreground/20 italic">Belum ada data nilai kuis.</td>
+                  <td colSpan={6} className="px-2 py-1"><MascotEmptyState title="Belum ada data nilai kuis." /></td>
                 </tr>
               ) : (
                 history.map((h: any) => (

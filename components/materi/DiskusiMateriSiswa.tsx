@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { trackMateriDownload, getDiskusiMateri, postKomentarDiskusi } from '@/actions/materi-discussion';
 import OnlineUsers from '@/components/ui/OnlineUsers';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default function DiskusiMateriSiswa({ materiId, fileUrl, kelas, currentUserName }: { materiId: string, fileUrl: string, kelas: string, currentUserName?: string }) {
   const [comments, setComments] = useState<any[]>([]);
@@ -95,7 +96,7 @@ export default function DiskusiMateriSiswa({ materiId, fileUrl, kelas, currentUs
         <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
           {comments.length === 0 ? (
             <div className="h-full flex items-center justify-center text-foreground/40 text-sm">
-              Belum ada diskusi untuk materi ini di kelas {kelas}. Jadilah yang pertama berkomentar!
+              <MascotEmptyState title="Belum ada diskusi" message={`Jadilah yang pertama berkomentar di kelas ${kelas}.`} className="py-1" />
             </div>
           ) : (
             comments.map((c: any) => (

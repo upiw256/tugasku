@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default function LogUnduhanMateri({ materiId, initialData }: { materiId: string, initialData: any[] }) {
   const [downloadedStudents, setDownloadedStudents] = useState<any[]>(initialData || []);
@@ -36,7 +37,7 @@ export default function LogUnduhanMateri({ materiId, initialData }: { materiId: 
       
       <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
         {downloadedStudents.length === 0 ? (
-          <p className="text-center text-xs text-foreground/40 py-4">Belum ada siswa yang mengunduh.</p>
+          <MascotEmptyState title="Belum ada siswa yang mengunduh." className="py-1" />
         ) : (
           downloadedStudents.map(student => (
             <div key={student.id} className="flex justify-between items-center bg-foreground/5 p-2 rounded-lg">

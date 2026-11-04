@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import { Absensi, Member } from '@/models';
 import { redirect } from 'next/navigation';
 import AdminAttendanceRow from '@/components/ui/AdminAttendanceRow'; 
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function RekapAbsensiPage({ 
   searchParams 
@@ -105,7 +106,7 @@ export default async function RekapAbsensiPage({
            </div>
         ) : students.length === 0 ? (
            <div className="p-16 text-center text-foreground/40">
-             Tidak ada siswa di kelas <b className="text-foreground">{selectedKelas}</b>.
+             <MascotEmptyState title={`Tidak ada siswa di kelas ${selectedKelas}.`} className="py-1" />
            </div>
         ) : (
           <div className="overflow-x-auto">

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { JadwalItem, GuruMap } from '@/types/jadwal';
 import { HARI_LIST, HariType, parseJadwalItem, getCurrentSchoolDay } from '@/lib/jadwal-api';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 // Nama pendek untuk tampilan mobile
 const HARI_SHORT: Record<string, string> = {
@@ -239,8 +240,7 @@ export default function SiswaJadwalClient({
         <div className="divide-y divide-border-custom p-2.5 sm:p-4 space-y-2.5 sm:space-y-3">
           {daySchedule.length === 0 ? (
             <div className="py-12 text-center text-foreground/40 space-y-2">
-              <div className="text-3xl">🌴</div>
-              <p className="text-sm font-semibold">Tidak ada jadwal pelajaran pada hari {selectedDay}</p>
+              <MascotEmptyState title={`Tidak ada jadwal pelajaran pada hari ${selectedDay}.`} className="py-1" />
             </div>
           ) : (
             daySchedule.map((item, idx) => {

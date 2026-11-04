@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Member, Nilai, Tugas } from '@/models';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -111,7 +112,8 @@ export default async function AdminDashboard() {
             <tbody>
               {recentSubmissions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-2 py-1">
+                    <MascotEmptyState title="Belum ada data pengumpulan tugas." className="py-1" />
                     Belum ada data pengumpulan tugas.
                   </td>
                 </tr>

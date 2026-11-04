@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { GuruMap } from '@/types/jadwal';
 import { getSubjectTheme } from '@/lib/jadwal-api';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface DirektoriGuruViewProps {
   guruMap: GuruMap;
@@ -111,7 +112,7 @@ export default function DirektoriGuruView({ guruMap, onSelectGuru }: DirektoriGu
         <div className="block sm:hidden divide-y divide-border-custom">
           {filteredGuru.length === 0 ? (
             <div className="p-8 text-center text-foreground/40 text-xs">
-              Tidak ada guru yang cocok dengan kata kunci &quot;{search}&quot;
+              <MascotEmptyState title={`Tidak ada guru yang cocok dengan kata kunci "${search}".`} className="py-1" />
             </div>
           ) : (
             filteredGuru.map((guru, idx) => {
@@ -162,9 +163,7 @@ export default function DirektoriGuruView({ guruMap, onSelectGuru }: DirektoriGu
             <tbody className="divide-y divide-border-custom">
               {filteredGuru.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-foreground/40 font-medium">
-                    Tidak ada guru yang cocok dengan kata kunci &quot;{search}&quot;
-                  </td>
+                  <td colSpan={4} className="px-2 py-1"><MascotEmptyState title={`Tidak ada guru yang cocok dengan kata kunci "${search}".`} /></td>
                 </tr>
               ) : (
                 filteredGuru.map((guru, idx) => {

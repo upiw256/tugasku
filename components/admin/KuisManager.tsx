@@ -5,6 +5,7 @@ import FormBuatSoal from './FormBuatSoal';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 export default function KuisManager({ 
   availableClasses, 
@@ -165,7 +166,7 @@ export default function KuisManager({
                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                 </div>
               ) : pesertaList.length === 0 ? (
-                <div className="text-center py-20 text-foreground/20 italic font-medium">Belum ada siswa yang mulai mengerjakan kuis ini.</div>
+                <MascotEmptyState title="Belum ada siswa yang mulai mengerjakan kuis ini." />
               ) : (
                 <table className="w-full text-sm">
                   <thead className="bg-foreground/5 text-foreground/60 uppercase text-[10px] font-bold">
@@ -256,7 +257,7 @@ export default function KuisManager({
             <tbody>
               {initialKuis.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-foreground/20 font-medium italic">Belum ada kuis yang dibuat.</td>
+                  <td colSpan={5} className="px-2 py-1"><MascotEmptyState title="Belum ada kuis yang dibuat." /></td>
                 </tr>
               ) : (
                 initialKuis.map((kuis: any) => (

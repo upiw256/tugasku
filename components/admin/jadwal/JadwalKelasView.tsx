@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { JadwalItem, GuruMap } from '@/types/jadwal';
 import { HARI_LIST, HariType, parseJadwalItem, naturalSortKelas } from '@/lib/jadwal-api';
+import { MascotEmptyState } from '@/components/ui/Mascot';
 
 interface JadwalKelasViewProps {
   availableClasses: string[];
@@ -209,15 +210,12 @@ export default function JadwalKelasView({
         </div>
       ) : displayedItems.length === 0 ? (
         <div className="bg-surface rounded-2xl border border-border-custom p-10 sm:p-12 text-center space-y-2">
+          <MascotEmptyState title="Tidak ada jadwal ditemukan" message="Tidak ada mata pelajaran yang cocok dengan filter atau pencarian Anda pada kelas ini." className="py-1" />
           <div className="w-12 h-12 rounded-full bg-foreground/5 text-foreground/40 mx-auto flex items-center justify-center">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <h4 className="font-bold text-foreground text-sm sm:text-base">Tidak Ada Jadwal Ditemukan</h4>
-          <p className="text-xs text-foreground/50 max-w-sm mx-auto">
-            Tidak ada mata pelajaran yang cocok dengan filter atau pencarian Anda pada kelas ini.
-          </p>
         </div>
       ) : (
         /* GRID MINGGUAN (Senin - Jumat) */
