@@ -1,7 +1,7 @@
 services:
   app:
     container_name: nextjs_app
-    image: ghcr.io/username-github-kamu/tugasku:latest
+    image: ghcr.io/upiw256/tugasku:latest
     restart: always
     
     # Mapping Port Aplikasi (Kiri: Laptop/Host, Kanan: Docker)
