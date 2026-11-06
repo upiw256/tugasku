@@ -1,11 +1,5 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error('Harap definisikan MONGODB_URI di dalam file .env.local');
-}
-
 // Global caching untuk mencegah koneksi berlebih di mode development
 let cached = (global as any).mongoose;
 
@@ -14,6 +8,11 @@ if (!cached) {
 }
 
 export async function connectDB() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) {
+    throw new Error('Harap definisikan MONGODB_URI di environment aplikasi.');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
