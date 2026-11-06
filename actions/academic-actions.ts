@@ -104,3 +104,63 @@ export async function updateTugasAction(formData: FormData) {
     return { success: false, message: 'Terjadi kesalahan saat mengupdate tugas.' };
   }
 }
+
+export async function deleteTugasAction(tugasId: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== 'admin') {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    if (!tugasId) return { success: false, message: 'ID tugas wajib diisi.' };
+
+    await connectDB();
+    const deletedTask = await Tugas.findByIdAndDelete(tugasId);
+    if (!deletedTask) return { success: false, message: 'Tugas tidak ditemukan.' };
+
+    await (await import('@/models')).Nilai.deleteMany({ tugas_id: tugasId });
+    revalidatePath('/admin/tugas');
+    revalidatePath('/siswa/tugas');
+    return { success: true, message: 'Tugas berhasil dihapus.' };
+  } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (academic-actions.deleteTugasAction): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
+    return { success: false, message: 'Gagal menghapus tugas.' };
+  }
+}
+
+export async function inputNilaiAction(memberId: string, tugasId: string, nilai: number) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== 'admin') {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    if (!memberId || !tugasId || !Number.isFinite(nilai) || nilai < 0 || nilai > 100) {
+      return { success: false, message: 'Data nilai tidak valid.' };
+    }
+
+    await connectDB();
+    const { Member, Nilai } = await import('@/models');
+    const [member, tugas] = await Promise.all([
+      Member.findById(memberId),
+      Tugas.findById(tugasId),
+    ]);
+    if (!member || !tugas) {
+      return { success: false, message: 'Siswa atau tugas tidak ditemukan.' };
+    }
+
+    await Nilai.findOneAndUpdate(
+      { member_id: memberId, tugas_id: tugasId },
+      { $set: { nilai, tanggal_dinilai: new Date() } },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+
+    revalidatePath(`/admin/siswa/${memberId}/nilai`);
+    revalidatePath(`/admin/tugas/${tugasId}/pengumpulan`);
+    revalidatePath('/siswa/tugas');
+    return { success: true, message: 'Nilai berhasil disimpan.' };
+  } catch (error) {
+    await logAktivitasSiswa({ aksi: `System Error (academic-actions.inputNilaiAction): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
+    return { success: false, message: 'Gagal menyimpan nilai.' };
+  }
+}
