@@ -14,14 +14,16 @@ interface Soal {
   gambar_url?: string;
 }
 
-export default function FormBuatSoal({ 
-  availableClasses, 
+export default function FormBuatSoal({
+  availableClasses,
   editData = null,
-  onCancel = () => {}
-}: { 
+  onCancel = () => {},
+  onQuotaUpdate = (_quota: { remaining: number; limit: number; reset: string; model: string } | null) => {}
+}: {
   availableClasses: string[];
   editData?: any;
   onCancel?: () => void;
+  onQuotaUpdate?: (quota: { remaining: number; limit: number; reset: string; model: string } | null) => void;
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -50,8 +52,10 @@ export default function FormBuatSoal({
 
   const [aiTopic, setAiTopic] = useState('');
   const [numQuestions, setNumQuestions] = useState(5);
+  const [questionCreationMode, setQuestionCreationMode] = useState<'ai' | 'manual'>('ai');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiImageFile, setAiImageFile] = useState<File | null>(null);
+  const [aiTokenUsage, setAiTokenUsage] = useState<{ input: number; output: number; total: number } | null>(null);
 
   const handleAiGenerate = async () => {
     if (!aiTopic) {
@@ -60,6 +64,7 @@ export default function FormBuatSoal({
     }
 
     setIsAiLoading(true);
+    setAiTokenUsage(null);
     try {
       let imageBase64 = null;
       if (aiImageFile) {
@@ -79,6 +84,20 @@ export default function FormBuatSoal({
       const data = await res.json();
       if (res.ok && Array.isArray(data)) {
         setDaftarSoal(data);
+        const input = Number(res.headers.get('X-AI-Token-Input'));
+        const output = Number(res.headers.get('X-AI-Token-Output'));
+        const total = Number(res.headers.get('X-AI-Token-Total'));
+        setAiTokenUsage(Number.isFinite(total) && total > 0 ? { input, output, total } : null);
+        const remainingHeader = res.headers.get('X-AI-Quota-Remaining-Tokens');
+        const limitHeader = res.headers.get('X-AI-Quota-Limit-Tokens');
+        const remaining = remainingHeader ? Number(remainingHeader) : NaN;
+        const limit = limitHeader ? Number(limitHeader) : NaN;
+        onQuotaUpdate(Number.isFinite(remaining) && Number.isFinite(limit) ? {
+          remaining,
+          limit,
+          reset: res.headers.get('X-AI-Quota-Reset-Tokens') || '',
+          model: res.headers.get('X-AI-Model') || 'Model AI',
+        } : null);
         toast.success('Berhasil membuat soal secara otomatis!');
       } else {
         toast.error(data.error || 'Gagal generate soal');
@@ -91,8 +110,14 @@ export default function FormBuatSoal({
   };
 
   const addSoal = () => {
-    const newId = (daftarSoal.length + 1).toString();
-    setDaftarSoal([...daftarSoal, { id: newId, pertanyaan: '', opsi: { A: '', B: '', C: '', D: '', E: '' }, jawaban_benar: 'A' }]);
+    const count = Math.min(20, Math.max(1, numQuestions));
+    const newQuestions = Array.from({ length: count }, (_, index) => ({
+      id: (daftarSoal.length + index + 1).toString(),
+      pertanyaan: '',
+      opsi: { A: '', B: '', C: '', D: '', E: '' },
+      jawaban_benar: 'A',
+    }));
+    setDaftarSoal([...daftarSoal, ...newQuestions]);
   };
 
   const removeSoal = (index: number) => {
@@ -153,7 +178,7 @@ export default function FormBuatSoal({
         setWaktuMulai('');
         setWaktuSelesai('');
         setDaftarSoal([{ id: '1', pertanyaan: '', opsi: { A: '', B: '', C: '', D: '', E: '' }, jawaban_benar: 'A' }]);
-        
+
         router.refresh();
       } else {
         const data = await res.json();
@@ -217,80 +242,14 @@ export default function FormBuatSoal({
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-foreground px-2 flex justify-between items-center">
           Daftar Pertanyaan
-          <div className="flex gap-2">
-             <button type="button" onClick={addSoal} className="text-sm bg-foreground/5 text-foreground/70 px-3 py-1 rounded-lg hover:bg-foreground/10 border border-border-custom">+ Tambah Manual</button>
-          </div>
         </h2>
-
-        {/* AI GENERATE BOX */}
-        <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 p-6 rounded-xl border border-indigo-500/20 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-             <span className="text-xl">✨</span>
-             <h3 className="font-bold text-indigo-500">AI Soal Generator</h3>
-          </div>
-          <div className="flex gap-2">
-            <input 
-              type="text" 
-              value={aiTopic}
-              onChange={(e) => setAiTopic(e.target.value)}
-              placeholder="Masukkan topik soal (misal: Pergaulan bebas, Matematika Bangun Ruang...)"
-              className="flex-1 px-4 py-2 border border-indigo-500/30 bg-surface text-foreground rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <div className="w-24">
-              <input 
-                type="number" 
-                min="1" 
-                max="20"
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(parseInt(e.target.value) || 1)}
-                className="w-full px-2 py-2 border border-indigo-500/30 bg-surface text-foreground rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-center"
-                title="Jumlah Soal"
-              />
-            </div>
-            
-            <div className="relative border border-indigo-500/30 rounded-lg bg-surface flex items-center px-3" title="Lampirkan Gambar (Opsional)">
-               <input 
-                 type="file" 
-                 id="ai-image-upload" 
-                 className="hidden" 
-                 accept="image/*"
-                 onChange={(e) => {
-                   if (e.target.files && e.target.files[0]) {
-                     setAiImageFile(e.target.files[0]);
-                   }
-                 }}
-               />
-               <label htmlFor="ai-image-upload" className="cursor-pointer text-indigo-500 font-bold hover:text-indigo-600 text-sm flex items-center gap-1">
-                 {aiImageFile ? `🖼️ ${aiImageFile.name.slice(0,10)}...` : '📎 Gambar +'}
-               </label>
-               {aiImageFile && (
-                 <button type="button" onClick={() => setAiImageFile(null)} className="ml-2 text-red-500 font-bold text-lg leading-none shrink-0" title="Hapus">&times;</button>
-               )}
-            </div>
-
-            <button 
-              type="button"
-              disabled={isAiLoading}
-              onClick={handleAiGenerate}
-              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition flex items-center gap-2 ${isAiLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isAiLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Proses AI...
-                </>
-              ) : 'Generate Soal'}
-            </button>
-          </div>
-          <p className="text-[10px] text-indigo-400 mt-2 italic">* AI akan secara otomatis menyusun 5 pertanyaan pilihan ganda sesuai topik Anda.</p>
-        </div>
 
         {daftarSoal.map((soal, index) => (
           <div key={index} className="bg-surface p-6 rounded-xl shadow-sm border border-border-custom space-y-4 relative group">
             <button type="button" onClick={() => removeSoal(index)} className="absolute top-4 right-4 text-foreground/40 hover:text-red-500 font-bold">&times;</button>
             <div>
               <label className="block text-sm font-bold text-foreground mb-1">Pertanyaan #{index + 1}</label>
-              
+
               {soal.gambar_url ? (
                 <div className="relative inline-block mb-3 border rounded border-border-custom overflow-hidden">
                    <img src={soal.gambar_url} alt="Soal Image" className="h-32 object-contain bg-foreground/5" />
@@ -298,10 +257,10 @@ export default function FormBuatSoal({
                 </div>
               ) : (
                 <div className="mb-2">
-                   <input 
-                     type="file" 
-                     id={`img-upload-${index}`} 
-                     className="hidden" 
+                   <input
+                     type="file"
+                     id={`img-upload-${index}`}
+                     className="hidden"
                      accept="image/*"
                      onChange={async (e) => {
                        const file = e.target.files?.[0];
@@ -334,9 +293,87 @@ export default function FormBuatSoal({
                   <input type="radio" name={`correct-${index}`} checked={soal.jawaban_benar === opt} onChange={() => updateSoal(index, 'jawaban_benar', opt)} className="w-4 h-4 text-blue-600" />
                 </div>
               ))}
+
             </div>
           </div>
         ))}
+
+        {/* AI GENERATE BOX */}
+        {questionCreationMode === 'ai' && <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 p-6 rounded-xl border border-indigo-500/20 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+             <span className="text-xl">✨</span>
+             <h3 className="font-bold text-indigo-500">AI Soal Generator</h3>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={aiTopic}
+              onChange={(e) => setAiTopic(e.target.value)}
+              placeholder="Masukkan topik soal (misal: Pergaulan bebas, Matematika Bangun Ruang...)"
+              className="flex-1 px-4 py-2 border border-indigo-500/30 bg-surface text-foreground rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <div className="relative border border-indigo-500/30 rounded-lg bg-surface flex items-center px-3" title="Lampirkan Gambar (Opsional)">
+               <input
+                 type="file"
+                 id="ai-image-upload"
+                 className="hidden"
+                 accept="image/*"
+                 onChange={(e) => {
+                   if (e.target.files && e.target.files[0]) {
+                     setAiImageFile(e.target.files[0]);
+                   }
+                 }}
+               />
+               <label htmlFor="ai-image-upload" className="cursor-pointer text-indigo-500 font-bold hover:text-indigo-600 text-sm flex items-center gap-1">
+                 {aiImageFile ? `🖼️ ${aiImageFile.name.slice(0,10)}...` : '📎 Gambar +'}
+               </label>
+               {aiImageFile && (
+                 <button type="button" onClick={() => setAiImageFile(null)} className="ml-2 text-red-500 font-bold text-lg leading-none shrink-0" title="Hapus">&times;</button>
+               )}
+            </div>
+          </div>
+          <p className="text-[10px] text-indigo-400 mt-2 italic">* AI akan menyusun {numQuestions} pertanyaan pilihan ganda sesuai topik Anda.</p>
+          {aiTokenUsage && (
+            <p className="text-xs text-indigo-600 dark:text-indigo-300 mt-2" aria-live="polite">
+              Token terpakai pada generate terakhir: {aiTokenUsage.total.toLocaleString('id-ID')} total
+              {' '}(input {aiTokenUsage.input.toLocaleString('id-ID')} · output {aiTokenUsage.output.toLocaleString('id-ID')})
+            </p>
+          )}
+        </div>}
+
+        <div className="bg-surface p-4 rounded-xl border border-border-custom space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span className="text-sm font-medium text-foreground/70">Pilih metode pembuatan soal:</span>
+            <div className="inline-flex rounded-lg border border-border-custom bg-foreground/5 p-1 w-fit" role="group" aria-label="Metode pembuatan soal">
+              <button type="button" aria-pressed={questionCreationMode === 'ai'} onClick={() => setQuestionCreationMode('ai')} className={`px-4 py-2 rounded-md text-sm font-bold transition ${questionCreationMode === 'ai' ? 'bg-indigo-600 text-white shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}>
+                Gunakan AI
+              </button>
+              <button type="button" aria-pressed={questionCreationMode === 'manual'} onClick={() => setQuestionCreationMode('manual')} className={`px-4 py-2 rounded-md text-sm font-bold transition ${questionCreationMode === 'manual' ? 'bg-blue-600 text-white shadow-sm' : 'text-foreground/60 hover:text-foreground'}`}>
+                Buat Manual
+              </button>
+            </div>
+          </div>
+          <label htmlFor="question-count" className="text-sm font-medium text-foreground/70">Jumlah soal</label>
+          <input
+            id="question-count"
+            type="number"
+            min={1}
+            max={20}
+            step={1}
+            value={numQuestions}
+            onChange={(event) => setNumQuestions(Math.min(20, Math.max(1, Number.parseInt(event.target.value, 10) || 1)))}
+            className="w-24 px-3 py-2 border border-border-custom bg-surface text-foreground rounded-lg text-center outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {questionCreationMode === 'manual' ? (
+            <button type="button" onClick={addSoal} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">
+              + Tambah {numQuestions} Soal Manual
+            </button>
+          ) : (
+            <button type="button" disabled={isAiLoading} onClick={handleAiGenerate} className={`px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition ${isAiLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {isAiLoading ? 'Memproses AI...' : `Generate ${numQuestions} Soal dengan AI`}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="pt-8 border-t border-border-custom mt-12">

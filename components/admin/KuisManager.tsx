@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FormBuatSoal from './FormBuatSoal';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
@@ -19,6 +19,22 @@ export default function KuisManager({
   const [monitoringKuis, setMonitoringKuis] = useState<any | null>(null);
   const [pesertaList, setPesertaList] = useState<any[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
+  const [tokenQuota, setTokenQuota] = useState<{ remaining: number; limit: number; reset: string; model?: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const storedQuota = localStorage.getItem('kuis-ai-token-quota');
+      if (storedQuota) setTokenQuota(JSON.parse(storedQuota));
+    } catch {
+      localStorage.removeItem('kuis-ai-token-quota');
+    }
+  }, []);
+
+  const updateTokenQuota = (quota: { remaining: number; limit: number; reset: string; model: string } | null) => {
+    setTokenQuota(quota);
+    if (quota) localStorage.setItem('kuis-ai-token-quota', JSON.stringify(quota));
+    else localStorage.removeItem('kuis-ai-token-quota');
+  };
 
   const startEdit = (kuis: any) => {
     if (kuis.sudahAdaJawaban) {
@@ -148,6 +164,25 @@ export default function KuisManager({
   
   return (
     <div className="grid grid-cols-1 gap-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Kelola Kuis PG</h1>
+          <p className="text-foreground/60">Buat, edit, dan analisis kuis pilihan ganda</p>
+        </div>
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3 md:text-right" title={tokenQuota?.reset ? `Reset dalam ${tokenQuota.reset}; data dari generate terakhir` : 'Data diperbarui setelah generate soal AI'}>
+          <p className="text-xs font-semibold text-foreground/60">Sisa batas token AI per menit</p>
+          {tokenQuota ? (
+            <p className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
+              {tokenQuota.remaining.toLocaleString('id-ID')} <span className="text-xs font-medium text-foreground/50">/ {tokenQuota.limit.toLocaleString('id-ID')} token</span>
+            </p>
+          ) : (
+            <p className="text-sm font-medium text-foreground/50">Tampil setelah generate AI</p>
+          )}
+          <p className="text-[10px] text-foreground/40">Batas TPM Groq · data pemanggilan terakhir</p>
+          {tokenQuota?.model && <p className="text-[10px] text-foreground/50">Model: {tokenQuota.model}</p>}
+        </div>
+      </div>
+
       {/* Modal Monitoring */}
       {monitoringKuis && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -227,6 +262,7 @@ export default function KuisManager({
           availableClasses={availableClasses} 
           editData={editingKuis} 
           onCancel={cancelEdit}
+          onQuotaUpdate={updateTokenQuota}
         />
         {editingKuis && (
           <button 

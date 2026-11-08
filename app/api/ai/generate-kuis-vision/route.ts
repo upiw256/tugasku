@@ -6,6 +6,44 @@ import { SystemSetting } from '@/models';
 import { connectDB } from '@/lib/db';
 import { logAktivitasSiswa } from '@/lib/log-aktivitas';
 
+function extractJsonPayload(text: string) {
+  const cleaned = text.replace(/```(?:json)?/gi, '').trim();
+  const arrayStart = cleaned.indexOf('[');
+  const objectStart = cleaned.indexOf('{');
+  const start = arrayStart === -1
+    ? objectStart
+    : objectStart === -1
+      ? arrayStart
+      : Math.min(arrayStart, objectStart);
+
+  if (start === -1) throw new Error('AI tidak mengembalikan JSON. Coba generate ulang.');
+
+  const opening = cleaned[start];
+  const closing = opening === '[' ? ']' : '}';
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < cleaned.length; index += 1) {
+    const character = cleaned[index];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === '"') inString = false;
+      continue;
+    }
+
+    if (character === '"') inString = true;
+    else if (character === opening) depth += 1;
+    else if (character === closing) {
+      depth -= 1;
+      if (depth === 0) return cleaned.slice(start, index + 1);
+    }
+  }
+
+  throw new Error('Respons AI terpotong sebelum JSON selesai. Coba kurangi jumlah soal lalu generate ulang.');
+}
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -33,6 +71,7 @@ export async function POST(req: Request) {
     
     const textModel = textModelSetting?.value || 'groq/compound';
     const visionModel = visionModelSetting?.value || 'llama-3.2-11b-vision-preview';
+    const selectedModel = imageBase64 ? visionModel : textModel;
 
     // Instruksi sistem untuk model LLaMA Vision
     const prompt = `Buatlah ${jumlahSoal} soal pilihan ganda tentang "${topik}" (berdasarkan gambar terlampir jika ada). 
@@ -44,7 +83,7 @@ export async function POST(req: Request) {
       "opsi": {
         "A": "string", "B": "string", "C": "string", "D": "string", "E": "string"
       },
-      "jawaban_benar": "A", // Hanya satu karakter A/B/C/D/E
+      "jawaban_benar": "A",
       "image_prompt": "Prompt bahasa inggris deskriptif untuk menghasilkan gambar ilustrasi soal (contoh: 'A realistic apple falling from a tree vector art'). Jika tidak perlu gambar, kosongkan."
     }`;
 
@@ -83,7 +122,7 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: imageBase64 ? visionModel : textModel,
+        model: selectedModel,
         messages: messages,
         temperature: 0.5,
         stream: false,
@@ -105,13 +144,19 @@ export async function POST(req: Request) {
       throw new Error('AI tidak memberikan respon yang valid');
     }
 
-    // Bersihkan code block markdown
-    const jsonString = textOutput.substring(
-       textOutput.indexOf('['),
-       textOutput.lastIndexOf(']') + 1
-    ) || textOutput.replace(/```json|```/g, '').trim();
+    if (data.choices?.[0]?.finish_reason === 'length') {
+      return NextResponse.json({
+        error: 'Respons AI terpotong karena terlalu panjang. Coba kurangi jumlah soal lalu generate ulang.',
+      }, { status: 502 });
+    }
 
-    const parsedData = JSON.parse(jsonString || "[]");
+    let parsedData: any;
+    try {
+      parsedData = JSON.parse(extractJsonPayload(textOutput));
+    } catch (parseError) {
+      const message = parseError instanceof Error ? parseError.message : 'Format JSON dari AI tidak valid.';
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
     
     // Normalize hasil Groq menjadi array tunggal
     const questions = Array.isArray(parsedData) ? parsedData : (parsedData.questions || parsedData.soal || Object.values(parsedData)[0]);
@@ -154,7 +199,18 @@ export async function POST(req: Request) {
       return q;
     }));
 
-    return NextResponse.json(finalQuestions);
+    const usage = data.usage || {};
+    return NextResponse.json(finalQuestions, {
+      headers: {
+        'X-AI-Token-Input': String(usage.prompt_tokens ?? 0),
+        'X-AI-Token-Output': String(usage.completion_tokens ?? 0),
+        'X-AI-Token-Total': String(usage.total_tokens ?? 0),
+        'X-AI-Quota-Remaining-Tokens': response.headers.get('x-ratelimit-remaining-tokens') ?? '',
+        'X-AI-Quota-Limit-Tokens': response.headers.get('x-ratelimit-limit-tokens') ?? '',
+        'X-AI-Quota-Reset-Tokens': response.headers.get('x-ratelimit-reset-tokens') ?? '',
+        'X-AI-Model': selectedModel,
+      },
+    });
   } catch (error: any) {
     await logAktivitasSiswa({ aksi: `System Error (${'D:/Js/tugasku/app/api/ai/generate-kuis-vision/route.ts'}): ${(error as any)?.message || String(error)}`, tipe: 'error' }).catch(() => {});
 

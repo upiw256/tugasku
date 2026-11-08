@@ -45,13 +45,6 @@ export default async function AdminKuisPage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface p-6 rounded-xl shadow-sm border border-border-custom">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Kelola Kuis PG</h1>
-          <p className="text-foreground/60">Buat, edit, dan analisis kuis pilihan ganda</p>
-        </div>
-      </div>
-
       <KuisManager availableClasses={availableClasses} initialKuis={serializedKuis} />
     </div>
   );
